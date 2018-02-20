@@ -14,7 +14,7 @@
 
 void main( int argc, char *argv[] )
 {
-	unsigned short cr_com,data_count=0;
+	unsigned short cr_com=0,num_com=0,data_count=0;
 	unsigned int TCount=0,DTTM=0; //общий таймер, последний приход данных
 	int TC10=0; //таймер по 100 мс
 	int N;//кол-во чтений УПОС
@@ -176,7 +176,17 @@ void main( int argc, char *argv[] )
 
 			//if (N==N1) printf("нет чтения\n");
 			N1=N;
-			if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==1))	Init_K1(p->from_MO3.from41.num_KS-1);
+			if ((cr_com!=p->from_MO3.from41.cr_com)&&(num_com!=p->from_MO3.from41.num_com))
+			{
+				if ((p->from_MO3.from41.num_com==1)||(p->from_MO3.from41.num_com==2))
+					Init_K1(p->from_MO3.from41.num_KS-1);
+				cr_com=p->from_MO3.from41.cr_com;
+				num_com=p->from_MO3.from41.num_com;
+		
+			}
+			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==1))	Init_K1(p->from_MO3.from41.num_KS-1);
+			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==2))	Init_K1(p->from_MO3.from41.num_KS-1);
+			
 			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==77))	writePorogs(SREDN,SREDN);
 			/*if ((cr_com!=p->from_MO3.from42.cr_com)&&(p->from_MO3.from42.num_com==6))	
 			{
@@ -184,7 +194,8 @@ void main( int argc, char *argv[] )
 				writeDopler(Dopler1);
 			}
 			*/
-			cr_com=p->from_MO3.from41.cr_com;
+			//cr_com=p->from_MO3.from41.cr_com;
+			//num_com=p->from_MO3.from41.num_com;
 		}
 //----------------------------чтение К1-----------------------------
 		if (pid==proxy_DRV1) {Read_K1();N++;}

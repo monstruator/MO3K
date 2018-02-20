@@ -198,6 +198,9 @@ while(1)
 
 	if (rec4.from41.cr_com!=cr_com41) 
 	{
+		if (p->num_com!=rec4.from41.num_com)
+			printf(" New Command 4.1 = %d\n",rec4.from41.num_com);
+		
 		p->from_MO3.from41=rec4.from41;
 		p->num_com=p->from_MO3.from41.num_com;
 		cr_com41=p->from_MO3.from41.cr_com;
@@ -205,7 +208,7 @@ while(1)
 		p->M[1]=0x0000;
 		p->M[2]=p->from_MO3.from42.M3&0xFFFE;
 		//p->M[3]=0x8410;		
-		printf(" New Command 4.1 = %d\n",p->num_com);
+		//printf(" New Command 4.1 = %d\n",p->num_com);
 	}
 	
 	//printf("V=%d\n",V);
@@ -319,7 +322,7 @@ while(1)
 	p->to_MO3.to42.USign=p->PR1[6]; //уровень сигнала ПРД из сост ПР1.0
 
 	
-//	p->to_MO3.to42.sum_K1=p->U.SUM_4;
+	p->to_MO3.to42.sum_K1=p->U.SUM_4;
 //	p->to_MO3.to42.sum_K1=p->U.SUM_20; //выводить после логарифма
 	
 

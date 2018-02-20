@@ -31,7 +31,7 @@ float Flt=0;
 int Seans=0; //признак начала сеанса по К2
 unsigned short toPR1[8]=
 //{0x07C7,0x0000,0x0000,0x0000,0x7000,0x0000,0x0841,0};
-{0x07C7,0x0000,0x0000,0x0000,0x000e,0x0000,0x8410,0};
+{0x07C7,0x0000,0x0000,0x0000,0x0000,0x0000,0x8410,0};
 
 struct DefCMD acmd[2]=
 {{0x1028,toPR1},{0x1428,NULL}}; // KC+D[] MK npu6opa 1
@@ -157,8 +157,9 @@ for(;;)//----- CEPBEP -----//
 			p->PR1[3]=p->PR1[3]|0xf800; //ОС комп
 		}
 		*/
-		if (p->PR1[4]&0x4000) p->to_MO3.to42.priem_K2=1; else p->to_MO3.to42.priem_K2=0;
+		//if (p->PR1[4]&0x4000) p->to_MO3.to42.priem_K2=1; else p->to_MO3.to42.priem_K2=0;
 		p->PR1[3]=p->PR1[3]|0x2000; //ОС комп
+		p->PR1[3]=p->PR1[3]|0x8000; //2018
 		p->PR1[4]=p->PR1[4]|0x0800; //TVP SUM
 		p->PR1[4]=p->PR1[4]|0x00ff; //лишние ниже списка
 		
@@ -195,6 +196,7 @@ for(;;)//----- CEPBEP -----//
 	case 3://--- HK
 		SIMF[0]++; //есть симфония
 		if (SIMF[0]==60000) SIMF[0]=0;
+		//printf("%d\n",dev->tx_B[3]);
 		if(ou_read(dev,HK,nogAgpecHK)){owu6ka|=8;break;}
    		if((dev->tx_B[3])!=32)  {owu6ka|=512;printf("error=%d\n",dev->tx_B[3]);break;}
    		if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
@@ -285,7 +287,7 @@ for(;;)//----- CEPBEP -----//
 			else ispr->mo1k=1; //нет пр1.0 
 			
 			//printf("1=%x 2=%x 3=%x\n",p->to_MO3.to42.Ms1,p->to_MO3.to42.Ms2,p->to_MO3.to42.Ms3);			
-			//printf("H=%d M=%d S=%d T41=%d T31=%d \n",p->Dout41[30],p->Dout41[31],p->Dout41[32],p->from_MO3.from41.T_SS,p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]);			
+			printf("H=%d M=%d S=%d T41=%d T31=%d \n",p->Dout41[30],p->Dout41[31],p->Dout41[32],p->from_MO3.from41.T_SS,p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]);			
 			//printf("navi=%d jump=%d \n",p->no_navi,p->jump);
 			
 			//КАЧКИ
@@ -315,7 +317,7 @@ for(;;)//----- CEPBEP -----//
 			{
 			    KK1=p->from_MO3.from41.P_ANT-KK;
 				//KK1=KK1+2*p->jump*pi;
-				
+				//printf("A%f\n",KK1);
 				if (KK1>4.71225) KK1=KK1-2*PI;
 				if (KK1<-4.71225) KK1=KK1+2*PI;
 				
@@ -359,8 +361,8 @@ for(;;)//----- CEPBEP -----//
 					//deltaKK=deltaKK*RADtoGRAD/2;
 					deltaKOD=(short)(deltaKK*RADtoGRAD/2);
 					//deltaKOD=(short)deltaKK;
-					//printf("P_ANT=%3.2f  KK=%3.2f  oldKK=%3.2f dKK=%3.2f dKOD=%d\n",
-					//p->from_MO3.from41.P_ANT*57.32,KK*57.32,oldKK*57.32,deltaKK,deltaKOD);
+					printf("P_ANT=%3.2f  KK=%3.2f  oldKK=%3.2f dKK=%3.2f dKOD=%d\n",
+					p->from_MO3.from41.P_ANT*57.32,KK*57.32,oldKK*57.32,deltaKK,deltaKOD);
 						
 					if (deltaKOD!=0)
 					{
@@ -382,8 +384,11 @@ for(;;)//----- CEPBEP -----//
 	    	if (p->num_com==4) //4-я или 5-я команда из 4.2
 			{	//управление пр. 1.0 из 4.2
 				//Углы
-				//printf("Az%f Um=%f\n",p->from_MO3.from42.q,p->from_MO3.from42.beta);
-			    //memcpy(&b2,&p->Dout41[5],2);	 KK=b2*pi/(1<<14);	
+				//printf("Az=%f Um=%f ",p->from_MO3.from42.q,p->from_MO3.from42.beta);
+		        for(i=0;i<3;i++) printf("  %x",toPR1[i]);printf("   to  \n");
+			    
+
+				//memcpy(&b2,&p->Dout41[5],2);	 KK=b2*pi/(1<<14);	
 				KK1=p->from_MO3.from42.q;//-KK;//Азимут
 				
 				if (p->from_MO3.from42.Rejim_AS==1) //режим АС
@@ -398,7 +403,7 @@ for(;;)//----- CEPBEP -----//
 				}
 				else //если не АС
 				{
-					if (KK1==0)
+			/*		if (KK1==0)
 					{
 //						//printf("PSI=%f TETA=%f\n",PSI,TETA);
 
@@ -414,6 +419,7 @@ for(;;)//----- CEPBEP -----//
 						//printf("alfa1=%f beta1=%f \n",alfa1,beta1);
 					}
 					else 
+*/
 					{
 						if (p->from_MO3.from42.beta>=0)	p->toPR1[2]=-p->from_MO3.from42.beta*C1;//Угол места
 						else p->toPR1[2]=(360+(-p->from_MO3.from42.beta*C3))*C2;//
@@ -467,7 +473,7 @@ for(;;)//----- CEPBEP -----//
 		for(i=0;i<3;i++) p->toPR1[i]=p->toPR1[i]&0x0fff;
 		//-------------------------- 1 Pr -------------------------
 		for(i=0;i<8;i++) toPR1[i]=p->toPR1[i];
-		//for(i=3;i<8;i++) printf("  %x",toPR1[i]);printf("   to  \n");
+		//for(i=0;i<3;i++) printf("  %x",toPR1[i]);printf("   to  \n");
 		//printf("toPR1=%x from42=%f\n",toPR1[2],p->from_MO3.from41.beta);
 	 	if((KK_frame(dev,Ynp_np1,2,acmd))==-1){owu6ka|=16;break;}
 
