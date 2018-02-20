@@ -196,13 +196,13 @@ while(1)
 		printf("M=%d\n",paramAKcom);
 	}
 
-	if (p->from_MO3.from41.cr_com!=cr_com41) 
+	if (rec4.from41.cr_com!=cr_com41) 
 	{
 		p->from_MO3.from41=rec4.from41;
 		p->num_com=p->from_MO3.from41.num_com;
 		cr_com41=p->from_MO3.from41.cr_com;
 		p->M[0]=0x0000;
-		p->M[1]=0x000e;
+		p->M[1]=0x0000;
 		p->M[2]=p->from_MO3.from42.M3&0xFFFE;
 		//p->M[3]=0x8410;		
 		printf(" New Command 4.1 = %d\n",p->num_com);
@@ -245,7 +245,7 @@ while(1)
 	//printf("d=%d\n",p->U.DPL_1);
 
 	//p->to_MO3.to41.UR_sign_K1=(short)p->U.SUM_20;	
-	if (p->to_MO3.to41.UR_sign_K1>17) p->to_MO3.to41.PrM_K1=1;else p->to_MO3.to41.PrM_K1=0;
+	if (p->to_MO3.to41.UR_sign_K1>32) p->to_MO3.to41.PrM_K1=1;else p->to_MO3.to41.PrM_K1=0;
 
 //	printf("                                Angle_Pr1 b=%4.3f q=%4.3f   \n",p->to_MO3.to41.beta_FACT*57.3,p->to_MO3.to41.P_FACT*57.3);
 //	printf(" Angle_PR4 = %4.3f %4.3f\n",p->from_MO3.from41.beta*57.3,p->from_MO3.from41.P_ANT*57.3);
