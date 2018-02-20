@@ -245,6 +245,15 @@ for(;;)//----- CEPBEP -----//
 		//if((dev->tx_B[3])!=6){owu6ka|=128;break;}
 		for(j=0;j<6;j++) p->CEB[j]=dev->tx_B[4+j]; //--- npueM CEB
 
+
+		    p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
+			p->Dout41[30]+=(p->CEB[2]>>12)*10;     //hours
+			p->Dout41[31]=(p->CEB[3]>>8)&0x000F;
+			p->Dout41[31]+=(p->CEB[3]>>12)*10;	//minutes
+			p->Dout41[32]=p->CEB[3]&0x000F;
+			p->Dout41[32]+=((p->CEB[3]>>4)&0x000f)*10; //seconds
+
+
 		//for(j=0;j<6;j++) printf(" %x",p->CEB[j]);printf("\n"); //--- npueM CEB
 		//printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);printf("\n");
 		break;//--- end npueMHuk CEB ---//
@@ -287,7 +296,7 @@ for(;;)//----- CEPBEP -----//
 			else ispr->mo1k=1; //­¥â ¯à1.0 
 			
 			//printf("1=%x 2=%x 3=%x\n",p->to_MO3.to42.Ms1,p->to_MO3.to42.Ms2,p->to_MO3.to42.Ms3);			
-			printf("H=%d M=%d S=%d T41=%d T31=%d \n",p->Dout41[30],p->Dout41[31],p->Dout41[32],p->from_MO3.from41.T_SS,p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]);			
+			//printf("H=%d M=%d S=%d T41=%d T31=%d \n",p->Dout41[30],p->Dout41[31],p->Dout41[32],p->from_MO3.from41.T_SS,p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]);			
 			//printf("navi=%d jump=%d \n",p->no_navi,p->jump);
 			
 			//Š€—Šˆ
