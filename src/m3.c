@@ -394,7 +394,7 @@ for(;;)//----- CEPBEP -----//
 			{	//управление пр. 1.0 из 4.2
 				//Углы
 				//printf("Az=%f Um=%f ",p->from_MO3.from42.q,p->from_MO3.from42.beta);
-		        for(i=0;i<3;i++) printf("  %x",toPR1[i]);printf("   to  \n");
+		        //for(i=0;i<3;i++) printf("  %x",toPR1[i]);printf("   to  \n");
 			    
 
 				//memcpy(&b2,&p->Dout41[5],2);	 KK=b2*pi/(1<<14);	

@@ -159,8 +159,10 @@ write_com (Ncom)
 	//printf("время : %d  <---  (",Tcount);
 	time_of_day=time(NULL);
 	msec1=div(Tcount,10);
-	strftime(b, 40 , "%T", localtime(&time_of_day));//D T
-	printf("%s:%03d <-- (",b,msec1.rem*100);			
+	//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
+	//printf("%s:%03d <-- (",b,msec1.rem*100);
+	printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
+			
 	for(i1=0;i1<test_K2[Ncom][1]+1;i1++) printf("%x.",test_K2[Ncom][i1]);
 	N_COM++;Ncount++;
 	Tcount_com=Tcount;
@@ -309,9 +311,11 @@ main(int argc, char *argv[]) {
 				{
 					//printf("N=%d \n",N);					
 					time_of_day=time(NULL);
-					strftime(b, 40 , "%T", localtime(&time_of_day));//D T
+					//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 					msec1=div(Tcount,10);
-					printf("%s:%03d -->",b,msec1.rem*100);			
+					//printf("%s:%03d -->",b,msec1.rem*100);			
+					printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
+
 					for(i1=0;i1<N;i1++) chkSUM+=buffer[i+i1]; //подсчет контр суммы         
 					//printf("i=%d chkSUM=%x\n",i,chkSUM);
 					if (chkSUM!=buffer[N+i]) //если не совпадает контр сумма
@@ -362,7 +366,7 @@ main(int argc, char *argv[]) {
 													//printf("\n");
 													break;
 										case 0x010: printf("  ПРМ - ");
-													if (buffer[i+4]&0x01) {printf(" ПРС");p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
+													if (buffer[i+4]&0x01) {printf(" ПРС");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
 													if (buffer[i+4]&0x02) printf(" СС");
 													if (buffer[i+4]&0x04) printf(" ЗС");
 													if (buffer[i+4]&0x08) printf(" СБ");
@@ -389,7 +393,7 @@ main(int argc, char *argv[]) {
 													else p->to_MO3.to41.UR_sign_K2=0;
 													break;
 										case 0x73 : printf(" ПРМ1 - ");
-													if (buffer[i+4]&0x01) {printf(" ПРС");p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
+													if (buffer[i+4]&0x01) {printf(" ПРС");p->to_MO3.to41.PrM_K2=p->to_MO3.to42.priem_K2=1;}else p->to_MO3.to41.PrM_K2=0;
 													if (buffer[i+4]&0x02) printf(" СС");
 													if (buffer[i+4]&0x04) printf(" ЗС");
 													if (buffer[i+4]&0x08) printf(" СБ");
@@ -492,7 +496,8 @@ main(int argc, char *argv[]) {
 			   case 23: if (TS) //!!!!!!!!!!!!!!!!!!!!!!!!
 						{	
 							printf("\n---- ВКЛЮЧЕН ТВК С МАХ ОСЛАБЛЕНИЕМ -----\n");
-							p->toPR1[3]=0xFC00;
+							//p->toPR1[3]=0xFC00;
+							p->toPR1[3]=0x0000;
 						}
 						N_COM++;break;
 			   case 24:	N_COM++;break;
@@ -520,6 +525,7 @@ main(int argc, char *argv[]) {
 						Tstart=p->from_MO3.from41.T_SS-8; //время старта за 10 сек до сеанса
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //время прибора из СЕВ
 						Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]+COR_T; //время прибора из СЕВ
+						printf("TS=%d TP=%d\n",Tstart,Tpr);
 						if (Tstart<Tpr) //если "проспали" сеанс -> переводим на след цикл
 							if ((Tpr-Tstart)<1200)	while(Tstart<Tpr) Tstart+=30;					
 						break;
