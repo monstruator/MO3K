@@ -166,7 +166,7 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 	}
 
 	if (TM)
-		if ( ( out_fp = fopen( "//1/home/seversk/new31/src/usb_log", "w" ) ) == NULL ) 
+		if ( ( out_fp = fopen( "//1/home/user/mo3k/src/usb_log", "w" ) ) == NULL ) 
 			fprintf( stderr, "Couldn't create/open file %s. %s\n", fname, strerror( errno ) );
 	
 
@@ -198,13 +198,13 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 			if ((TM)&&(out_fp != NULL)) //если тестовый режим пишем в файл
 				if ( fwrite( DCP_K2, sum_ret, 1, out_fp ) != 1 )
 					fprintf( stderr, "Failed to write to file. %s\n", strerror( errno ) );
-			if ((p->from41.num_com==2)&&(p->from41.num_KS==2))//если это сеанс К2
+			if ((p->from_MO3.from41.num_com==2)&&(p->from_MO3.from41.num_KS==2))//если это сеанс К2
 			{
 				if (sum_ret>SUM_DCP_K2*2) sum_ret=SUM_DCP_K2*2; //обрежем лишнее
-		    	memcpy(&p->to41.DCP_K2,&DCP_K2,sum_ret);
-				p->to41.sum_DCP=sum_ret/2;			
-				p->to41.cr_SEANCE++;
-				if (TM) printf("Сформирован массив К2 N%d. Кол-во данных %d слов\n",p->to41.cr_SEANCE,p->to41.sum_DCP);				
+		    	memcpy(&p->to_MO3.to41.DCP_K2,&DCP_K2,sum_ret);
+				p->to_MO3.to41.sum_DCP=sum_ret/2;			
+				p->to_MO3.to41.cr_SEANCE++;
+				printf("Сформирован массив К2 N%d. Кол-во данных %d слов\n",p->to_MO3.to41.cr_SEANCE,p->to_MO3.to41.sum_DCP);				
 			}
 			sum_ret=0;
 		}

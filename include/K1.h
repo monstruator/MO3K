@@ -321,8 +321,8 @@ int Read_K1()
 						//p->U.OI[p->U.c_OI]+=massiv[i]; 	
 					}
 				    //printf("\n");
-					p->to41.GL_CP = massiv[3] >>4 & 0x01;
-					p->to41.GL_priem = massiv[3] >>5 & 0x01;
+					p->to_MO3.to41.GL_CP = massiv[3] >>4 & 0x01;
+					p->to_MO3.to41.GL_priem = massiv[3] >>5 & 0x01;
 //					if (p->to41.GL_priem==1)
 //					printf("\n -------- PR = %d -------- \n", p->to41.GL_priem);						
 //					printf("	SR = %d PR = %d\n", p->to41.GL_CP, p->to41.GL_priem);						
@@ -605,8 +605,8 @@ test[120] =0x88888;test[121] =0x88888;
 		//printf("\n %d", i);	
 		Read_K1();
 		delay(12);
-		SR=p->to41.GL_CP;
-		PR=p->to41.GL_priem;
+		SR=p->to_MO3.to41.GL_CP;
+		PR=p->to_MO3.to41.GL_priem;
 	}
 	
 	for(i=0;i<p->U.c_OI;i++)	
