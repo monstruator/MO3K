@@ -129,7 +129,8 @@ void main( void )
 	else
 	if (p->from_MO3.from41.num_KS==2)  
 	{
-		printf(" pr2=%d ",p->to_MO3.to41.PrM_K2);
+		printf(" pr2=%d ", p->to_MO3.to41.PrM_K2);
+        printf(" zi2=%d ", p->to_MO3.to41.Pr_ZI_K2);
 		printf("lvl2=%d ",p->to_MO3.to41.UR_sign_K2);
 	}
 

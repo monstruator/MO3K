@@ -56,6 +56,7 @@ typedef struct	{
 								//обновляется с частотой 1гц с момента расчетного СС
 	unsigned short    cr_SEANCE;//порядковый номер последнего полученного массива ДЦП
 	unsigned short    Rejim_AS;	//режим автосопровождения 1-вкл/0-откл
+	unsigned short    Key_FRCH; //ключ ФРЧ
 
 }obmen_41_31_2t;
 

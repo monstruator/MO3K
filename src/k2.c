@@ -57,7 +57,8 @@ char test_K2[40][15]={{0x55, 0x04, 0x01, 0x0B, 0x65},		// ->+ 0
 					{0x55, 0x04, 0x01, 0x18, 0x72}, //23 прер
 					{0x55, 0x08, 0x01, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00}, //24 ДанИ
 					{0x55, 0x05, 0x01, 0x04, 0x00, 0x5F}, //25 АКП-ВЫКЛ
-					{0x55, 0x05, 0x01, 0x04, 0x00, 0x5F}, //26 К2-ВЫКЛ
+					//{0x55, 0x05, 0x01, 0x16, 0x01, 0x72}, //26 К2-ВКЛ
+					{0x55, 0x05, 0x01, 0x16, 0x00, 0x71}, //26 К2-ВЫКЛ
 					{0x55, 0x0B, 0x01, 0x08, 0x2D, 0xF8, 0x0C, 0xBB, 0xAE, 0x29, 0x00, 0x2C}, //27 DanP.T.R
 					//{0x55, 0x0B, 0x01, 0x08, 0x4A, 0x17, 0x15, 0x40, 0xAE, 0x29, 0x00, 0xF6}, //27 DanP.T.R
 					{0x55, 0x05, 0x01, 0x25, 0x6B, 0xEB}, //28 ZDR.Z
@@ -150,6 +151,7 @@ void Init_K2()
 
 write_com (Ncom)
 {
+	int hour=0, min=0, sec=0;
 	wr_cpcs_s.type=5;
 	wr_cpcs_s.cnl=chan2;
 	wr_cpcs_s.cnt=test_K2[Ncom][1]+1;
@@ -162,7 +164,10 @@ write_com (Ncom)
 	//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 	//printf("%s:%03d <-- (",b,msec1.rem*100);
 	printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
-			
+	hour=(p->CEB[2]>>12)*10 + ((p->CEB[2]>>8)&0x0F);
+	min =(p->CEB[3]>>12)*10 + ((p->CEB[3]>>8)&0x0F);
+	sec =((p->CEB[3]>>4)&0x0f)*10 + ((p->CEB[3])&0x0F);
+	//printf("\nhour=%d min=%d sec=%d\n",hour,min,sec);		
 	for(i1=0;i1<test_K2[Ncom][1]+1;i1++) printf("%x.",test_K2[Ncom][i1]);
 	N_COM++;Ncount++;
 	Tcount_com=Tcount;
@@ -216,6 +221,7 @@ main(int argc, char *argv[]) {
 	unsigned int Tpr1=0;
 	unsigned int Tstart=0;
 	short OC4=0;
+	int s=0;
     pid_t proxy;
 	FILE 		 	*out_fp = NULL;
     timer_t id;
@@ -366,9 +372,10 @@ main(int argc, char *argv[]) {
 													//printf("\n");
 													break;
 										case 0x010: printf("  ПРМ - ");
-													if (buffer[i+4]&0x01) {printf(" ПРС");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
+													if (buffer[i+4]&0x01) printf(" ПРС");
 													if (buffer[i+4]&0x02) printf(" СС");
-													if (buffer[i+4]&0x04) printf(" ЗС");
+													if (buffer[i+4]&0x04) {printf(" ЗС");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
+
 													if (buffer[i+4]&0x08) printf(" СБ");
 													if (buffer[i+4]&0x10) {printf(" ИДК");p->to_MO3.to41.Pr_ZI_K2=1;}else p->to_MO3.to41.Pr_ZI_K2=0;
 													if (buffer[i+4]&0x20) printf(" ИДД");
@@ -393,9 +400,10 @@ main(int argc, char *argv[]) {
 													else p->to_MO3.to41.UR_sign_K2=0;
 													break;
 										case 0x73 : printf(" ПРМ1 - ");
-													if (buffer[i+4]&0x01) {printf(" ПРС");p->to_MO3.to41.PrM_K2=p->to_MO3.to42.priem_K2=1;}else p->to_MO3.to41.PrM_K2=0;
+													if (buffer[i+4]&0x01) printf(" ПРС");
 													if (buffer[i+4]&0x02) printf(" СС");
-													if (buffer[i+4]&0x04) printf(" ЗС");
+													if (buffer[i+4]&0x04) {printf(" ЗС");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
+
 													if (buffer[i+4]&0x08) printf(" СБ");
 													if (buffer[i+4]&0x10) {printf(" ИДК");p->to_MO3.to41.Pr_ZI_K2=1;}else p->to_MO3.to41.Pr_ZI_K2=0;
 													if (buffer[i+4]&0x20) printf(" ИДД");
@@ -486,11 +494,58 @@ main(int argc, char *argv[]) {
 			   case 14: read_kvit();break;
  			   case 15: write_com(12);printf(")  Команда ДК-Р отправлена\n");break;
 			   case 16: read_kvit();break;
- 			   case 17: write_com(13);printf(")  Команда Реж-А1 отправлена\n");break;
+ 			   case 17: write_com(13);printf(")  Команда Реж-АГ1 отправлена\n");break;
 			   case 18: read_kvit();break;
- 			   case 19: write_com(26);printf(")  Команда К2-ВЫКЛ отправлена\n");break;
+ 			   case 19: 
+						if (p->from_MO3.from41.kod_Barker)
+						{
+							test_K2[26][4] = 0x01;
+							test_K2[26][5] = 0x72;
+						}
+						else
+						{
+							test_K2[26][4] = 0x00;
+							test_K2[26][5] = 0x71;
+						}
+						write_com(26);						
+						if (p->from_MO3.from41.kod_Barker) 	printf(")  Команда К2-ВКЛ отправлена\n");
+						else								printf(")  Команда К2-ВЫКЛ отправлена\n");																		
+						break;
 			   case 20: read_kvit();break;
- 			   case 21: write_com(9);printf(")  Команда КАН-Л отправлена\n");break;
+ 			   case 21: 
+						switch(p->from_MO3.from41.ZUNf)
+						{
+							case 1: //FR
+									test_K2[9][4]=p->from_MO3.from41.N_FRCH;
+									test_K2[9][5]=p->from_MO3.from41.Nd_FRCH;
+									break;
+							case 2: //DP
+									test_K2[9][4]=0x88;
+									test_K2[9][5]=p->from_MO3.from41.Nd_FRCH;
+									break;
+							case 3: //PP
+									test_K2[9][4]=0x99;
+									test_K2[9][5]=p->from_MO3.from41.Nd_FRCH + (p->from_MO3.from41.Key_FRCH<<3);
+									break;
+						}
+						test_K2[9][6]=0;
+						for(s=0;s<6;s++) test_K2[9][6]+=test_K2[9][s]; //chksum
+						write_com(9);
+		 			    printf(")  Команда КАН-Л отправлена ");
+
+						switch(p->from_MO3.from41.ZUNf)
+						{
+							case 1: //FR
+									printf(" ФР Кан=%d Част=%d \n",p->from_MO3.from41.N_FRCH,p->from_MO3.from41.Nd_FRCH);
+									break;
+							case 2: //DP
+									printf(" ДП Кан=%d \n",p->from_MO3.from41.Nd_FRCH);
+									break;
+							case 3: //PP
+									printf(" ПП Кан=%d Ключ=%d\n",p->from_MO3.from41.Nd_FRCH,p->from_MO3.from41.Key_FRCH);
+									break;
+						}
+						break;
 			   case 22: read_kvit();break;
 
 			   case 23: if (TS) //!!!!!!!!!!!!!!!!!!!!!!!!
