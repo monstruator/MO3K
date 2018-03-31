@@ -59,7 +59,8 @@ char test_K2[40][15]={{0x55, 0x04, 0x01, 0x0B, 0x65},		// ->+ 0
 					{0x55, 0x05, 0x01, 0x04, 0x00, 0x5F}, //25 АКП-ВЫКЛ
 					//{0x55, 0x05, 0x01, 0x16, 0x01, 0x72}, //26 К2-ВКЛ
 					{0x55, 0x05, 0x01, 0x16, 0x00, 0x71}, //26 К2-ВЫКЛ
-					{0x55, 0x0B, 0x01, 0x08, 0x2D, 0xF8, 0x0C, 0xBB, 0xAE, 0x29, 0x00, 0x2C}, //27 DanP.T.R
+					{0x55, 0x0B, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x69}, //27 DanP.T.R
+					//{0x55, 0x0B, 0x01, 0x00, 0x2D, 0xF8, 0x0C, 0xBB, 0xAE, 0x29, 0x00, 0x2C}, //27 DanP.T.R
 					//{0x55, 0x0B, 0x01, 0x08, 0x4A, 0x17, 0x15, 0x40, 0xAE, 0x29, 0x00, 0xF6}, //27 DanP.T.R
 					{0x55, 0x05, 0x01, 0x25, 0x6B, 0xEB}, //28 ZDR.Z
 					{0x55, 0x05, 0x01, 0x2C, 0x02, 0x89}, //29 R4K
@@ -151,7 +152,6 @@ void Init_K2()
 
 write_com (Ncom)
 {
-	int hour=0, min=0, sec=0;
 	wr_cpcs_s.type=5;
 	wr_cpcs_s.cnl=chan2;
 	wr_cpcs_s.cnt=test_K2[Ncom][1]+1;
@@ -163,11 +163,7 @@ write_com (Ncom)
 	msec1=div(Tcount,10);
 	//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 	//printf("%s:%03d <-- (",b,msec1.rem*100);
-	printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
-	hour=(p->CEB[2]>>12)*10 + ((p->CEB[2]>>8)&0x0F);
-	min =(p->CEB[3]>>12)*10 + ((p->CEB[3]>>8)&0x0F);
-	sec =((p->CEB[3]>>4)&0x0f)*10 + ((p->CEB[3])&0x0F);
-	//printf("\nhour=%d min=%d sec=%d\n",hour,min,sec);		
+	printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);	
 	for(i1=0;i1<test_K2[Ncom][1]+1;i1++) printf("%x.",test_K2[Ncom][i1]);
 	N_COM++;Ncount++;
 	Tcount_com=Tcount;
@@ -217,11 +213,10 @@ read_kvit_NUS()
 
 main(int argc, char *argv[]) {
 	unsigned short cr_com=0;
-	unsigned int Tpr=0;
-	unsigned int Tpr1=0;
-	unsigned int Tstart=0;
+	unsigned int Tpr=0,Tpr1=0,Tstart=0, Time=0;
 	short OC4=0;
-	int s=0;
+	unsigned short D1=0;
+	int s=0, hour=0, min=0, sec=0, day=0, years=0;
     pid_t proxy;
 	FILE 		 	*out_fp = NULL;
     timer_t id;
@@ -544,6 +539,7 @@ main(int argc, char *argv[]) {
 							case 3: //PP
 									printf(" ПП Кан=%d Ключ=%d\n",p->from_MO3.from41.Nd_FRCH,p->from_MO3.from41.Key_FRCH);
 									break;
+							default:printf("-режим не задан\n");
 						}
 						break;
 			   case 22: read_kvit();break;
@@ -599,7 +595,38 @@ main(int argc, char *argv[]) {
 						}				
 						break;
 			//-----------------------------------
- 			   case 38: write_com(27);printf(")  Команда ДанП.Т.Р отправлена\n");break;
+ 			   case 38: //p->from_MO3.from41.D = 1500000;
+						D1 = p->from_MO3.from41.D / 300;
+						test_K2[27][8] = D1 & 0x00ff;
+						test_K2[27][9] = D1 >> 8;
+						
+						years=5;
+						day = 731; //01-01-18
+						switch(p->CEB[0] & 0x00FF)
+						{
+							case 12: day+=30;
+							case 11: day+=31;
+							case 10: day+=30;
+							case  9: day+=31;
+							case  8: day+=31;
+							case  7: day+=30;
+							case  6: day+=31;
+							case  5: day+=30;
+							case  4: day+=31;
+							case  3: day+=28;
+							case  2: day+=31;
+						}			
+						day += ((p->CEB[1]>>8)&0x000F) + ((p->CEB[1]>>12)&0x000F)*10 - 1;
+						hour=(p->CEB[2]>>12)*10 + ((p->CEB[2]>>8)&0x0F);
+						min =(p->CEB[3]>>12)*10 + ((p->CEB[3]>>8)&0x0F);
+						sec =((p->CEB[3]>>4)&0x0F)*10 + ((p->CEB[3])&0x0F);
+						printf("\day=%d nhour=%d min=%d sec=%d\n",day,hour,min,sec);	
+						Time += sec + (min<<6) + (hour<<12) + (day<<17) + (years<<28);	
+						for(s=0;s<4;s++) test_K2[27][s+4] = Time >> (s*8);
+						
+						test_K2[27][11]=0;
+						for(s=0;s<11;s++) test_K2[27][11]+=test_K2[27][s]; //chksum
+						write_com(27);printf(") Команда ДанП.Т.Р отпр\n");break;
 			   case 39: read_kvit();break;
 			//-----------------------------------
  			   case 40: write_com(31);printf(")  			Команда Сеанс.L отправлена\n\n");

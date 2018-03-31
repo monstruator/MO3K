@@ -78,7 +78,7 @@ void main( void )
 		//printf("lvl = %d data=%d Nmas=%d\n",p->to_MO3.to41.UR_sign_K1,p->U.c_OI,p->to_MO3.to41.cr_SEANCE);
 		//printf("%d\n",p->from_MO3.from41.num_KS); 
 //		printf(" a=%04x ",p->toPR1[2]); 
-
+		printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
 //		if (p->from_MO3.from41.num_KS==1) 
 		{	
 //			printf("SUM_4=%1.1e ",p->U.SUM_4);
@@ -97,13 +97,14 @@ void main( void )
 //			printf("\n");
 		}
 	//	if (p->from_MO3.from41.num_com==2) printf("%3d  ",i2++); else printf("  0  ");
-		printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
+		
 
 		//	printf("V=%f A=%f D=%f T=%d \n",p->from_MO3.from41.Vr,p->from_MO3.from41.Ar,p->from_MO3.from41.D,p->from_MO3.from41.T_SS);
 //-------------------------------------------------------------------------------------
 //		printf("to_MO3.to41=%2.2f fr41=%2.2f fact=%2.2f Pr1=%d ",p->to_MO3.to41.P_FACT,p->from_MO3.from41.P_ANT,p->to_MO3.to41.P_FACT-p->to_MO3.to41.simfonia41.Kg,p->Dout41[16]); //16
 //		printf("fr41=%2.2f fact=%2.2f Pr1=%d ",p->from_MO3.from41.P_ANT,p->to_MO3.to41.P_FACT-p->to_MO3.to41.simfonia41.Kg,p->Dout41[18]); //16
-		printf(" Si=%d Inf=%1.1e DPL=%2.2d ",p->to_MO3.to41.UR_sign_K1,p->U.SUM_20,p->U.DPL_1*244);
+		printf("Si=%d Inf=%1.1e ",p->to_MO3.to41.UR_sign_K1,p->U.SUM_20);
+//!		printf(" DPL=%2.2d ",p->U.DPL_1*244);
 //		printf(" D=%f Vr=%f ",p->from_MO3.from41.D,p->from_MO3.from41.Vr);
 //			printf("H=%d M=%d S=%d T41=%d T31=%d\n",p->Dout41[30],p->Dout41[31],p->Dout41[32],p->from_MO3.from41.T_SS,p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]);
 //			printf("  D=%d \n",p->from_MO3.from41.T_SS-10-(p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]));
@@ -129,13 +130,14 @@ void main( void )
 	else
 	if (p->from_MO3.from41.num_KS==2)  
 	{
-		printf(" pr2=%d ", p->to_MO3.to41.PrM_K2);
-        printf(" zi2=%d ", p->to_MO3.to41.Pr_ZI_K2);
+		printf("pr2=%d ", p->to_MO3.to41.PrM_K2);
+        printf("zi2=%d ", p->to_MO3.to41.Pr_ZI_K2);
 		printf("lvl2=%d ",p->to_MO3.to41.UR_sign_K2);
 	}
 
 // 	printf(" sDCP=%d ",p->to_MO3.to41.sum_DCP);		//количество принятых слов с массиве дцп
-//    printf(" ZI_D=%x",p->U.ZI_DOST);
+    printf(" D=%f ",p->from_MO3.from41.D);
+	printf("pr1=%04x topr1=%04x",p->PR1[2],p->toPR1[2]);
 
 	printf("\n");
 	if ((p->from_MO3.from41.num_com==3)||(p->from_MO3.from41.num_com==2))
