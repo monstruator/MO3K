@@ -62,9 +62,11 @@ char test_K2[40][15]={{0x55, 0x04, 0x01, 0x0B, 0x65},		// ->+ 0
 					{0x55, 0x0B, 0x01, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x69}, //27 DanP.T.R
 					//{0x55, 0x0B, 0x01, 0x00, 0x2D, 0xF8, 0x0C, 0xBB, 0xAE, 0x29, 0x00, 0x2C}, //27 DanP.T.R
 					//{0x55, 0x0B, 0x01, 0x08, 0x4A, 0x17, 0x15, 0x40, 0xAE, 0x29, 0x00, 0xF6}, //27 DanP.T.R
-					{0x55, 0x05, 0x01, 0x25, 0x6B, 0xEB}, //28 ZDR.Z
-					{0x55, 0x05, 0x01, 0x2C, 0x02, 0x89}, //29 R4K
-					{0x55, 0x05, 0x01, 0x05, 0x02, 0x62}, //30 S4K
+					//{0x55, 0x05, 0x01, 0x25, 0x6B, 0xEB}, //28 ZDR.Z
+					{0x55, 0x05, 0x01, 0x25, 0x01, 0x81}, //28 ZDR.Z
+					{0x55, 0x05, 0x01, 0x2C, 0x04, 0x8B}, //29 R4K
+					//{0x55, 0x05, 0x01, 0x05, 0x02, 0x62}, //30 S4K
+					{0x55, 0x05, 0x01, 0x05, 0x04, 0x64}, //30 S4K
 					{0x55, 0x06, 0x01, 0x19, 0x28, 0x01, 0x9E}, //31 Сеанс
 					{0x55, 0x05, 0x01, 0x2A, 0x06, 0x8B}, //32 ОБР-ТЕСТ
 					{0x55, 0x05, 0x01, 0x22, 0x01, 0x7E}}; //33 ПРЕР
@@ -179,12 +181,12 @@ write_com24 (Ncom)
 	if (TS) V=0;
 	test_K2[24][4]=V&0x00ff;
 	test_K2[24][5]=V>>8;
-	printf("!! V=%d",V);
+	printf(" V=%d",V);
 	V=(short)(p->from_MO3.from41.Ar/1.5625);
 	if (TS) V=0;
 	test_K2[24][6]=V&0x00ff;
 	test_K2[24][7]=V>>8;
-	printf("!! A=%d\n",V);
+	printf(" A=%d\n",V);
 	test_K2[24][8]=0; //check sum
 	for (i1=0;i1<8;i1++) test_K2[24][8]+=test_K2[24][i1]; //test sum
 	wr_cpcs_s.type=5;	wr_cpcs_s.cnl=chan2;	wr_cpcs_s.cnt=9;
@@ -507,7 +509,39 @@ main(int argc, char *argv[]) {
 						else								printf(")  Команда К2-ВЫКЛ отправлена\n");																		
 						break;
 			   case 20: read_kvit();break;
- 			   case 21: 
+ 			   case 21: test_K2[9][4]=40;
+						test_K2[9][5]=1;
+						test_K2[9][6]=0;
+						for(s=0;s<6;s++) test_K2[9][6]+=test_K2[9][s]; //chksum
+						write_com(9);
+		 			    printf(")  Команда КАН-Л отправлена \n");
+						break;
+			   case 22: read_kvit();break;
+
+			   case 23: if (TS) //!!!!!!!!!!!!!!!!!!!!!!!!
+						{	
+							printf("\n---- ВКЛЮЧЕН ТВК С МАХ ОСЛАБЛЕНИЕМ -----\n");
+							//p->toPR1[3]=0xFC00;
+							p->toPR1[3]=0x0000;
+						}
+						N_COM++;break;
+			   case 24:	N_COM++;break;
+						//if(kbhit()) {N_COM++;getch();}break;
+			   case 25:	write_com(10);printf(")  Команда НУС отправлена\n");break;
+			   case 26: read_kvit_NUS();break;
+			   case 27: if (comOK[10]>0) {comOK[10]=Ncount=0;N_COM+=3;break;}//9
+						if (Tcount>Tcount_com+500) {printf("Timeout 50 sec\n");N_COM=-2;}
+						if (Ncount>10) {printf("TPO not responding\n");N_COM=0;}
+						break;
+ 			   case 28: N_COM+=8;
+						//write_com(27);printf(")  Команда ДанП.Т.Р отправлена\n");
+						break;
+			   case 29: read_kvit();break;
+ 			   case 30: write_com(28);printf(") Команда ЗДР.З отправлена\n");break;
+			   case 31: read_kvit();break;
+ 			   case 32: write_com(30);printf(") Команда СЧК отправлена\n");break;
+			   case 33: read_kvit();break;
+ 			   case 34: //write_com(29);printf(") Команда РЧК отправлена\n");
 						switch(p->from_MO3.from41.ZUNf)
 						{
 							case 1: //FR
@@ -523,6 +557,8 @@ main(int argc, char *argv[]) {
 									test_K2[9][5]=p->from_MO3.from41.Nd_FRCH + (p->from_MO3.from41.Key_FRCH<<3);
 									break;
 						}
+						//test_K2[9][4]=40;
+						//test_K2[9][5]=1;
 						test_K2[9][6]=0;
 						for(s=0;s<6;s++) test_K2[9][6]+=test_K2[9][s]; //chksum
 						write_com(9);
@@ -542,33 +578,6 @@ main(int argc, char *argv[]) {
 							default:printf("-режим не задан\n");
 						}
 						break;
-			   case 22: read_kvit();break;
-
-			   case 23: if (TS) //!!!!!!!!!!!!!!!!!!!!!!!!
-						{	
-							printf("\n---- ВКЛЮЧЕН ТВК С МАХ ОСЛАБЛЕНИЕМ -----\n");
-							//p->toPR1[3]=0xFC00;
-							p->toPR1[3]=0x0000;
-						}
-						N_COM++;break;
-			   case 24:	N_COM++;break;
-						//if(kbhit()) {N_COM++;getch();}break;
-			   case 25:	write_com(10);printf(")  Команда НУС отправлена\n");break;
-			   case 26: read_kvit_NUS();break;
-			   case 27: if (comOK[10]>0) {comOK[10]=Ncount=0;N_COM+=9;break;}//9
-						if (Tcount>Tcount_com+500) {printf("Timeout 50 sec\n");N_COM=-2;}
-						if (Ncount>10) {printf("TPO not responding\n");N_COM=0;}
-						
-						break;
- 			   case 28: N_COM+=8;
-						//write_com(27);printf(")  Команда ДанП.Т.Р отправлена\n");
-						break;
-			   case 29: read_kvit();break;
- 			   case 30: write_com(28);printf(")  Команда ЗДР.З отправлена\n");break;
-			   case 31: read_kvit();break;
- 			   case 32: write_com(29);printf(")  Команда РЧК отправлена\n");break;
-			   case 33: read_kvit();break;
- 			   case 34: write_com(30);printf(")  Команда СЧК отправлена\n");break;
 			   case 35: read_kvit();break;
  			   case 36: write_com24(24);printf("  Начата посылка команды ДанИ.V.dV\n");
 						comOK[24]=1;N_COM++;
@@ -585,7 +594,9 @@ main(int argc, char *argv[]) {
 			   case 37: if (TM) {N_COM++;break;}
 						Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]+COR_T; //время прибора из СЕВ
 						if (Tpr1!=Tpr) printf("---- ОЖИДАНИЕ НАЧАЛА СС   Ts=%d  Tpr=%d-----\n",Tstart,Tpr);
+						//printf("Tpr=%d Tstart=%d Tpr1=%d ",Tpr,Tstart,Tpr1);
 						Tpr1=Tpr;
+						
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //время прибора из СЕВ
 						if (Tpr==Tstart) //если время начала сеанса совпало
 						{
@@ -596,7 +607,10 @@ main(int argc, char *argv[]) {
 						break;
 			//-----------------------------------
  			   case 38: //p->from_MO3.from41.D = 1500000;
+						//Выдача команды ДанПТР в начале следующей секунды
+						while((p->CEB[4]>>12)>2) {};// printf("w %d ",p->CEB[4]>>12); printf("\n");
 						D1 = p->from_MO3.from41.D / 300;
+						D1 += 1000 + (p->Dout41[59]*1000);
 						test_K2[27][8] = D1 & 0x00ff;
 						test_K2[27][9] = D1 >> 8;
 						
@@ -620,18 +634,29 @@ main(int argc, char *argv[]) {
 						hour=(p->CEB[2]>>12)*10 + ((p->CEB[2]>>8)&0x0F);
 						min =(p->CEB[3]>>12)*10 + ((p->CEB[3]>>8)&0x0F);
 						sec =((p->CEB[3]>>4)&0x0F)*10 + ((p->CEB[3])&0x0F);
-						printf("\day=%d nhour=%d min=%d sec=%d\n",day,hour,min,sec);	
-						Time += sec + (min<<6) + (hour<<12) + (day<<17) + (years<<28);	
+						//---------------------------------------------------------
+						sec += 1; //p->Dout41[59];
+						if (sec>59) {sec=sec-60;min++;}
+						if (min>59) {min=min-0;hour++;}
+						if (hour>23) {hour=0;day++;}
+						//min=40;
+						//hour=16;
+						//sec=10;
+						//---------------------------------------------------------
+						Time = sec + (min<<6) + (hour<<12) + (day<<17) + (years<<28);	
 						for(s=0;s<4;s++) test_K2[27][s+4] = Time >> (s*8);
 						
 						test_K2[27][11]=0;
 						for(s=0;s<11;s++) test_K2[27][11]+=test_K2[27][s]; //chksum
-						write_com(27);printf(") Команда ДанП.Т.Р отпр\n");break;
+						write_com(27);printf(") Команда ДанП.Т.Р отпр\n");
+						printf("\n           day=%d hour=%d min=%d sec=%d msec=%d out=%d d=%f d1=%d\n",day,hour,min,sec,p->Dout41[59],p->CEB[4]>>12,p->from_MO3.from41.D,D1);	
+						break;
 			   case 39: read_kvit();break;
 			//-----------------------------------
- 			   case 40: write_com(31);printf(")  			Команда Сеанс.L отправлена\n\n");
+ 			   case 40: //пауза между данПТР и Сеанс
+						while((p->CEB[4]>>12)<8) {};// printf("w1 %d ",p->CEB[4]>>12); printf("\n");
+						write_com(31);printf(")  			Команда Сеанс.L отправлена msec=%d \n\n",p->CEB[4]>>12);
 						break;
-			   //case 41: read_kvit_NUS();break;
 			   case 41: read_kvit();break;
  			   case 42: if (TS) {if (Tcount>Tcount_com+40) {write_com(32);printf("\n\nОБР ТЕСТ\n\n");}}
 						else N_COM++;
@@ -643,6 +668,7 @@ main(int argc, char *argv[]) {
 						}
 						else 
 						{
+							//printf("Tcount=%d Tcount_com=%d\n",Tcount,Tcount_com);
 							if (Tcount>Tcount_com+240) {write_com(23);write_com(33);N_COM=37;}
 							else if (Tcount>Tcount_com+40) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}} 
 						}

@@ -136,7 +136,7 @@ void main( void )
 	}
 
 // 	printf(" sDCP=%d ",p->to_MO3.to41.sum_DCP);		//количество принятых слов с массиве дцп
-    printf(" D=%f ",p->from_MO3.from41.D);
+//    printf(" D=%f ",p->from_MO3.from41.D);
 	printf("pr1=%04x topr1=%04x",p->PR1[2],p->toPR1[2]);
 
 	printf("\n");
