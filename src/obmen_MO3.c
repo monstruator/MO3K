@@ -77,7 +77,7 @@ float Angle0;
 	//gloriya(1,1,31);//test K2 по умолчанию
 	//gloriya(1,1,1);//work K2
 	//gloriya(1,0,2);//work K1
-	gloriya(1,0,31);//test K2 по умолчанию
+	gloriya(1,1,31);//test K2 по умолчанию
 
 	delay(2000);
 	open_shmem();

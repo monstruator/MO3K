@@ -610,7 +610,7 @@ main(int argc, char *argv[]) {
 						//Выдача команды ДанПТР в начале следующей секунды
 						while((p->CEB[4]>>12)>2) {};// printf("w %d ",p->CEB[4]>>12); printf("\n");
 						D1 = p->from_MO3.from41.D / 300;
-						D1 += 1000 + (p->Dout41[59]*1000);
+						//D1 += 1000;// + (p->Dout41[59]*1000);
 						test_K2[27][8] = D1 & 0x00ff;
 						test_K2[27][9] = D1 >> 8;
 						
@@ -645,7 +645,6 @@ main(int argc, char *argv[]) {
 						//---------------------------------------------------------
 						Time = sec + (min<<6) + (hour<<12) + (day<<17) + (years<<28);	
 						for(s=0;s<4;s++) test_K2[27][s+4] = Time >> (s*8);
-						
 						test_K2[27][11]=0;
 						for(s=0;s<11;s++) test_K2[27][11]+=test_K2[27][s]; //chksum
 						write_com(27);printf(") Команда ДанП.Т.Р отпр\n");
@@ -654,8 +653,42 @@ main(int argc, char *argv[]) {
 			   case 39: read_kvit();break;
 			//-----------------------------------
  			   case 40: //пауза между данПТР и Сеанс
-						while((p->CEB[4]>>12)<8) {};// printf("w1 %d ",p->CEB[4]>>12); printf("\n");
-						write_com(31);printf(")  			Команда Сеанс.L отправлена msec=%d \n\n",p->CEB[4]>>12);
+						//while((p->CEB[4]>>12)<8) {};// printf("w1 %d ",p->CEB[4]>>12); printf("\n");
+						
+						switch(p->from_MO3.from41.ZUNf)
+						{
+							case 1: //FR
+									test_K2[31][4]=p->from_MO3.from41.N_FRCH;
+									test_K2[31][5]=p->from_MO3.from41.Nd_FRCH;
+									break;
+							case 2: //DP
+									test_K2[31][4]=0x88;
+									test_K2[31][5]=p->from_MO3.from41.Nd_FRCH;
+									break;
+							case 3: //PP
+									test_K2[31][4]=0x99;
+									test_K2[31][5]=p->from_MO3.from41.Nd_FRCH + (p->from_MO3.from41.Key_FRCH<<3);
+									break;
+						}
+						//test_K2[9][4]=40;
+						//test_K2[9][5]=1;
+						test_K2[31][6]=0;
+						for(s=0;s<6;s++) test_K2[31][6]+=test_K2[31][s]; //chksum
+						write_com(31);printf(")  Команда Сеанс.L отпр msec=%d ",p->CEB[4]>>12);
+
+						switch(p->from_MO3.from41.ZUNf)
+						{
+							case 1: //FR
+									printf(" ФР Кан=%d Част=%d \n\n",p->from_MO3.from41.N_FRCH,p->from_MO3.from41.Nd_FRCH);
+									break;
+							case 2: //DP
+									printf(" ДП Кан=%d \n\n",p->from_MO3.from41.Nd_FRCH);
+									break;
+							case 3: //PP
+									printf(" ПП Кан=%d Ключ=%d\n\n",p->from_MO3.from41.Nd_FRCH,p->from_MO3.from41.Key_FRCH);
+									break;
+							default:printf("-режим не задан\n\n");
+						}				
 						break;
 			   case 41: read_kvit();break;
  			   case 42: if (TS) {if (Tcount>Tcount_com+40) {write_com(32);printf("\n\nОБР ТЕСТ\n\n");}}
