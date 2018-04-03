@@ -271,7 +271,7 @@ while(1)
 	if (p->num_com==2) 
 	{
 		gloria_count++;
-		if (gloria_count>50)
+		if (gloria_count>100)
 		{
 			rez=gloriya_read();
 			if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;

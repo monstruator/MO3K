@@ -653,7 +653,7 @@ main(int argc, char *argv[]) {
 			   case 39: read_kvit();break;
 			//-----------------------------------
  			   case 40: //пауза между данПТР и Сеанс
-						//while((p->CEB[4]>>12)<8) {};// printf("w1 %d ",p->CEB[4]>>12); printf("\n");
+						while((p->CEB[4]>>12)<6) {};// printf("w1 %d ",p->CEB[4]>>12); printf("\n");
 						
 						switch(p->from_MO3.from41.ZUNf)
 						{
@@ -702,7 +702,12 @@ main(int argc, char *argv[]) {
 						else 
 						{
 							//printf("Tcount=%d Tcount_com=%d\n",Tcount,Tcount_com);
-							if (Tcount>Tcount_com+240) {write_com(23);write_com(33);N_COM=37;}
+							if (Tcount>Tcount_com+240) 
+							{
+								write_com(23);
+								//write_com(33);
+								N_COM=37;
+							}
 							else if (Tcount>Tcount_com+40) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}} 
 						}
 						break;
@@ -714,7 +719,9 @@ main(int argc, char *argv[]) {
 		{
 			getch();
 			write_com(23);
-			write_com(33);
+			//write_com(33);
+			write_com(23);
+			//write_com(33);
 			N_COM=0;
 			p->toPR1[3]=0x0000;//8000-onn 0 dBm 0000-off TVK 
 		}//printf("%d",getch());
