@@ -77,12 +77,13 @@ float Angle0;
 	//gloriya(1,1,31);//test K2 по умолчанию
 	//gloriya(1,1,1);//work K2
 	//gloriya(1,0,2);//work K1
-	gloriya(1,1,31);//test K2 по умолчанию
+	//gloriya(1,1,31);//test K2 по умолчанию
 
 	delay(2000);
 	open_shmem();
 	delay(1000);
 
+	if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	//Angle0=4;
 	//p->jump=-1;
 

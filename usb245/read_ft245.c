@@ -157,10 +157,10 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 	//short b=0;
 	int priem=0;	//счетчик циклов без приема  информации
 	unsigned long   ret;
-	unsigned char	DCP_K2[16400];	//массив дцп для пр-к2
+	unsigned char	DCP_K2[27000];	//массив дцп для пр-к2
 
 
-	if ( ( data_buff = malloc( 17000 ) ) == NULL ) {
+	if ( ( data_buff = malloc( 27000 ) ) == NULL ) {
 		fprintf( stderr, "Failed to allocate mem for the data buffer. %s\n", strerror( errno ) );
 		return ( -1 );
 	}
@@ -178,6 +178,7 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 		else 
 			if ( in_buf > 0 ) 
 			{	//printf("in_buf=%d\n",in_buf);
+				//if ((in_buf+ret)>SUM_DCP_K2*2) in_buf=SUM_DCP_K2*2 - ret; //обрежем лишнее
 				if ( ( ret = read( fd, data_buff, in_buf ) ) == -1 ) 
 					fprintf( stderr, "read() error. %s\n", strerror( errno ) );
 				else //если прочитали данные
@@ -189,7 +190,7 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 				}
 			}
 		
-		if (kbhit()&&TM) i=0;
+		//if (kbhit()&&TM) i=0;
 		
 		priem++;	//не было приема 4 cek
 
@@ -207,15 +208,13 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 				printf("Сформирован массив К2 N%d. Кол-во данных %d слов\n",p->to_MO3.to41.cr_SEANCE,p->to_MO3.to41.sum_DCP);				
 			}
 			sum_ret=0;
+			printf("Очистка массива\n");
 		}
 		delay(300);	
-//		printf("1\n");
 	}
-
 	printf( "\n" );
 	free( data_buff );
 	//fclose( out_fp );
-	
 	return ( 0 );
 }
 

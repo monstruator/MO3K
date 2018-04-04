@@ -390,7 +390,7 @@ main(int argc, char *argv[]) {
 									switch(buffer[i+3])
 									{
 										case 0x07 : OC4=buffer[i+5];OC4=(OC4<<8)|buffer[i+4];
-													printf(" ОСЧ - %6.3f м/с ",OC4*0.582);break;
+													printf(" %6.3f м/с ",OC4*0.582);break;
 													//printf(" ОСЧ - %d м/с ",OC4);break;
 										case 0x11 : printf(" Pтек - %d ",buffer[i+4]);
 													if (buffer[i+4]>0)	p->to_MO3.to41.UR_sign_K2=buffer[i+4]*3;
@@ -650,7 +650,9 @@ main(int argc, char *argv[]) {
 						write_com(27);printf(") Команда ДанП.Т.Р отпр\n");
 						printf("\n           day=%d hour=%d min=%d sec=%d msec=%d out=%d d=%f d1=%d\n",day,hour,min,sec,p->Dout41[59],p->CEB[4]>>12,p->from_MO3.from41.D,D1);	
 						break;
-			   case 39: read_kvit();break;
+			   case 39: read_kvit();
+						printf("--------------------------------read---------------------\n");
+						break;
 			//-----------------------------------
  			   case 40: //пауза между данПТР и Сеанс
 						while((p->CEB[4]>>12)<6) {};// printf("w1 %d ",p->CEB[4]>>12); printf("\n");
@@ -696,7 +698,13 @@ main(int argc, char *argv[]) {
 						break;			   
  			   case 43: if (TS)	
 						{
-							if (Tcount>Tcount_com+200) {write_com(23);write_com(33);N_COM=37;}
+							if (Tcount>Tcount_com+200) 
+							{
+								write_com(23);
+								printf("-------write_com(23);---------\n");
+								//write_com(33);
+								//N_COM=37;
+							}
 							else if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}} 
 						}
 						else 
@@ -705,13 +713,17 @@ main(int argc, char *argv[]) {
 							if (Tcount>Tcount_com+240) 
 							{
 								write_com(23);
+								printf("-------write_com(23);---------\n");
 								//write_com(33);
-								N_COM=37;
+								//N_COM++;
 							}
 							else if (Tcount>Tcount_com+40) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}} 
 						}
 						break;
-			   case 44: read_kvit();break;
+			   case 44: read_kvit();
+						printf("-------read_kvit---------\n");
+						N_COM=37;
+						break;
 			}
 			//if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
 		}
