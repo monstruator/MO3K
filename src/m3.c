@@ -190,7 +190,7 @@ for(;;)//----- CEPBEP -----//
 		//printf("\n");
 		TIMER10=0;//был обмен с пр1.0
 		break;
-	case 2://--- ОШИБКА ОБМЕНА С ПР1
+	case 2://--- О?ИБКА ОБМЕНА С ПР1
 		if(KK_end(dev,Ynp_np1,2)==-1)owu6ka|=1024;else owu6ka|=4;
 		break;
 	case 3://--- HK
@@ -273,13 +273,16 @@ for(;;)//----- CEPBEP -----//
 			 }		
 		if (Din_ModB[2]==0) ispr->sevB=1; //признак наличия СЕВ в Мод Б
 		else {
-				ispr->sevB=0; //сев Мод Б исправен
-			    p->Dout41[30]=(Din_ModB[20]>>8)&0x000F;
-				p->Dout41[30]+=(Din_ModB[20]>>12)*10;     //hours
-				p->Dout41[31]=(Din_ModB[21]>>8)&0x000F;
-				p->Dout41[31]+=(Din_ModB[21]>>12)*10;	//minutes
-				p->Dout41[32]=Din_ModB[21]&0x000F;
-				p->Dout41[32]+=((Din_ModB[21]>>4)&0x000f)*10; //seconds
+				if (ispr->sevA==1) //если нет СЕВ в Мод А, то копируем из Б
+				{
+					ispr->sevB=0; //сев Мод Б исправен
+					p->Dout41[30]=(Din_ModB[20]>>8)&0x000F;
+					p->Dout41[30]+=(Din_ModB[20]>>12)*10;     //hours
+					p->Dout41[31]=(Din_ModB[21]>>8)&0x000F;
+					p->Dout41[31]+=(Din_ModB[21]>>12)*10;	//minutes
+					p->Dout41[32]=Din_ModB[21]&0x000F;
+					p->Dout41[32]+=((Din_ModB[21]>>4)&0x000f)*10; //seconds
+				}
 			 }			 
 		
 		//printf("ModB - ");	for(j=0;j<3;j++) printf("%x ",Din_ModB[j]);printf("\n");
