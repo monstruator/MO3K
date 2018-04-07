@@ -33,7 +33,7 @@
 	float Mc=64.*1852./32384./3600., Dbl, Flt=0;
 	int sock, length, i , count_mes=0;
 	static Udp_Client_t Uc41,Uc42;
-	char bufi[1024],bufo[1024],but_buf[1024],gloria_start=0,gloria_count=0;
+	char bufi[1024],bufo[1024],but_buf[1024],gloria_start=0,gloria_count=90;
 	obmen_MO3_MO3K_t rec4;	
 	unsigned int pr1_c_old=0;
 	unsigned int AK_c=0; //счетчик обмена после поступления команды АК
@@ -83,7 +83,7 @@ float Angle0;
 	open_shmem();
 	delay(1000);
 
-	if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
+	//if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	//Angle0=4;
 	//p->jump=-1;
 
@@ -260,25 +260,29 @@ while(1)
 	//printf("Angl 2=%02f r=%f NK%d  \n",from41.P_ANT,p->to_MO3.to41.P_FACT,from41.num_com);
 
 	//Готовность к сеансу связи
-	if (p->num_com==1) i2++; //считаем время от первой ком нач сеанса
-	if ((gloria_start==0)&&((p->num_com==1)||(p->num_com==2)))
+	
+	/*if ((gloria_start==0)&&((p->num_com==1)||(p->num_com==2)))
 	{
 		if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0)) 
 			{rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR);gloria_start=1;}
 		else printf("Error Gloriya Key %d \n",p->from_MO3.from41.Nkey_SHAKR);
 		if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
-	}
+	}*/
 
-	if (p->num_com==2) 
+	gloria_count++;
+	if (gloria_count>100)
 	{
-		gloria_count++;
-		if (gloria_count>100)
-		{
-			rez=gloriya_read();
+			if ((p->num_com==1)||(p->num_com==2))
+			{
+				if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0)) 
+					{rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR);}
+			}
+			else rez=gloriya(1,1,31);
 			if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 			gloria_count=0;
-		}
 	}
+
+	if (p->num_com==1) i2++; //считаем время от первой ком нач сеанса	
 	if (i2>30) 	{p->to_MO3.to41.pr_GSS=1;i2=0;}
 	if (p->num_com==3) gloria_start=0;
 	///printf("GSS=%d ",p->to_MO3.to41.pr_GSS);

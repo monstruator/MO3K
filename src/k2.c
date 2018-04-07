@@ -24,6 +24,7 @@
 int COR_T=0; //correction time
 int TM=0; //test time mode
 int TS=0; //test signal mode
+int verbose=0; //
  
 int rez=0;
 pid_t proxy_DRV2=0; 
@@ -165,8 +166,11 @@ write_com (Ncom)
 	msec1=div(Tcount,10);
 	//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 	//printf("%s:%03d <-- (",b,msec1.rem*100);
-	printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);	
-	for(i1=0;i1<test_K2[Ncom][1]+1;i1++) printf("%x.",test_K2[Ncom][i1]);
+	if (verbose) 
+	{
+		printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);	
+		for(i1=0;i1<test_K2[Ncom][1]+1;i1++) printf("%x.",test_K2[Ncom][i1]);
+	}
 	N_COM++;Ncount++;
 	Tcount_com=Tcount;
 }
@@ -181,19 +185,18 @@ write_com24 (Ncom)
 	if (TS) V=0;
 	test_K2[24][4]=V&0x00ff;
 	test_K2[24][5]=V>>8;
-	printf(" V=%d",V);
+	if (verbose) printf(" V=%d",V);
 	V=(short)(p->from_MO3.from41.Ar/1.5625);
 	if (TS) V=0;
 	test_K2[24][6]=V&0x00ff;
 	test_K2[24][7]=V>>8;
-	printf(" A=%d\n",V);
+	if (verbose) printf(" A=%d\n",V);
 	test_K2[24][8]=0; //check sum
 	for (i1=0;i1<8;i1++) test_K2[24][8]+=test_K2[24][i1]; //test sum
 	wr_cpcs_s.type=5;	wr_cpcs_s.cnl=chan2;	wr_cpcs_s.cnt=9;
 	for(i=0;i<test_K2[24][1]+1;i++) wr_cpcs_s.uom.dt[i]=test_K2[24][i];
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 //	for(i1=0;i1<9;i1++) printf(" %x.",wr_cpcs_s.uom.dt[i1]);printf("\n");
-//	printf("!! V=%d\n",V);
 }
 
 read_kvit()
@@ -231,6 +234,7 @@ main(int argc, char *argv[]) {
 		switch(i){
 			case 't' :	TM=1; break;
 			case 's' :	TS=1; break;
+			case 'v' :	verbose=1; break;
 			//case 'c' :	sscanf(optarg,"%d",COR_T); break;
 		}//switch
 	}//while
@@ -317,19 +321,22 @@ main(int argc, char *argv[]) {
 					//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 					msec1=div(Tcount,10);
 					//printf("%s:%03d -->",b,msec1.rem*100);			
-					printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
+					if (verbose) printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
 
 					for(i1=0;i1<N;i1++) chkSUM+=buffer[i+i1]; //подсчет контр суммы         
 					//printf("i=%d chkSUM=%x\n",i,chkSUM);
 					if (chkSUM!=buffer[N+i]) //если не совпадает контр сумма
 					{
-						printf(" error CHKSUM\n");//проверка контрольной суммы
+						if (verbose) printf(" error CHKSUM\n");//проверка контрольной суммы
 						K2count=chkSUM=0;		//очистка буфера
 						break;					//выходим и ждем дальше
 					}
 					//пришел правильный пакет
-					printf(" (");			
-					for(i1=0;i1<N+1;i1++) printf("%x.",buffer[i1+i]);printf(")");         
+					if (verbose)
+					{
+						printf(" (");			
+						for(i1=0;i1<N+1;i1++) printf("%x.",buffer[i1+i]);printf(")");         
+					}
 					//анализ полученного пакета
 					switch(buffer[i+1])
 					{
@@ -338,10 +345,9 @@ main(int argc, char *argv[]) {
 									//printf(" Получена квитанция - команда принята ");		
 									//if(buffer[i+3]==0) {comOK[1]++;printf("ПРАВИЛЬНО");break;}
 									//else printf("неправильно");
-									if(buffer[i+3]==0) {comOK[1]++;printf("");break;}
-									else printf("");
+									if(buffer[i+3]==0) {comOK[1]++;break;}
 								}
-								else printf(" Получен неизвестный пакет");		
+								else if (verbose) printf(" Получен неизвестный пакет");		
 								break;
  						case 5: if(buffer[i+2]==2)
 								{
@@ -383,43 +389,45 @@ main(int argc, char *argv[]) {
 																
 									}
 								}
-								else printf(" Получен неизвестный пакет");								
+								else if (verbose) printf(" Получен неизвестный пакет");								
 								break;
  						case 6: if(buffer[i+2]==2)
 								{
 									switch(buffer[i+3])
 									{
 										case 0x07 : OC4=buffer[i+5];OC4=(OC4<<8)|buffer[i+4];
-													printf(" %6.3f м/с ",OC4*0.582);break;
+													if (verbose) printf(" %6.3f м/с ",OC4*0.582);
+													break;
 													//printf(" ОСЧ - %d м/с ",OC4);break;
-										case 0x11 : printf(" Pтек - %d ",buffer[i+4]);
+										case 0x11 : if (verbose) printf(" Pтек - %d ",buffer[i+4]);
 													if (buffer[i+4]>0)	p->to_MO3.to41.UR_sign_K2=buffer[i+4]*3;
 													else p->to_MO3.to41.UR_sign_K2=0;
 													break;
-										case 0x73 : printf(" ПРМ1 - ");
-													if (buffer[i+4]&0x01) printf(" ПРС");
-													if (buffer[i+4]&0x02) printf(" СС");
-													if (buffer[i+4]&0x04) {printf(" ЗС");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
-
-													if (buffer[i+4]&0x08) printf(" СБ");
+										case 0x73 : if (buffer[i+4]&0x04) {printf(" ЗС");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
 													if (buffer[i+4]&0x10) {printf(" ИДК");p->to_MO3.to41.Pr_ZI_K2=1;}else p->to_MO3.to41.Pr_ZI_K2=0;
-													if (buffer[i+4]&0x20) printf(" ИДД");
-													if (buffer[i+4]&0x40) printf(" ВИ");
-													if (buffer[i+4]&0x80) printf(" ПС");	
-
-													if (buffer[i+5]&0x01) printf(" 27М1н");
-													if (buffer[i+5]&0x02) printf(" ПФ");
-													if (buffer[i+5]&0x04) printf(" РНС");
-													if (buffer[i+5]&0x08) printf(" РПС");
-													if (buffer[i+5]&0x10) printf(" РСС");
-													if (buffer[i+5]&0x20) printf(" ЗКС");
-													if (buffer[i+5]&0x40) printf(" ОСС");
-													if (buffer[i+5]&0x80) printf(" НС");
+													if (verbose)
+													{
+														printf(" ПРМ1 - ");
+														if (buffer[i+4]&0x01) printf(" ПРС");
+														if (buffer[i+4]&0x02) printf(" СС");
+														if (buffer[i+4]&0x08) printf(" СБ");
+														if (buffer[i+4]&0x20) printf(" ИДД");
+														if (buffer[i+4]&0x40) printf(" ВИ");
+														if (buffer[i+4]&0x80) printf(" ПС");	
+														if (buffer[i+5]&0x01) printf(" 27М1н");
+														if (buffer[i+5]&0x02) printf(" ПФ");
+														if (buffer[i+5]&0x04) printf(" РНС");
+														if (buffer[i+5]&0x08) printf(" РПС");
+														if (buffer[i+5]&0x10) printf(" РСС");
+														if (buffer[i+5]&0x20) printf(" ЗКС");
+														if (buffer[i+5]&0x40) printf(" ОСС");
+														if (buffer[i+5]&0x80) printf(" НС");
 													//printf("\n");
+													}
 													break;
 									}
 								}
-								else printf(" Получен неизвестный пакет");								
+								else if (verbose) printf(" Получен неизвестный пакет");								
 								break;
  						case 7: if(buffer[i+2]==2)
 								{
@@ -448,8 +456,6 @@ main(int argc, char *argv[]) {
 								}
 								else printf(" Получен неизвестный пакет");								
 								break;
-
-
 					}									
 					printf("\n");
 					chkSUM=0;
@@ -562,8 +568,10 @@ main(int argc, char *argv[]) {
 						test_K2[9][6]=0;
 						for(s=0;s<6;s++) test_K2[9][6]+=test_K2[9][s]; //chksum
 						write_com(9);
-		 			    printf(")  Команда КАН-Л отправлена ");
-
+		 			    if (verbose) 
+						{
+						printf(")  Команда КАН-Л отправлена ");
+						
 						switch(p->from_MO3.from41.ZUNf)
 						{
 							case 1: //FR
@@ -576,6 +584,7 @@ main(int argc, char *argv[]) {
 									printf(" ПП Кан=%d Ключ=%d\n",p->from_MO3.from41.Nd_FRCH,p->from_MO3.from41.Key_FRCH);
 									break;
 							default:printf("-режим не задан\n");
+						}
 						}
 						break;
 			   case 35: read_kvit();break;

@@ -196,15 +196,16 @@ for(;;)//----- CEPBEP -----//
 	case 3://--- HK
 		SIMF[0]++; //есть симфония
 		if (SIMF[0]==60000) SIMF[0]=0;
-		//printf("%d\n",dev->tx_B[3]);
+		
 		if(ou_read(dev,HK,nogAgpecHK)){owu6ka|=8;break;}
    		if((dev->tx_B[3])!=32)  {owu6ka|=512;printf("error=%d\n",dev->tx_B[3]);break;}
    		if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
+		//printf("ModA simf- "); 	for(j=0;j<dev->tx_B[3]+4;j++) printf("%x ",dev->tx_B[j]);printf("\n");
 		//printf("%d\n",dev->tx_B[3]);
     	for(j=0;j<15;j++) p->Dout41[j]=dev->tx_B[4+j]; //--- npueM HK
 		//printf("N=%d",SIMF[0]);
 //		printf("ModA simf- "); 	for(j=0;j<15;j++) printf("%x ",p->Dout41[j]);printf("\n");
-//		printf("ModA simf- "); 	for(j=0;j<15;j++) printf("%x ",dev->tx_B[j]);printf("\n");
+//		
 		//printf("%x\n",p->Dout41[4]);
 
 	    //memcpy(&b2,&p->Dout41[5],2);	 KK=b2*pi/(1<<14);
