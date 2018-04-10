@@ -55,50 +55,50 @@ rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 msg_i.type=BT_WRK;
 msg_i.act_s.t_act=work;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf("Выдача сигнала Работа \n");
+//printf("Выдача сигнала Работа \n");
 
 // выдать сигнал "Режим"
 msg_i.type=BT_MD;
 msg_i.act_s.t_act=mode;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf("Выдача сигнала Режим \n");
+//printf("Выдача сигнала Режим \n");
 
 // выдать сигнал "K-1P"
 msg_i.type=BT_K_1P;
 msg_i.act_s.t_act=k_1r;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf("Выдача сигнала K-1P ");
+//printf("Выдача сигнала K-1P ");
 
 // выдать сигнал "K-2P"
 msg_i.type=BT_K_2P;
 msg_i.act_s.t_act=k_2r;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf(" K-2P ");
+//printf(" K-2P ");
 
 // выдать сигнал "K-3P"
 msg_i.type=BT_K_3P;
 msg_i.act_s.t_act=k_3r;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf(" K-3P ");
+//printf(" K-3P ");
 
 // выдать сигнал "K-4P"
 msg_i.type=BT_K_4P;
 msg_i.act_s.t_act=k_4r;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf(" K-4P ");
+//printf(" K-4P ");
 
 // выдать сигнал "K-5P"
 msg_i.type=BT_K_5P;
 msg_i.act_s.t_act=k_5r;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf(" K-5P \n");
+//printf(" K-5P \n");
 
 sleep(2);
 
 msg_i.type=GET_IN; 
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
-printf("Вх. сигналы=%x\n", msg_o.inp_r.u_inp.i_d);
-printf("ИСПР-К=%x НИ-К=%x НИ-Р=%x Готов=%x\n",msg_o.inp_r.u_inp.st_in.ISPR_K, 
+printf("Вх. сигналы=%x   ", msg_o.inp_r.u_inp.i_d);
+printf("ИСПР-К=%x НИ-К=%x НИ-Р=%x Готов=%x   ",msg_o.inp_r.u_inp.st_in.ISPR_K, 
 msg_o.inp_r.u_inp.st_in.NI_K, msg_o.inp_r.u_inp.st_in.NI_R,
 msg_o.inp_r.u_inp.st_in.SOI_RDy);
 

@@ -221,16 +221,11 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 
 int main( int argc, char *argv[] )
 {
-//	unsigned long		in_buf;
-//	char		 	*data_buff;
-//	int ret;
  	int							c;
 	optparams_t					oparams;
 	int							fd;
 	int							oflag;
 
-	printf( "read_ft245 test program is started\n" );
-	
 	oparams.dev_name = strdup( "//9/dev/ft245" ); //!!!!
 	oparams.fname = NULL;
 	oparams.nonblock = 0;
@@ -283,7 +278,9 @@ int main( int argc, char *argv[] )
 				break;
 		}
 	}
-	
+
+	printf( "read_ft245 test program is started\n" );	
+	delay(5000);
 	open_shmem();
 	// open device in block or nonblock mode
 	oflag = O_RDONLY | O_NONBLOCK;

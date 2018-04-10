@@ -230,7 +230,7 @@ main(int argc, char *argv[]) {
     struct sigevent event;
 
 	int K2count=0;//счетчик бафтов в буфере К2
-	while( (i=getopt(argc, argv, "t:s:") )!=-1)	{
+	while( (i=getopt(argc, argv, "t:s:v:") )!=-1)	{
 		switch(i){
 			case 't' :	TM=1; break;
 			case 's' :	TS=1; break;
@@ -372,7 +372,6 @@ main(int argc, char *argv[]) {
 										case 0x02 : printf("  Дан.Н.НН - ");
 													if (buffer[i+4]&1) printf(" нет-ДанИ");
 													if (buffer[i+4]&2) printf(" нет-ДанП");
-													//printf("\n");
 													break;
 										case 0x010: printf("  ПРМ - ");
 													if (buffer[i+4]&0x01) printf(" ПРС");
@@ -384,7 +383,6 @@ main(int argc, char *argv[]) {
 													if (buffer[i+4]&0x20) printf(" ИДД");
 													if (buffer[i+4]&0x40) printf(" ВИ");
 													if (buffer[i+4]&0x80) printf(" ПС");
-													//printf("\n");
 													break;
 																
 									}
@@ -422,7 +420,6 @@ main(int argc, char *argv[]) {
 														if (buffer[i+5]&0x20) printf(" ЗКС");
 														if (buffer[i+5]&0x40) printf(" ОСС");
 														if (buffer[i+5]&0x80) printf(" НС");
-													//printf("\n");
 													}
 													break;
 									}
@@ -445,7 +442,7 @@ main(int argc, char *argv[]) {
  						case 0x1b:
 								if(buffer[i+2]==2)
 								{
-									printf("\n		");
+									
 									if (buffer[i+5]||buffer[i+6]) printf("ГР=%02x%02x ",buffer[i+6],buffer[i+5]);
 									if (buffer[i+7]||buffer[i+8]) printf("НДИ=%02x%02x ",buffer[i+8],buffer[i+7]);
 									if (buffer[i+9]||buffer[i+10])printf("МН=%02x%02x ",buffer[i+10],buffer[i+9]);
@@ -453,11 +450,12 @@ main(int argc, char *argv[]) {
 									if (buffer[i+24]) {printf("СИГ=%x ",buffer[i+24]);p->to_MO3.to41.GL_priem=1;} else p->to_MO3.to41.GL_priem=0;
 									if (buffer[i+25]) {printf("СРГ=%x ",buffer[i+25]);p->to_MO3.to41.GL_CP=1;} else p->to_MO3.to41.GL_CP=0;
 									if (buffer[i+26]) printf("СбСИГ=%x ",buffer[i+26]);
+									printf("\n");
 								}
 								else printf(" Получен неизвестный пакет");								
 								break;
 					}									
-					printf("\n");
+					if (verbose) printf("\n");
 					chkSUM=0;
 					K2count-=N+i+1; // сдвигаем данные в буфере
 					for(i1=0;i1<K2count;i1++) buffer[i1]=buffer[i+N+i1+1];
@@ -535,20 +533,18 @@ main(int argc, char *argv[]) {
 						//if(kbhit()) {N_COM++;getch();}break;
 			   case 25:	write_com(10);printf(")  Команда НУС отправлена\n");break;
 			   case 26: read_kvit_NUS();break;
-			   case 27: if (comOK[10]>0) {comOK[10]=Ncount=0;N_COM+=3;break;}//9
+			   case 27: if (comOK[10]>0) {comOK[10]=Ncount=0;N_COM++;break;}//9
 						if (Tcount>Tcount_com+500) {printf("Timeout 50 sec\n");N_COM=-2;}
 						if (Ncount>10) {printf("TPO not responding\n");N_COM=0;}
 						break;
- 			   case 28: N_COM+=8;
-						//write_com(27);printf(")  Команда ДанП.Т.Р отправлена\n");
+ 			   case 28: write_com(29);printf(") Команда РЧК отправлена\n");
 						break;
 			   case 29: read_kvit();break;
  			   case 30: write_com(28);printf(") Команда ЗДР.З отправлена\n");break;
 			   case 31: read_kvit();break;
  			   case 32: write_com(30);printf(") Команда СЧК отправлена\n");break;
 			   case 33: read_kvit();break;
- 			   case 34: //write_com(29);printf(") Команда РЧК отправлена\n");
-						switch(p->from_MO3.from41.ZUNf)
+ 			   case 34: switch(p->from_MO3.from41.ZUNf)
 						{
 							case 1: //FR
 									test_K2[9][4]=p->from_MO3.from41.N_FRCH;
@@ -570,10 +566,9 @@ main(int argc, char *argv[]) {
 						write_com(9);
 		 			    if (verbose) 
 						{
-						printf(")  Команда КАН-Л отправлена ");
-						
-						switch(p->from_MO3.from41.ZUNf)
-						{
+							printf(")  Команда КАН-Л отправлена ");
+							switch(p->from_MO3.from41.ZUNf)
+							{
 							case 1: //FR
 									printf(" ФР Кан=%d Част=%d \n",p->from_MO3.from41.N_FRCH,p->from_MO3.from41.Nd_FRCH);
 									break;
@@ -584,11 +579,12 @@ main(int argc, char *argv[]) {
 									printf(" ПП Кан=%d Ключ=%d\n",p->from_MO3.from41.Nd_FRCH,p->from_MO3.from41.Key_FRCH);
 									break;
 							default:printf("-режим не задан\n");
-						}
+							}	
 						}
 						break;
 			   case 35: read_kvit();break;
- 			   case 36: write_com24(24);printf("  Начата посылка команды ДанИ.V.dV\n");
+ 			   case 36: write_com24(24);
+						if (verbose) printf("  Начата посылка команды ДанИ.V.dV\n");
 						comOK[24]=1;N_COM++;
 						if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK 
 						Tstart=p->from_MO3.from41.T_SS-8; //время старта за 10 сек до сеанса
@@ -602,14 +598,14 @@ main(int argc, char *argv[]) {
 //----------------------------------------------------------------------------
 			   case 37: if (TM) {N_COM++;break;}
 						Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]+COR_T; //время прибора из СЕВ
-						if (Tpr1!=Tpr) printf("---- ОЖИДАНИЕ НАЧАЛА СС   Ts=%d  Tpr=%d-----\n",Tstart,Tpr);
+						if ((verbose)&&(Tpr1!=Tpr)) printf("---- ОЖИДАНИЕ НАЧАЛА СС   Ts=%d  Tpr=%d-----\n",Tstart,Tpr);
 						//printf("Tpr=%d Tstart=%d Tpr1=%d ",Tpr,Tstart,Tpr1);
 						Tpr1=Tpr;
 						
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //время прибора из СЕВ
 						if (Tpr==Tstart) //если время начала сеанса совпало
 						{
-							printf("			СТАРТ Ts=%d Tpr=%d\n",Tstart,Tpr);
+							if (verbose) printf("			СТАРТ Ts=%d Tpr=%d\n",Tstart,Tpr);
 							Tstart+=30;			
 							N_COM++;//выход из цикла
 						}				
@@ -656,16 +652,19 @@ main(int argc, char *argv[]) {
 						for(s=0;s<4;s++) test_K2[27][s+4] = Time >> (s*8);
 						test_K2[27][11]=0;
 						for(s=0;s<11;s++) test_K2[27][11]+=test_K2[27][s]; //chksum
-						write_com(27);printf(") Команда ДанП.Т.Р отпр\n");
-						printf("\n           day=%d hour=%d min=%d sec=%d msec=%d out=%d d=%f d1=%d\n",day,hour,min,sec,p->Dout41[59],p->CEB[4]>>12,p->from_MO3.from41.D,D1);	
+						write_com(27);
+						if (verbose)
+						{
+							printf(") Команда ДанП.Т.Р отпр\n");
+							printf("\n           day=%d hour=%d min=%d sec=%d msec=%d out=%d d=%f d1=%d\n",day,hour,min,sec,p->Dout41[59],p->CEB[4]>>12,p->from_MO3.from41.D,D1);	
+						}
 						break;
 			   case 39: read_kvit();
-						printf("--------------------------------read---------------------\n");
+						if (verbose) printf("--------------------------------read---------------------\n");
 						break;
 			//-----------------------------------
  			   case 40: //пауза между данПТР и Сеанс
 						while((p->CEB[4]>>12)<6) {};// printf("w1 %d ",p->CEB[4]>>12); printf("\n");
-						
 						switch(p->from_MO3.from41.ZUNf)
 						{
 							case 1: //FR
@@ -685,21 +684,24 @@ main(int argc, char *argv[]) {
 						//test_K2[9][5]=1;
 						test_K2[31][6]=0;
 						for(s=0;s<6;s++) test_K2[31][6]+=test_K2[31][s]; //chksum
-						write_com(31);printf(")  Команда Сеанс.L отпр msec=%d ",p->CEB[4]>>12);
-
-						switch(p->from_MO3.from41.ZUNf)
+						write_com(31);
+						if (verbose)
 						{
-							case 1: //FR
+							printf(")  Команда Сеанс.L отпр msec=%d ",p->CEB[4]>>12);
+							switch(p->from_MO3.from41.ZUNf)
+							{
+								case 1: //FR
 									printf(" ФР Кан=%d Част=%d \n\n",p->from_MO3.from41.N_FRCH,p->from_MO3.from41.Nd_FRCH);
 									break;
-							case 2: //DP
+								case 2: //DP
 									printf(" ДП Кан=%d \n\n",p->from_MO3.from41.Nd_FRCH);
 									break;
-							case 3: //PP
+								case 3: //PP
 									printf(" ПП Кан=%d Ключ=%d\n\n",p->from_MO3.from41.Nd_FRCH,p->from_MO3.from41.Key_FRCH);
 									break;
-							default:printf("-режим не задан\n\n");
-						}				
+								default:printf("-режим не задан\n\n");
+							}
+						}
 						break;
 			   case 41: read_kvit();break;
  			   case 42: if (TS) {if (Tcount>Tcount_com+40) {write_com(32);printf("\n\nОБР ТЕСТ\n\n");}}
@@ -710,7 +712,7 @@ main(int argc, char *argv[]) {
 							if (Tcount>Tcount_com+200) 
 							{
 								write_com(23);
-								printf("-------write_com(23);---------\n");
+								if (verbose) printf("-------write_com(23);---------\n");
 								//write_com(33);
 								//N_COM=37;
 							}
@@ -730,7 +732,7 @@ main(int argc, char *argv[]) {
 						}
 						break;
 			   case 44: read_kvit();
-						printf("-------read_kvit---------\n");
+						if (verbose) printf("-------read_kvit---------\n");
 						N_COM=37;
 						break;
 			}
