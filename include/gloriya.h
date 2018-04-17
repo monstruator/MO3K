@@ -93,7 +93,7 @@ msg_i.act_s.t_act=k_5r;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 //printf(" K-5P \n");
 
-sleep(2);
+sleep(1);
 
 msg_i.type=GET_IN; 
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));

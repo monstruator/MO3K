@@ -1,3 +1,4 @@
+#define ASTRA 1
 /*
 	*********	IP-адреса абонентов и номера портов   *********
 	__________________________________________________________
@@ -184,7 +185,14 @@ typedef struct	{
 }obmen_31_42_2t;
 
 typedef struct	{
-	
+	unsigned short	oHK[32];	// HK - навигация
+	unsigned short	oCEB[6];	// CEB
+}obmen_CEB_HKt;
+
+typedef struct	{
+	#ifdef ASTRA
+	obmen_CEB_HKt	toNT;	// данные HK и CEB
+	#endif
 	obmen_31_42_2t to42;
 	obmen_31_41_2t to41;
 	obmen_AK_MO3K_MN3_t toAK;

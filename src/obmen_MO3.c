@@ -23,8 +23,13 @@
   #define SVC   0x0400
   #define SVCFC 0x0800
 
-  #define SRC_PORT41 8208
-  #define DST_PORT41 8208
+  #ifdef ASTRA
+	#define SRC_PORT41 8209
+	#define DST_PORT41 8209
+  #else
+	#define SRC_PORT41 8208
+	#define DST_PORT41 8208
+  #endif
 
   # define max_len_OUT    4096*8
   # define max_len_IP     4096*8
@@ -71,7 +76,11 @@ float Angle0;
 //поиск сервера
 //qnx_name_attach(0,"4.1");
 //инициализация канала UDP
+#ifdef ASTRA
+	i = Udp_Client_Ini(&Uc41,"194.1.1.7",SRC_PORT41,DST_PORT41);
+#else
 	i = Udp_Client_Ini(&Uc41,"194.1.1.6",SRC_PORT41,DST_PORT41);
+#endif	
 	printf(" Udp_Init=%d	\n", i);
 			
 	//gloriya(1,1,31);//test K2 по умолчанию

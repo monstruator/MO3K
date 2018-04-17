@@ -122,6 +122,8 @@ unsigned short DCEB[6];//Dout42[V];
 	p->M[3]=0x8410;
 //	p->M[3]=0xC430; //включение УМ
 
+	//p->jump=0;
+	
 for(;;)//----- CEPBEP -----//
 {
  pid=Receive(0,dev->tx_B,N_B*2);s=0;owu6ka&=0xF000;//ucnp-Mble.owu6ku
@@ -199,10 +201,11 @@ for(;;)//----- CEPBEP -----//
 		
 		if(ou_read(dev,HK,nogAgpecHK)){owu6ka|=8;break;}
    		if((dev->tx_B[3])!=32)  {owu6ka|=512;printf("error=%d\n",dev->tx_B[3]);break;}
-   		if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
+   		if((dev->tx_B[1])!=0x11)  {printf("adressNK=%h",dev->tx_B[1]);break;} //адрес кормовой качки
 		//printf("ModA simf- "); 	for(j=0;j<dev->tx_B[3]+4;j++) printf("%x ",dev->tx_B[j]);printf("\n");
 		//printf("%d\n",dev->tx_B[3]);
     	for(j=0;j<15;j++) p->Dout41[j]=dev->tx_B[4+j]; //--- npueM HK
+		for(j=0;j<32;j++) p->to_MO3.toNT.oHK[j]=dev->tx_B[4+j];
 		//printf("N=%d",SIMF[0]);
 //		printf("ModA simf- "); 	for(j=0;j<15;j++) printf("%x ",p->Dout41[j]);printf("\n");
 //		
@@ -223,15 +226,15 @@ for(;;)//----- CEPBEP -----//
 		if (p->Dout41[1]&0x8000) PSI=-(0xffff-p->Dout41[1])*pi/(1<<14);
 		    else PSI=p->Dout41[1]*pi/(1<<14);
 
-		if (p->Dout41[3]&0x8000) TETA=-(0xffff-p->Dout41[3])*pi/(1<<14);
-		    else TETA=p->Dout41[3]*pi/(1<<14);
+		if (p->Dout41[3]&0x8000) TETA=(0xffff-p->Dout41[3])*pi/(1<<14);
+		    else TETA=-p->Dout41[3]*pi/(1<<14); //бортовая
 
 //			if (dev->tx_B[6]==0x8000) PSI=0;
 //			if (dev->tx_B[7]==0x8000) TETA=0;
 
 	//	if (abs(PSI)>1/4)  PSI=oldPSI;
 	//	if (abs(TETA)>1/4) TETA=oldTETA;
-	//	printf(" TETA=%f(%f) PSI=%f(%f)\n",PSI,PSI*57.32,TETA,TETA*57.32);
+	//	printf("KK=%1.3f TETA=%1.3f(%1.3f) PSI=%1.3f(%1.3f)\n",KK,PSI,PSI*57.32,TETA,TETA*57.32);
 	//	printf(" A_simf "); 	for(j=0;j<9;j++) printf("%04x ",p->Dout41[j]);printf("\n");
 		
   		break;
@@ -310,14 +313,20 @@ for(;;)//----- CEPBEP -----//
 			if (p->num_com==1) //подготовка к сеансу связи
 			{
 				KK1=p->from_MO3.from41.P_ANT_1-KK;
-				/*if ((KK1>pi/2)&&(p->from_MO3.from41.P_ANT_2>p->from_MO3.from41.P_ANT_1)) p->jump=-1;
+				
+				//printf("KK1=%1.4f ANT1=%1.4f KK=%1.4f ANT2=%1.4f ",KK1,p->from_MO3.from41.P_ANT_1,KK,p->from_MO3.from41.P_ANT_2);
+				
+				if ((KK1>pi/2)&&(p->from_MO3.from41.P_ANT_2>p->from_MO3.from41.P_ANT_1)) p->jump=-1;
 					else if ((KK1<-pi/2)&&(p->from_MO3.from41.P_ANT_2<p->from_MO3.from41.P_ANT_1)) p->jump=1;
-
-				if (KK1>4.71225)  p->jump=-1;	
-				if (KK1<-4.71225) p->jump=1;
+						else p->jump=0;
+				
+				//if (KK1>4.01225)  p->jump=-1; //4.71225
+				//	else if (KK1<-4.01225) p->jump=1;
+				//		else p->jump=0;
 
 				KK1=KK1+2*p->jump*pi;
-				*/
+				
+				//printf("KK1=%f j=%d\n",KK1,p->jump);
 				oldKK=KK1; //сохраним установленный азимут
 	    		if (p->from_MO3.from41.beta_1>=0)	p->toPR1[2]=-p->from_MO3.from41.beta_1*C1;//Угол места
 			    else p->toPR1[2]=(360+(-p->from_MO3.from41.beta_1*C3))*C2;//
@@ -328,18 +337,27 @@ for(;;)//----- CEPBEP -----//
 			else
 			if (p->num_com==2) //сеанс связи начался
 			{
-			    KK1=p->from_MO3.from41.P_ANT-KK;
-				//KK1=KK1+2*p->jump*pi;
-				//printf("A%f\n",KK1);
+				if (!setANT) //не проводили настройку
+				{
+					KK1=p->from_MO3.from41.P_ANT_1-KK;
+					if ((KK1>pi/2)&&(p->from_MO3.from41.P_ANT_2>p->from_MO3.from41.P_ANT_1)) p->jump=-1;
+					else if ((KK1<-pi/2)&&(p->from_MO3.from41.P_ANT_2<p->from_MO3.from41.P_ANT_1)) p->jump=1;
+						else p->jump=0;
+					setANT=1;//была настройка углов перед сеансом
+					//printf("KK1=%1.4f ANT1=%1.4f KK=%1.4f ANT2=%1.4f \n",KK1,p->from_MO3.from41.P_ANT_1,KK,p->from_MO3.from41.P_ANT_2);
+				}
+				KK1=p->from_MO3.from41.P_ANT-KK;
+				//printf("ANT=%f KK=%f KK1=%f ",p->from_MO3.from41.P_ANT,KK,KK1);
+				KK1=KK1+2*p->jump*pi;
 				if (KK1>4.71225) KK1=KK1-2*PI;
 				if (KK1<-4.71225) KK1=KK1+2*PI;
 				
-				if (p->from_MO3.from41.beta>=0)	p->toPR1[2]=-p->from_MO3.from41.beta*C1;//Угол места
-		    	else p->toPR1[2]=(360+(-p->from_MO3.from41.beta*C3))*C2;//
- 
-				p->toPR1[0]=KK1*RADtoGRAD/2+1991;//Азимут	
+				//printf("KK1=%f j=%d\n",KK1,p->jump);
+				
+	//			if (p->from_MO3.from41.beta>=0)	p->toPR1[2]=-p->from_MO3.from41.beta*C1;//Угол места
+	//	    	else p->toPR1[2]=(360+(-p->from_MO3.from41.beta*C3))*C2;//
 //!!!
-				/*x=(double)KK1; //азимут от 4-1	
+				x=(double)KK1; //азимут от 4-1	
 				if (x<0) {x+=2*PI;minus_x=1;} else minus_x=0;
 				y=(double)p->from_MO3.from41.beta;
 		//		PSI=(double)i*rad;		
@@ -356,9 +374,10 @@ for(;;)//----- CEPBEP -----//
 				if (minus_x==1) x1=x1-2*PI;
 				x2=x-x1; //дельта по x
 				y2=y-y1; //дельта по y
-				//printf(" x0=%3.1f y0=%3.1f PSI=%3.1f TETA=%3.1f x1=%3.1f y1=%3.1f\n",
-				//KK*grad,y*grad,PSI*grad,TETA*grad,x1*grad,y1*grad);
 				
+				printf("KK=%3.1f x0=%3.1f y0=%3.1f PSI=%3.1f TETA=%3.1f x1=%3.1f y1=%3.1f\n",
+				KK*grad,x*grad,y*grad,PSI*grad,TETA*grad,x1*grad,y1*grad);
+				/*
 				KK1=x1;
 				oldKOD=p->PR1[0];
 				oldKK=(oldKOD-1991)/325.94915;//Азимут установленный	
@@ -384,11 +403,12 @@ for(;;)//----- CEPBEP -----//
 					//	oldKK=(oldKOD-1991)/325.94915;//Азимут установленный	
 					//	printf("	toPR1=%d  deltaKOD=%d realKK=%f\n",p->toPR1[0],deltaKOD,oldKK);
 					}
-				}
-
+				}*/
+				
+				p->toPR1[0]=x1*RADtoGRAD/2+1991;//Азимут
 				if (y1>=0)	p->toPR1[2]=-y1*C1;//Угол места
 		    		else p->toPR1[2]=(360+(-y1*C3))*C2;//
-					*/
+					
 				
 					
 			}
