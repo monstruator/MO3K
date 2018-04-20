@@ -145,8 +145,16 @@ for(;;)//----- CEPBEP -----//
 		for(j=0;j<15;j++) Dout[3+j]=dev->tx_B[4+j]; //--- npueM HK
 		//puts("HK: "); for(j=0;j<32;j++) printf(" %Xh",dev->tx_B[4+j]); printf("\n"); //--- npueM HK
 		errHK=0; Dout[1]=1; //есть симфония
-		//printf("Симфония\n");
-		//for(i=0;i<3;i++) printf(" %02x",Dout[i]); printf("\n");
+
+//		printf("Симфония\n");
+//		for(i=0;i<3;i++)  printf(" %04x",Dout[i]); printf("\n");
+//		for(i=3;i<18;i++) printf(" %04x",Dout[i]); printf("\n");
+
+		Dout[3+12]=dev->tx_B[4+25]; //Скорость
+		for(i=8;i<12;i++) Dout[3+i]=dev->tx_B[4+11+i]; //Широта + Долгота
+
+//		for(i=4;i<18;i++) printf(" %04x",Dout[i]); printf("\n");
+
 	break;//--- end npueMHuk HK ---//
 
 	case 2: break; // HEBEPEH proxy HK
@@ -176,6 +184,7 @@ for(;;)//----- CEPBEP -----//
 		//for(j=0;j<6;j++) printf("  %Xh", Dout[18+j]);
 		//printf("  %02x:%02x:%02x\n\n", Dout[20]>>8,Dout[21]>>8,Dout[21]&0x00ff);
 		//	printf("\n");
+
 		errHK++; errCEB++;
 		if(errHK>5)  Dout[1]=0;
 		if(errCEB>5) Dout[2]=0;
@@ -201,9 +210,9 @@ for(;;)//----- CEPBEP -----//
 			//for(i=0;i<24;i++) wr_cpcs_s.uom.dt[i]=Dout[i];//
 			memcpy(&wr_cpcs_s.uom.dt, &Dout, sizeof(Dout));
 
-			//for(i=0;i<24;i++) printf("d%d=%Xh  ", i,Dout[i]);	printf("\n\n");
-//			for(i=0;i<48;i++) printf("w%d= %Xh  ", i,wr_cpcs_s.uom.dt[i]);	printf("\n\n");
-//			for(i=0;i<48;i++) printf(" %02x", wr_cpcs_s.uom.dt[i]);	printf("\n\n");
+//			for(i=0;i<24;i++) printf("d%d=%Xh  ", i,Dout[i]);	printf("\n");
+//			for(i=0;i<48;i++) printf("w%d= %Xh  ", i,wr_cpcs_s.uom.dt[i]);	printf("\n");
+//			for(i=0;i<48;i++) printf(" %02x", wr_cpcs_s.uom.dt[i]);	printf("\n");
 
 			Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 		}
