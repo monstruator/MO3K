@@ -355,7 +355,7 @@ while(1)
 	for(i1=0;i1<16;i1++) {buf[0]+=((p->to_MO3.to42.Ms3>>i1)&1)<<(15-i1);} p->to_MO3.to42.Ms3=buf[0];buf[0]=0;
 
 	#ifdef ASTRA
-	for(i1=0;i1<6;i1++) p->to_MO3.toNT.oCEB[i1]=p->CEB[i1];
+		for(i1=0;i1<6;i1++) p->to_MO3.toNT.oCEB[i1]=p->CEB[i1];
 	#endif	
 	
 //	printf("1=%04x 2=%04x 3=%04x\n",Priem[1],Priem[2],Priem[3]);

@@ -55,9 +55,9 @@ typedef struct	{
 
 	float			D;			//наклонная дальность до КА   м 
 								//обновляется с частотой 1гц с момента расчетного СС
-	unsigned short    cr_SEANCE;//порядковый номер последнего полученного массива ДЦП
-	unsigned short    Rejim_AS;	//режим автосопровождения 1-вкл/0-откл
-	unsigned short    Key_FRCH; //ключ ФРЧ
+	unsigned short  cr_SEANCE;//порядковый номер последнего полученного массива ДЦП
+	unsigned short  Rejim_AS;	//режим автосопровождения 1-вкл/0-откл
+	unsigned short  Key_FRCH; //ключ ФРЧ
 
 }obmen_41_31_2t;
 
@@ -76,7 +76,7 @@ typedef struct	{
 	float			q;		//угол установки антенны по азимуту рад
 	float			alfa;	//угол установки антенны по крену рад
 	float			beta;		//угол установки антенны по углу места рад
-	unsigned short    Rejim_AS;	//режим автосопровождения 1-вкл/0-откл
+	unsigned short  Rejim_AS;	//режим автосопровождения 1-вкл/0-откл
 	float			Fd;		//сдвиг Доплера -70 - +70 Кгц
 
 							//параметры команды 5
@@ -190,9 +190,9 @@ typedef struct	{
 }obmen_CEB_HKt;
 
 typedef struct	{
-	#ifdef ASTRA
+  #ifdef ASTRA
 	obmen_CEB_HKt	toNT;	// данные HK и CEB
-	#endif
+  #endif
 	obmen_31_42_2t to42;
 	obmen_31_41_2t to41;
 	obmen_AK_MO3K_MN3_t toAK;

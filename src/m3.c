@@ -82,8 +82,8 @@ int		 MODB[2]={0,0};
 #define V 1400
 unsigned short DCEB[6];//Dout42[V];
 
- C1=2048./pi;C2=4096.0/360.0;C3=180./pi;C4=C1*Kncu;
- C5=C2*Kncu;C6=C1*Kq;C7=C3;C8=C2*Kq;
+C1=2048./pi;	C2=4096.0/360.0;	C3=180./pi;	C4=C1*Kncu;
+C5=C2*Kncu;		C6=C1*Kq;			C7=C3;		C8=C2*Kq;
 
     pid_timer = qnx_proxy_attach( 0, 0, 0, -1 );
     if( pid_timer == -1 ) {printf( "Unable to attach proxy." );return;}
@@ -193,12 +193,12 @@ for(;;)//----- CEPBEP -----//
 		TIMER10=0;//был обмен с пр1.0
 		break;
 
-	case 2://--- О?ИБКА ОБМЕНА С ПР1
+	case 2://--- ОШИБКА ОБМЕНА С ПР1
 		if(KK_end(dev,Ynp_np1,2)==-1)owu6ka|=1024;else owu6ka|=4;
 		break;
 
 	case 3://--- HK
-		SIMF[0]++; //есть симфония
+		SIMF[0]++; //есть симфония A (HK A)
 		if (SIMF[0]==60000) SIMF[0]=0;
 
 		if(ou_read(dev,HK,nogAgpecHK)){owu6ka|=8;break;}
@@ -238,7 +238,7 @@ for(;;)//----- CEPBEP -----//
 
 	//	if (abs(PSI)>1/4)  PSI=oldPSI;
 	//	if (abs(TETA)>1/4) TETA=oldTETA;
-	//	printf("KK=%1.3f TETA=%1.3f(%1.3f) PSI=%1.3f(%1.3f)\n",KK,PSI,PSI*57.32,TETA,TETA*57.32);
+	//	printf("KK=%1.3f PSI=%1.3f(%1.3f) TETA=%1.3f(%1.3f)\n",KK,PSI,PSI*57.32,TETA,TETA*57.32);
 	//	printf(" A_simf "); 	for(j=0;j<9;j++) printf("%04x ",p->Dout41[j]);printf("\n");
 
   		break;
@@ -250,14 +250,14 @@ for(;;)//----- CEPBEP -----//
 		break;
 
 	case 6://--- npueMHuk CEB ---//
-		SIMF[4]++; //есть  ModB
+		SIMF[4]++; //есть CEB A
 		if (SIMF[4]==60000) SIMF[2]=0;
 
 		if(ou_read(dev,CEB,nogAgpecCEB)){owu6ka|=64;break;}
 
 		//if((dev->tx_B[3])!=6){owu6ka|=128;break;}
 		for(j=0;j<6;j++) p->CEB[j]=dev->tx_B[4+j]; //--- npueM CEB
-		
+//		for(j=0;j<6;j++) p->to_MO3.toNT.oCEB[j]=dev->tx_B[4+j]; // Перенесено в obmen_MO3
 
 		    p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
 			p->Dout41[30]+=(p->CEB[2]>>12)*10;     //hours
@@ -266,8 +266,7 @@ for(;;)//----- CEPBEP -----//
 			p->Dout41[32]=p->CEB[3]&0x000F;
 			p->Dout41[32]+=((p->CEB[3]>>4)&0x000f)*10; //seconds
 
-
-		//for(j=0;j<6;j++) printf(" %x",p->CEB[j]);printf("\n"); //--- npueM CEB
+		//for(j=0;j<6;j++) printf(" %04x",p->CEB[j]);printf("\n"); //--- npueM CEB
 		//printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);printf("\n");
 		break;//--- end npueMHuk CEB ---//
 
@@ -278,36 +277,43 @@ for(;;)//----- CEPBEP -----//
 		if (SIMF[2]==60000) SIMF[2]=0;
 
 		i=Read_ModB(); //читаем данные из Мод Б
-
 		//if (i!=48) break; //если не целый пакет - выход
-		//printf("nk=%x sev=%x\n",Din_ModB[1],Din_ModB[2]);
-		//if (Din_ModB[1] || Din_ModB[2]) { // вывод только если есть НК или/и СЕВ от Мод.В
-		//	printf("read= %d (%d) nk= %x  sev= %x\n",i,sizeof(Din_ModB), Din_ModB[1],Din_ModB[2]);
-		//	printf("Din_ModB: ");
-		//	for(j=0;j<sizeof(Din_ModB)/2;j++) printf("%x ", Din_ModB[j]);  printf("\n\n");
-		//}
 
-		//if (Din_ModB[1]==0) ispr->nkB=0; //всегда работает навигация в Мод Б
-		if (Din_ModB[1]==0) ispr->nkB=1; //признак наличия навигации в Мод Б
-		else {
-				ispr->nkB=0; //навигац Мод Б исправна
-			    if (ispr->nkA==1) //если нет навигации в Мод А
-					for(j=0;j<15;j++) p->to_MO3.toNT.oHK[j]=p->Dout41[j]=Din_ModB[j+3]; //используем из Б
-			 }
-		if (Din_ModB[2]==0) ispr->sevB=1; //признак наличия СЕВ в Мод Б
-		else {
-				if (ispr->sevA==1) //если нет СЕВ в Мод А, то копируем из Б
-				{
-					ispr->sevB=0; //сев Мод Б исправен
-					for(j=0;j<6;j++) p->CEB[j]=Din_ModB[18+j]; //--- npueM CEB
-					p->Dout41[30]=(Din_ModB[20]>>8)&0x000F;
-					p->Dout41[30]+=(Din_ModB[20]>>12)*10;     //hours
-					p->Dout41[31]=(Din_ModB[21]>>8)&0x000F;
-					p->Dout41[31]+=(Din_ModB[21]>>12)*10;	//minutes
-					p->Dout41[32]=Din_ModB[21]&0x000F;
-					p->Dout41[32]+=((Din_ModB[21]>>4)&0x000f)*10; //seconds
-				}
-			 }
+		//printf("read= %d (%d) nk= %x  sev= %x\n",i,sizeof(Din_ModB), Din_ModB[1],Din_ModB[2]);
+/*		if (Din_ModB[1] || Din_ModB[2]) { // вывод только если есть НК или/и СЕВ от Мод.В
+			//printf("read= %d (%d) nk= %x  sev= %x\n",i,sizeof(Din_ModB), Din_ModB[1],Din_ModB[2]);
+			//printf("Din_ModB: ");
+			//for(j=0;j<sizeof(Din_ModB);j++) printf("%d= %d %Xh  ", j,Din_ModB[j],Din_ModB[j]);
+			//for(j=0;j<sizeof(Din_ModB)/2;j++) printf("%x ", Din_ModB[j]);
+			for(j=0;j<24;j++) printf("%04x ", Din_ModB[j]);
+			printf("\n");
+		}
+*/
+		ispr->nkB  = (Din_ModB[1]==1) ? 0 : 1; //признак наличия HK  в Мод Б
+		ispr->sevB = (Din_ModB[2]==1) ? 0 : 1; //признак наличия CEB в Мод Б
+
+		if ( (ispr->nkA==1) && (ispr->nkB==0)) { //если нет НК в Мод А, но есть в Мод Б - берём из Мод Б
+			// копируем на позиции по протоколу Скорость, Широту, Долготу
+			p->to_MO3.toNT.oHK[25]=Din_ModB[3+12]; //Скорость
+			for(j=8;j<12;j++) p->to_MO3.toNT.oHK[11+j]=Din_ModB[3+j]; //Широта + Долгота
+
+			for(j=0;j<11;j++) p->to_MO3.toNT.oHK[j]=p->Dout41[j]=Din_ModB[3+j]; //копируем остальные данные
+
+			//for(j=0; j<32;j++) printf("%04x %04x %04x ", p->to_MO3.toNT.oHK[j], p->Dout41[j], Din_ModB[3+j]);
+		}
+
+		if ((ispr->sevA==1) && (ispr->sevB==0))
+		{ //если нет СЕВ в Мод А, но есть в Мод Б -> берём из Мод Б
+			for(j=0;j<6;j++) p->CEB[j]=Din_ModB[18+j]; //--- npueM CEB
+			//for(j=0;j<6;j++) p->to_MO3.toNT.oCEB[j]=p->CEB[j]; // Перенесено в obmen_MO3
+
+			p->Dout41[30]=(Din_ModB[20]>>8)&0x000F;
+			p->Dout41[30]+=(Din_ModB[20]>>12)*10;     //hours
+			p->Dout41[31]=(Din_ModB[21]>>8)&0x000F;
+			p->Dout41[31]+=(Din_ModB[21]>>12)*10;	//minutes
+			p->Dout41[32]=Din_ModB[21]&0x000F;
+			p->Dout41[32]+=((Din_ModB[21]>>4)&0x000f)*10; //seconds
+		}
 
 		//printf("ModB - ");	for(j=0;j<3;j++) printf("%x ",Din_ModB[j]);printf("\n");
 		//ispr->nkB=ispr->sevB=0;//временно
@@ -397,7 +403,7 @@ for(;;)//----- CEPBEP -----//
 				y2=y-y1; //дельта по y
 
 				printf("KK=%3.1f x0=%3.1f y0=%3.1f PSI=%3.1f TETA=%3.1f x1=%3.1f y1=%3.1f\n",
-				KK*grad,x*grad,y*grad,PSI*grad,TETA*grad,x1*grad,y1*grad);
+						KK*grad,x*grad,y*grad,PSI*grad,TETA*grad,x1*grad,y1*grad);
 				/*
 				KK1=x1;
 				oldKOD=p->PR1[0];
@@ -490,20 +496,20 @@ for(;;)//----- CEPBEP -----//
 
 			if (p->num_com==301) //
 			{	//
-    			if (p->from_MO3.fromAK.beta>=0)	p->toPR1[2]=-p->from_MO3.fromAK.beta*C1;//╙уюы ьхёЄр
+    			if (p->from_MO3.fromAK.beta>=0)	p->toPR1[2]=-p->from_MO3.fromAK.beta*C1;//Угол места
 		    	else p->toPR1[2]=(360+(-p->from_MO3.fromAK.beta*C3))*C2;//
-				//p->toPR1[0]=p->from_MO3.fromAK.Peleng*RADtoGRAD/2+1991;//└чшьєЄ
+				//p->toPR1[0]=p->from_MO3.fromAK.Peleng*RADtoGRAD/2+1991;//Азимут
 				KK1=p->from_MO3.fromAK.Peleng-KK;
 				//if (KK1>pi) KK1=-KK1;
 				if (KK1>4.71225) KK1=KK1-2*PI;
 				if (KK1<-4.71225) KK1=KK1+2*PI;
 				printf("Peleng=%2.2f KK=%1.2f KK1=%1.2f\n", p->from_MO3.fromAK.Peleng, KK, KK1);
-				p->toPR1[0]=KK1*RADtoGRAD/2+1991;//└чшьєЄ
+				p->toPR1[0]=KK1*RADtoGRAD/2+1991;//Азимут
 			}
 				//-------------------------------------------------------------
 			TIMER41=0;
-			if (SIMF[1]<SIMF[0]) ispr->nkA=0; //есть симф A
-			else ispr->nkA=1; //нет симф
+			if (SIMF[1]<SIMF[0]) ispr->nkA=0; //есть симф HK A
+			else ispr->nkA=1; //нет симф HK A
 			SIMF[1]=SIMF[0];
  			if (SIMF[3]<SIMF[2]) ispr->cvsB=0; //есть
 			else ispr->cvsB=1; //нет модБ,СЕВ,НК
