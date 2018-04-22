@@ -589,6 +589,12 @@ main(int argc, char *argv[]) {
 						if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK 
 						Tstart=p->from_MO3.from41.T_SS-8; //время старта за 10 сек до сеанса
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //время прибора из СЕВ
+							    p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
+						p->Dout41[30]+=(p->CEB[2]>>12)*10;     //hours
+						p->Dout41[31]=(p->CEB[3]>>8)&0x000F;
+						p->Dout41[31]+=(p->CEB[3]>>12)*10;	//minutes
+						p->Dout41[32]=p->CEB[3]&0x000F;
+						p->Dout41[32]+=((p->CEB[3]>>4)&0x000f)*10; //seconds
 						Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]+COR_T; //время прибора из СЕВ
 						printf("TS=%d TP=%d\n",Tstart,Tpr);
 						if (Tstart<Tpr) //если "проспали" сеанс -> переводим на след цикл
