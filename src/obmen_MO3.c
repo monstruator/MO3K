@@ -77,7 +77,7 @@ float Angle0;
 //qnx_name_attach(0,"4.1");
 //инициализация канала UDP
 #ifdef ASTRA
-	i = Udp_Client_Ini(&Uc41,"194.1.1.7",SRC_PORT41,DST_PORT41);
+	i = Udp_Client_Ini(&Uc41,"194.1.1.170",SRC_PORT41,DST_PORT41);
 #else
 	i = Udp_Client_Ini(&Uc41,"194.1.1.6",SRC_PORT41,DST_PORT41);
 #endif	
@@ -219,6 +219,7 @@ while(1)
 		p->M[2]=p->from_MO3.from42.M3&0xFFFE;
 		//p->M[3]=0x8410;		
 		//printf(" New Command 4.1 = %d\n",p->num_com);
+		if (p->num_com==3) p->to_MO3.to41.pr_GSS=0;
 	}
 	
 	//printf("V=%d\n",V);
