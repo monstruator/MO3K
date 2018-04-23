@@ -39,13 +39,13 @@
 	int sock, length, i , count_mes=0;
 	static Udp_Client_t Uc41,Uc42;
 	char bufi[1024],bufo[1024],but_buf[1024],gloria_start=0,gloria_count=90;
-	obmen_MO3_MO3K_t rec4;	
+	obmen_MO3_MO3K_t rec4;
 	unsigned int pr1_c_old=0;
 	unsigned int AK_c=0; //счетчик обмена после поступления команды АК
 	short bM4; //буфер для M4
 	short cr_com41=0,cr_com42=0,cr_comAK=0;
 	paramAKcom=0;
-	simfonia41_t simfonia;	
+	simfonia41_t simfonia;
 	int r,bytes,byta4;
 	pid_t pid_CEP;
 	short MK2[15];
@@ -56,18 +56,18 @@
                          numb_vol;      // текущий номер тома в пакете
 
 struct
-   { 
+   {
      char      out_buf[max_len_OUT];  // данные для Socket'a
-   } ip_out; 
+   } ip_out;
 
-	  
+
 main ()
 {
 float 	C1,C2,C3,C4,C5,C6,C7,C8;
 unsigned short cr_com; //порядковый номер предыдущей команды
 		short		V,dV;
 int cnt=0;
-int i1=0,i2;
+int i1=0,i2=0;
 int rez;
 unsigned short buf[4];
 float Angle0;
@@ -80,9 +80,9 @@ float Angle0;
 	i = Udp_Client_Ini(&Uc41,"194.1.1.170",SRC_PORT41,DST_PORT41);
 #else
 	i = Udp_Client_Ini(&Uc41,"194.1.1.6",SRC_PORT41,DST_PORT41);
-#endif	
+#endif
 	printf(" Udp_Init=%d	\n", i);
-			
+
 	//gloriya(1,1,31);//test K2 по умолчанию
 	//gloriya(1,1,1);//work K2
 	//gloriya(1,0,2);//work K1
@@ -92,6 +92,7 @@ float Angle0;
 	open_shmem();
 	delay(1000);
 
+	memset(&p->to_MO3,0,sizeof(obmen_MO3K_MO3_t));
 	//if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	//Angle0=4;
 	//p->jump=-1;
@@ -104,10 +105,10 @@ while(1)
 //	printf(" read=%d size1=%d size2=%d size3=%d sizeALL=%d\n",
 //	bytes,sizeof(obmen_42_31_2t),sizeof(obmen_41_31_2t),sizeof(obmen_AK_MN3_MO3K_t),sizeof(obmen_MO3_MO3K_t));
 
-    //memcpy(&p->from_MO3,&bufi[4],sizeof(obmen_MO3_MO3K_t)); 
-	memcpy(&rec4,&bufi[4],sizeof(obmen_MO3_MO3K_t)); 
+    //memcpy(&p->from_MO3,&bufi[4],sizeof(obmen_MO3_MO3K_t));
+	memcpy(&rec4,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 	//выбор управляюще1 команды
-	if (rec4.from42.cr_com!=cr_com42) 
+	if (rec4.from42.cr_com!=cr_com42)
 	{
 		printf(" New Command 4.2 = %d  cr_com = %d\n",
 			p->from_MO3.from42.num_com,p->from_MO3.from42.cr_com);
@@ -128,7 +129,7 @@ while(1)
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[3]>>i1)&1)<<(15-i1);} p->M[3]=buf[0];buf[0]=0;
 		}
 	}
-	if ((rec4.fromAK.cr_com!=cr_comAK)&&(rec4.fromAK.num_com!=0)) 
+	if ((rec4.fromAK.cr_com!=cr_comAK)&&(rec4.fromAK.num_com!=0))
 	{
 		p->num_com=rec4.fromAK.num_com;
 		cr_comAK=rec4.fromAK.cr_com;
@@ -145,15 +146,14 @@ while(1)
 		{
 			case 300 : 	switch(p->from_MO3.fromAK.a_params[0])
 						{
-							case 0: 
-							 
-							     {paramAKcom=1;p->M[2]=p->M[2]|0x0001;printf("PRM\n");} 
+							case 0:
+									{	paramAKcom=1;p->M[2]=p->M[2]|0x0001;printf("PRM\n");	}
 							//else {printf("KA\n");paramAKcom=2;p->M[2]=p->M[2]&0xFFFE;}
 							break;
-							
-							case 1:	
-							//if (p->from_MO3.fromAK.a_params[1]==1) 
-							{paramAKcom=3;p->M[2]=p->M[2]|0x0001;printf("PRD\n");} 
+
+							case 1:
+							//if (p->from_MO3.fromAK.a_params[1]==1)
+							{paramAKcom=3;p->M[2]=p->M[2]|0x0001;printf("PRD\n");}
 							//else {printf("KA\n");paramAKcom=4;p->M[2]=p->M[2]&0xFFFE;}break;
 						}
 						break;
@@ -161,33 +161,34 @@ while(1)
 			case 264 :  paramAKcom=6; break;
 			case 265 : 	switch(p->from_MO3.fromAK.a_params[0])
 						{
-							case 2:	case 3: paramAKcom=7;break; 
-							case 4: case 5: 
-							case 6:	case 7: 
+							case 2:	case 3: paramAKcom=7;break;
+							case 4: case 5:
+							case 6:	case 7:
 							case 8: case 9: paramAKcom=8;break;
 						}
 						break;
 			case 281 : 	switch(p->from_MO3.fromAK.a_params[0])
 						{
-							case 1:	paramAKcom=9;break; 
+							case 1:	paramAKcom=9;break;
 							case 2: paramAKcom=10;break;
 						}
-						break;			
-			
-			case 290 :	paramAKcom=11; break;//8410			
+						break;
+
+			case 290 :	paramAKcom=11; break;//8410
 			case 292 : 	switch(p->from_MO3.fromAK.a_params[0])
 						{
 							case 1:	case 2:
 							//case 4:	case 5:
-							case 7:	paramAKcom=15;break; 
+							case 7:	paramAKcom=15;break;
 							//case 7:
-							//case 8:	
-							paramAKcom=14;break; 
+							//case 8:
+							paramAKcom=14;break;
 							case 3: paramAKcom=13;break;
 							case 9: paramAKcom=12;break;
 						}
-						break;	
+						break;
 		}
+
 		switch(paramAKcom)
 		{
 			case 1  : p->M[3]=0x8400;break;
@@ -201,27 +202,27 @@ while(1)
 			case 9  : p->M[3]=0x8400;break;
 			case 10 : p->M[3]=0x0400;break;
 			case 15 : p->M[3]=0x8210;break;
-			
+
 		}
 		printf("M=%d\n",paramAKcom);
 	}
 
-	if (rec4.from41.cr_com!=cr_com41) 
+	if (rec4.from41.cr_com!=cr_com41)
 	{
 		if (p->num_com!=rec4.from41.num_com)
 			printf(" New Command 4.1 = %d\n",rec4.from41.num_com);
-		
+
 		p->from_MO3.from41=rec4.from41;
 		p->num_com=p->from_MO3.from41.num_com;
 		cr_com41=p->from_MO3.from41.cr_com;
 		p->M[0]=0x0000;
 		p->M[1]=0x0000;
 		p->M[2]=p->from_MO3.from42.M3&0xFFFE;
-		//p->M[3]=0x8410;		
+		//p->M[3]=0x8410;
 		//printf(" New Command 4.1 = %d\n",p->num_com);
 		if (p->num_com==3) p->to_MO3.to41.pr_GSS=0;
 	}
-	
+
 	//printf("V=%d\n",V);
 	//printf("V=%f\n",p->from41.Vr);
 	//for(i=4;i<20;i++) printf("%x ",bufi[i]);printf("\n");
@@ -231,21 +232,18 @@ while(1)
 	//p->from41.ZUNf,p->from41.Nans_PSP,p->from41.Vr,p->from41.Ar);
 
 	//SIMFONIA
-	buf[0]=p->Dout41[7]; 
-	buf[1]=p->Dout41[6];
- 	buf[2]=p->Dout41[9];
-	buf[3]=p->Dout41[8];		
- 
+	buf[0]=p->Dout41[7];  buf[1]=p->Dout41[6];  buf[2]=p->Dout41[9];  buf[3]=p->Dout41[8];
+
 	p->simfonia41.status1=p->Dout41[24];
     //memcpy(&byta2,&p->Dout41[0],2);	 Flt=byta2*pi/(1<<14); p->simfonia41.Kg=Flt;// printf("Kypc=%8.4f \n",Flt);
-    memcpy(&byta2,&p->Dout41[4],2);	 Flt=byta2*Mc;p->simfonia41.V=Flt;	
-    memcpy(&byta4,&buf[0],4);	 Flt=byta4*pi/(1<<31);p->simfonia41.fi=-Flt;// printf("Fi=%f \n",Flt*180/pi);
-    memcpy(&byta4,&buf[2],4);	 p->simfonia41.la=-(byta4*pi/(1<<31));	
+    memcpy(&byta2,&p->Dout41[4],2);	 Flt=byta2*Mc;p->simfonia41.V=Flt;
+    memcpy(&byta4,&buf[0],4);	 Flt=byta4*pi/(1<<31);	p->simfonia41.fi=-Flt;// printf("Fi=%f \n",Flt*180/pi);
+    memcpy(&byta4,&buf[2],4);	 p->simfonia41.la=-(byta4*pi/(1<<31));
 
-    memcpy(&byta2,&p->Dout41[10],2); p->simfonia41.a=byta2*32000./(1<<15);	
-    memcpy(&byta2,&p->Dout41[11],2); p->simfonia41.b=byta2*32000./(1<<15);	
-    memcpy(&byta2,&p->Dout41[12],2); p->simfonia41.tau=byta2*pi/(1<<15);	
-    memcpy(&byta2,&p->Dout41[13],2); p->simfonia41.status2=byta2;	
+    memcpy(&byta2,&p->Dout41[10],2); p->simfonia41.a=byta2*32000./(1<<15);
+    memcpy(&byta2,&p->Dout41[11],2); p->simfonia41.b=byta2*32000./(1<<15);
+    memcpy(&byta2,&p->Dout41[12],2); p->simfonia41.tau=byta2*pi/(1<<15);
+    memcpy(&byta2,&p->Dout41[13],2); p->simfonia41.status2=byta2;
 
 
 //	printf("%02x%02x	",p->Dout41[6],p->Dout41[7]);
@@ -258,7 +256,7 @@ while(1)
 		else p->to_MO3.to41.Fd_FACT=-(float)0.24414*p->U.DPL_1;
 	//printf("d=%d\n",p->U.DPL_1);
 
-	//p->to_MO3.to41.UR_sign_K1=(short)p->U.SUM_20;	
+	//p->to_MO3.to41.UR_sign_K1=(short)p->U.SUM_20;
 	if (p->to_MO3.to41.UR_sign_K1>32) p->to_MO3.to41.PrM_K1=1;else p->to_MO3.to41.PrM_K1=0;
 
 //	printf("                                Angle_Pr1 b=%4.3f q=%4.3f   \n",p->to_MO3.to41.beta_FACT*57.3,p->to_MO3.to41.P_FACT*57.3);
@@ -270,10 +268,10 @@ while(1)
 	//printf("Angl 2=%02f r=%f NK%d  \n",from41.P_ANT,p->to_MO3.to41.P_FACT,from41.num_com);
 
 	//Готовность к сеансу связи
-	
+
 	/*if ((gloria_start==0)&&((p->num_com==1)||(p->num_com==2)))
 	{
-		if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0)) 
+		if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0))
 			{rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR);gloria_start=1;}
 		else printf("Error Gloriya Key %d \n",p->from_MO3.from41.Nkey_SHAKR);
 		if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
@@ -284,17 +282,25 @@ while(1)
 	{
 			if ((p->num_com==1)||(p->num_com==2))
 			{
-				if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0)) 
-					{rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR);}
+				if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0))
+				{	rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR); }
 			}
 			else rez=gloriya(1,1,31);
-			if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
+
+			if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;
+			else 	 p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
+
 			gloria_count=0;
 	}
 
-	if (p->num_com==1) i2++; //считаем время от первой ком нач сеанса	
-	if (i2>30) 	{p->to_MO3.to41.pr_GSS=1;i2=0;}
-	if (p->num_com==3) gloria_start=0;
+	if (p->to_MO3.to41.pr_GSS==0)
+	{
+		if ((p->num_com==1)||(p->num_com==2)) i2++; //считаем время от первой ком нач сеанса
+		if (i2>30) 	{
+			p->to_MO3.to41.pr_GSS=1;	i2=0;
+		}
+	}
+	if (p->num_com==3) {gloria_start=p->to_MO3.to41.pr_GSS=i2=0;}
 	///printf("GSS=%d ",p->to_MO3.to41.pr_GSS);
 
 	cr_com=p->from_MO3.from41.cr_com;
@@ -303,7 +309,7 @@ while(1)
 	//призник приема данных по К2
 	//p->to_MO3.to41.pr_PD=1;
 
-/////////////////////////////////////////////////////////////////////	
+/////////////////////////////////////////////////////////////////////
 	buf[0]=0;
 	for(i1=0;i1<16;i1++) {buf[0]+=((p->from_MO3.from42.M1>>i1)&1)<<(15-i1);} p->from_MO3.from42.M1=buf[0];buf[0]=0;
 	for(i1=0;i1<16;i1++) {buf[0]+=((p->from_MO3.from42.M2>>i1)&1)<<(15-i1);} p->from_MO3.from42.M2=buf[0];buf[0]=0;
@@ -318,28 +324,27 @@ while(1)
 	//Для СЕРЕЖИ
 	if (p->num_com==9) p->toPR1[6]=0xFA30;
 
-	if (p->num_com==12) p->no_navi=1;	
-	if (p->num_com==13) p->no_navi=0;	
+	if (p->num_com==12) p->no_navi=1;
+	if (p->num_com==13) p->no_navi=0;
 
 	//printf("cr_com=%x n_com=%x NKS=%d NSHKR=%x Nd_FR4=%d N_FR4=%x ZUNf=%x N_psp=%x Vr=%f Ar=%f\n",
 	//p->from41.cr_com,p->from41.num_com,p->from41.num_KS,
 	//p->from41.Nkey_SHAKR,p->from41.Nd_FRCH,p->from41.N_FRCH,
 	//p->from41.ZUNf,p->from41.Nans_PSP,p->from41.Vr,p->from41.Ar);
-	
-		
+
+
 //	printf(" %04x   %04x   %04x   %04x ",p->from_MO3.from42.M1,p->from_MO3.from42.M2,p->from_MO3.from42.M3,p->from_MO3.from42.M4);
 //	printf(" CR=%d NC=%d \n",p->from_MO3.from42.cr_com,p->from_MO3.from42.num_com);
-//  printf("\n");  
-  
+//  printf("\n");
+
 //	p->to_MO3.to42.Ms1=p->PR1[3];   //состояние прибора 1.0
 //	p->to_MO3.to42.Ms2=p->PR1[4];
 //	p->to_MO3.to42.Ms3=p->PR1[5];
 	p->to_MO3.to42.USign=p->PR1[6]; //уровень сигнала ПРД из сост ПР1.0
 
-	
 	p->to_MO3.to42.sum_K1=p->U.SUM_4;
 //	p->to_MO3.to42.sum_K1=p->U.SUM_20; //выводить после логарифма
-	
+
 
 	p->to_MO3.to42.D_K1=(float)p->U.DPL_1*244.14;
 
@@ -349,7 +354,7 @@ while(1)
 	if (p->PR1[2]&0x800) p->to_MO3.to42.beta=(360-p->PR1[2]/C2)/C3; //УГОЛ МЕСТА
 	else p->to_MO3.to42.beta=-p->PR1[2]/C1;
 	//if (p->PR1[1]&0x800) p->to_MO3.to42.alfa=(p->PR1[1]-0xFFF)/12.27/RADtoGRAD;//КРЕН
-	//else p->to_MO3.to42.alfa=p->PR1[1]/C4; 
+	//else p->to_MO3.to42.alfa=p->PR1[1]/C4;
 
 	for(i1=0;i1<16;i1++) {buf[0]+=((p->to_MO3.to42.Ms1>>i1)&1)<<(15-i1);} p->to_MO3.to42.Ms1=buf[0];buf[0]=0;
 	for(i1=0;i1<16;i1++) {buf[0]+=((p->to_MO3.to42.Ms2>>i1)&1)<<(15-i1);} p->to_MO3.to42.Ms2=buf[0];buf[0]=0;
@@ -357,8 +362,8 @@ while(1)
 
 	#ifdef ASTRA
 		for(i1=0;i1<6;i1++) p->to_MO3.toNT.oCEB[i1]=p->CEB[i1];
-	#endif	
-	
+	#endif
+
 //	printf("1=%04x 2=%04x 3=%04x\n",Priem[1],Priem[2],Priem[3]);
 //	for(i1=0;i1<16;i1++) {buf+=((Priem[7]>>i1)&1)<<(15-i1);} Priem[8]=buf;buf=0;
 
@@ -369,7 +374,7 @@ while(1)
 
 //	printf(" q=%8.4f a=%8.4f b=%8.4f \n",p->to_MO3.to42.q,p->to_MO3.to42.alfa,p->to_MO3.to42.beta);
 //	p->to_MO3.to42.q=p->to_MO3.to42.alfa=p->to_MO3.to42.beta=1;
-//	if ((p->PR1[3]&0x0008)&&(p->PR1[5]&0x0004)) printf("!!!\n");    
+//	if ((p->PR1[3]&0x0008)&&(p->PR1[5]&0x0004)) printf("!!!\n");
 //	for(i=0;i<3;i++) printf("%04x ",p->PR1[3+i]);printf("\n");
 ////////////////////////////UPR AK//////////////////////////////////////
 	if (AK_c>0) //пакет с новой командой АК
@@ -400,7 +405,7 @@ while(1)
 					AK_c=0;
 					printf("Окончание команды %d. Нет ответа от пр. 1. kzv=1\n",p->to_MO3.toAK.num_com);
 				}
-				else AK_c++; 
+				else AK_c++;
 	}
 
 	//printf("pr1_c=%d pr1_c_old=%d AK_c=%d\n",p->pr1_c,pr1_c_old,AK_c);
@@ -411,9 +416,9 @@ while(1)
 //////////////////////////////////////////////////////////////////////
   	len_OUT = sizeof(obmen_MO3K_MO3_t); //!!!!
     memcpy(ip_out.out_buf,&p->to_MO3,sizeof(obmen_MO3K_MO3_t)); ///!!!!!!
-    if (len_OUT <= 1400) 
+    if (len_OUT <= 1400)
     {
-         pack_buf[0] = 80 ;               
+         pack_buf[0] = 80 ;
          pack_buf[1] = numb_pack;
          pack_buf[2] = 1;
          pack_buf[3] = 1;
@@ -422,7 +427,7 @@ while(1)
     }
     else
     {
-         pack_buf[0] = 81 ;               
+         pack_buf[0] = 81 ;
          vol = div(len_OUT,1400);
          pack_buf[1] = numb_pack;
          pack_buf[2] = 1;
@@ -438,10 +443,10 @@ while(1)
 
            pack_buf[2] ++ ;
          }
-                
-         for (j = 0; j<vol.rem; j++) pack_buf[j+4] = ip_out.out_buf[(1400*(vol.quot))+j]; 
+
+         for (j = 0; j<vol.rem; j++) pack_buf[j+4] = ip_out.out_buf[(1400*(vol.quot))+j];
           Udp_Client_Send(&Uc41,pack_buf,(vol.rem + 4));
     }
           numb_pack ++;
-  }   
+  }
 }
