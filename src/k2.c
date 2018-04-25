@@ -25,15 +25,15 @@ int COR_T=0; //correction time
 int TM=0; //test time mode
 int TS=0; //test signal mode
 int verbose=0; //
- 
+
 int rez=0;
-pid_t proxy_DRV2=0; 
+pid_t proxy_DRV2=0;
 chan2=3;
 
 char test_K2[40][15]={{0x55, 0x04, 0x01, 0x0B, 0x65},		// ->+ 0
 					{0x55, 0x04, 0x03, 0x00, 0x5C},			// <- (->) квитанция
 					{0x55, 0x05, 0x02, 0x03, 0x00, 0x5F},	// <-2
-					{0x55, 0x04, 0x01, 0x0C, 0x66},			// ->+3	
+					{0x55, 0x04, 0x01, 0x0C, 0x66},			// ->+3
 					{0x55, 0x05, 0x02, 0x06, 0x00, 0x62},	// <-4
 					{0x55, 0x04, 0x01, 0x0D, 0x67},			// ->+5
 					{0x55, 0x05, 0x02, 0x18, 0x00, 0x74},	// <-6
@@ -86,7 +86,7 @@ unsigned int    Tcount, 		//счетчик таймера
 				Ncount;		//кол-во повторений
 unsigned state;
 unsigned char c;
-div_t msec1; 
+div_t msec1;
 time_t time_of_day;
 char b[80];
 int N_COM=1;//,KVIT=0;//,ILS=0,LK11=0;
@@ -101,7 +101,7 @@ void Init_K2()
 	if (!pid_drv) {
 		printf("!!! Драйвер не запущен\n"); err++; rez=2;
 		exit(0);
-	} 
+	}
 
 	wr_cpcs_s.type=7;
 	wr_cpcs_s.cnl=chan2;
@@ -114,12 +114,12 @@ void Init_K2()
 	init_pcs_s.b_info=8;			// кол-во бит в информационном байте
 	init_pcs_s.b_StrStp=1;			// кол-во стоп-бит
 	init_pcs_s.b_prt=0;			// наличие и тип паритета (нет) ПОСТ-3Ц
-	init_pcs_s.dev=0; 				// тип у-ва (0 - обычный RS канал) 
+	init_pcs_s.dev=0; 				// тип у-ва (0 - обычный RS канал)
 	init_pcs_s.lvl_inp=45;			// уровень заполнения FIFO до прерывания
 
 	i=Send(pid_drv,&init_pcs_s,&init_pcs_r,sizeof(init_pcs_s),sizeof(init_pcs_r));
 	if (i==-1) printf("Нет общения с драйвером\n");
-	if (init_pcs_r.type==1) 
+	if (init_pcs_r.type==1)
 		if (init_pcs_r.status!=0) {
 			printf("!!! Инициализация канала %d не прошла\n", 3);
 			exit(2);
@@ -137,11 +137,11 @@ void Init_K2()
 		if (start_pcs_r.status==-1) {
 			printf("!!! Старт канала %d не выполнен\n", 3);
 			exit(2);
-		} 
+		}
 		else { proxy_DRV2=start_pcs_r.Proxy;
 		  printf("Старт канала %d выполнен, proxy=%d\n", 3, proxy_DRV2);
 		}
-	}       
+	}
 
 	for(i=0;i<10;i++)
 	{
@@ -149,7 +149,7 @@ void Init_K2()
 		rd_cpcs_s.cnl=chan2;
 		Send(pid_drv,&rd_cpcs_s,&rd_cpcs_r,sizeof(rd_cpcs_s),sizeof(rd_cpcs_r));
 		delay(50);
-	}   
+	}
 }
 
 
@@ -166,9 +166,9 @@ write_com (Ncom)
 	msec1=div(Tcount,10);
 	//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 	//printf("%s:%03d <-- (",b,msec1.rem*100);
-	if (verbose) 
+	if (verbose)
 	{
-		printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);	
+		printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
 		for(i1=0;i1<test_K2[Ncom][1]+1;i1++) printf("%x.",test_K2[Ncom][i1]);
 	}
 	N_COM++;Ncount++;
@@ -251,11 +251,11 @@ main(int argc, char *argv[]) {
 
 	if (!TM)
 	{
-		//if ( ( out_fp = fopen( "//1/home/seversk/new31/k2_log", "w" ) ) == NULL ) 
+		//if ( ( out_fp = fopen( "//1/home/seversk/new31/k2_log", "w" ) ) == NULL )
 		//		fprintf( stderr, "Couldn't create/open file. %s\n",  strerror( errno ) );
 		printf("ОЖИДАНИЕ КОМАНДЫ НАЧАЛА СС \n");
 		while((p->from_MO3.from41.num_com!=1)&&(p->from_MO3.from41.num_com!=2)) delay(500);
-	}	
+	}
 
     proxy = qnx_proxy_attach( 0, 0, 0, -1 );
     if( proxy == -1 ) {
@@ -277,15 +277,15 @@ main(int argc, char *argv[]) {
     timer.it_interval.tv_nsec = 100*m_sec;
     timer_settime( id, 0, &timer, NULL );
 
-	delay(1000);	
+	delay(1000);
 	Init_K2();
 	delay(500);
 	printf("			НАСТРОЙКА К2	команда %d\n",p->from_MO3.from41.num_com);
-	
+
 	while(1)
 	{
 		pid=Receive(0,0,0); //получение всех системных сообщений
-		if (pid==proxy_DRV2) 
+		if (pid==proxy_DRV2)
 		{  //получили сообщение чтения данных из ПОСТ-3Ц
 			rd_cpcs_s.type=4;
 			rd_cpcs_s.cnl=chan2;
@@ -296,34 +296,34 @@ main(int argc, char *argv[]) {
     		// переформатирование
 		    for (i=0;i<rd_cpcs_r.cnt;i++)  buffer[i+K2count]=rd_cpcs_r.uim.dt[i];//дополним массив
 
-			//if ( out_fp != NULL ) 
+			//if ( out_fp != NULL )
 			//	if ( fwrite( buffer+K2count, rd_cpcs_r.cnt, 1, out_fp ) != 1 )
 			//		fprintf( stderr, "Failed to write to file. %s\n", strerror( errno ) );
 
 			K2count=K2count+rd_cpcs_r.cnt;//увеличим кол-во байт в буфере
 		}
 
-		if (pid==proxy) 
+		if (pid==proxy)
 		{  //срабатывание таймера
 			Tcount++;
-			//for(i1=0;i1<K2count;i1++) printf("%x ",buffer[i1]);printf("\n");         
+			//for(i1=0;i1<K2count;i1++) printf("%x ",buffer[i1]);printf("\n");
 			//printf("com1=%2x ", c);  //печать байта
 			//printf("count=%d\n",K2count);
-			if (K2count>4) 
+			if (K2count>4)
 			for(i=0;i<K2count;i++)
 			if (buffer[i]==0x55) //найден заголовок
-			{	
+			{
 				N=buffer[i+1]; //кол-во байт в пакете без КС
 				if (K2count>N+i) //достаточное кол-во байт в буфере
 				{
-					//printf("N=%d \n",N);					
+					//printf("N=%d \n",N);
 					time_of_day=time(NULL);
 					//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 					msec1=div(Tcount,10);
-					//printf("%s:%03d -->",b,msec1.rem*100);			
+					//printf("%s:%03d -->",b,msec1.rem*100);
 					if (verbose) printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
 
-					for(i1=0;i1<N;i1++) chkSUM+=buffer[i+i1]; //подсчет контр суммы         
+					for(i1=0;i1<N;i1++) chkSUM+=buffer[i+i1]; //подсчет контр суммы
 					//printf("i=%d chkSUM=%x\n",i,chkSUM);
 					if (chkSUM!=buffer[N+i]) //если не совпадает контр сумма
 					{
@@ -334,20 +334,20 @@ main(int argc, char *argv[]) {
 					//пришел правильный пакет
 					if (verbose)
 					{
-						printf(" (");			
-						for(i1=0;i1<N+1;i1++) printf("%x.",buffer[i1+i]);printf(")");         
+						printf(" (");
+						for(i1=0;i1<N+1;i1++) printf("%x.",buffer[i1+i]);printf(")");
 					}
 					//анализ полученного пакета
 					switch(buffer[i+1])
 					{
  						case 4: if(buffer[i+2]==3)
 								{
-									//printf(" Получена квитанция - команда принята ");		
+									//printf(" Получена квитанция - команда принята ");
 									//if(buffer[i+3]==0) {comOK[1]++;printf("ПРАВИЛЬНО");break;}
 									//else printf("неправильно");
 									if(buffer[i+3]==0) {comOK[1]++;break;}
 								}
-								else if (verbose) printf(" Получен неизвестный пакет");		
+								else if (verbose) printf(" Получен неизвестный пакет");
 								break;
  						case 5: if(buffer[i+2]==2)
 								{
@@ -384,10 +384,10 @@ main(int argc, char *argv[]) {
 													if (buffer[i+4]&0x40) printf(" ВИ");
 													if (buffer[i+4]&0x80) printf(" ПС");
 													break;
-																
+
 									}
 								}
-								else if (verbose) printf(" Получен неизвестный пакет");								
+								else if (verbose) printf(" Получен неизвестный пакет");
 								break;
  						case 6: if(buffer[i+2]==2)
 								{
@@ -411,7 +411,7 @@ main(int argc, char *argv[]) {
 														if (buffer[i+4]&0x08) printf(" СБ");
 														if (buffer[i+4]&0x20) printf(" ИДД");
 														if (buffer[i+4]&0x40) printf(" ВИ");
-														if (buffer[i+4]&0x80) printf(" ПС");	
+														if (buffer[i+4]&0x80) printf(" ПС");
 														if (buffer[i+5]&0x01) printf(" 27М1н");
 														if (buffer[i+5]&0x02) printf(" ПФ");
 														if (buffer[i+5]&0x04) printf(" РНС");
@@ -424,7 +424,7 @@ main(int argc, char *argv[]) {
 													break;
 									}
 								}
-								else if (verbose) printf(" Получен неизвестный пакет");								
+								else if (verbose) printf(" Получен неизвестный пакет");
 								break;
  						case 7: if(buffer[i+2]==2)
 								{
@@ -437,12 +437,12 @@ main(int argc, char *argv[]) {
 													break;
 									}
 								}
-								else printf(" Получен неизвестный пакет");								
+								else printf(" Получен неизвестный пакет");
 								break;
  						case 0x1b:
 								if(buffer[i+2]==2)
 								{
-									
+
 									if (buffer[i+5]||buffer[i+6]) printf("ГР=%02x%02x ",buffer[i+6],buffer[i+5]);
 									if (buffer[i+7]||buffer[i+8]) printf("НДИ=%02x%02x ",buffer[i+8],buffer[i+7]);
 									if (buffer[i+9]||buffer[i+10])printf("МН=%02x%02x ",buffer[i+10],buffer[i+9]);
@@ -452,14 +452,14 @@ main(int argc, char *argv[]) {
 									if (buffer[i+26]) printf("СбСИГ=%x ",buffer[i+26]);
 									printf("\n");
 								}
-								else printf(" Получен неизвестный пакет");								
+								else printf(" Получен неизвестный пакет");
 								break;
-					}									
+					}
 					if (verbose) printf("\n");
 					chkSUM=0;
 					K2count-=N+i+1; // сдвигаем данные в буфере
 					for(i1=0;i1<K2count;i1++) buffer[i1]=buffer[i+N+i1+1];
-				}			
+				}
 			}
 
 			//printf("%d\n",Tcount);
@@ -497,7 +497,7 @@ main(int argc, char *argv[]) {
 			   case 16: read_kvit();break;
  			   case 17: write_com(13);printf(")  Команда Реж-АГ1 отправлена\n");break;
 			   case 18: read_kvit();break;
- 			   case 19: 
+ 			   case 19:
 						if (p->from_MO3.from41.kod_Barker)
 						{
 							test_K2[26][4] = 0x01;
@@ -508,9 +508,9 @@ main(int argc, char *argv[]) {
 							test_K2[26][4] = 0x00;
 							test_K2[26][5] = 0x71;
 						}
-						write_com(26);						
+						write_com(26);
 						if (p->from_MO3.from41.kod_Barker) 	printf(")  Команда К2-ВКЛ отправлена\n");
-						else								printf(")  Команда К2-ВЫКЛ отправлена\n");																		
+						else								printf(")  Команда К2-ВЫКЛ отправлена\n");
 						break;
 			   case 20: read_kvit();break;
  			   case 21: test_K2[9][4]=40;
@@ -523,7 +523,7 @@ main(int argc, char *argv[]) {
 			   case 22: read_kvit();break;
 
 			   case 23: if (TS) //!!!!!!!!!!!!!!!!!!!!!!!!
-						{	
+						{
 							printf("\n---- ВКЛЮЧЕН ТВК С МАХ ОСЛАБЛЕНИЕМ -----\n");
 							//p->toPR1[3]=0xFC00;
 							p->toPR1[3]=0x0000;
@@ -564,7 +564,7 @@ main(int argc, char *argv[]) {
 						test_K2[9][6]=0;
 						for(s=0;s<6;s++) test_K2[9][6]+=test_K2[9][s]; //chksum
 						write_com(9);
-		 			    if (verbose) 
+		 			    if (verbose)
 						{
 							printf(")  Команда КАН-Л отправлена ");
 							switch(p->from_MO3.from41.ZUNf)
@@ -579,14 +579,14 @@ main(int argc, char *argv[]) {
 									printf(" ПП Кан=%d Ключ=%d\n",p->from_MO3.from41.Nd_FRCH,p->from_MO3.from41.Key_FRCH);
 									break;
 							default:printf("-режим не задан\n");
-							}	
+							}
 						}
 						break;
 			   case 35: read_kvit();break;
  			   case 36: write_com24(24);
 						if (verbose) printf("  Начата посылка команды ДанИ.V.dV\n");
 						comOK[24]=1;N_COM++;
-						if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK 
+						if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 						Tstart=p->from_MO3.from41.T_SS-8; //время старта за 10 сек до сеанса
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //время прибора из СЕВ
 							    p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
@@ -598,7 +598,7 @@ main(int argc, char *argv[]) {
 						Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]+COR_T; //время прибора из СЕВ
 						printf("TS=%d TP=%d\n",Tstart,Tpr);
 						if (Tstart<Tpr) //если "проспали" сеанс -> переводим на след цикл
-							if ((Tpr-Tstart)<1200)	while(Tstart<Tpr) Tstart+=30;					
+							if ((Tpr-Tstart)<1200)	while(Tstart<Tpr) Tstart+=30;
 						break;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
@@ -607,14 +607,14 @@ main(int argc, char *argv[]) {
 						if ((verbose)&&(Tpr1!=Tpr)) printf("---- ОЖИДАНИЕ НАЧАЛА СС   Ts=%d  Tpr=%d-----\n",Tstart,Tpr);
 						//printf("Tpr=%d Tstart=%d Tpr1=%d ",Tpr,Tstart,Tpr1);
 						Tpr1=Tpr;
-						
+
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //время прибора из СЕВ
 						if (Tpr==Tstart) //если время начала сеанса совпало
 						{
 							if (verbose) printf("			СТАРТ Ts=%d Tpr=%d\n",Tstart,Tpr);
-							Tstart+=30;			
+							Tstart+=30;
 							N_COM++;//выход из цикла
-						}				
+						}
 						break;
 			//-----------------------------------
  			   case 38: //p->from_MO3.from41.D = 1500000;
@@ -624,7 +624,7 @@ main(int argc, char *argv[]) {
 						//D1 += 1000;// + (p->Dout41[59]*1000);
 						test_K2[27][8] = D1 & 0x00ff;
 						test_K2[27][9] = D1 >> 8;
-						
+
 						years=5;
 						day = 731; //01-01-18
 						switch(p->CEB[0] & 0x00FF)
@@ -640,7 +640,7 @@ main(int argc, char *argv[]) {
 							case  4: day+=31;
 							case  3: day+=28;
 							case  2: day+=31;
-						}			
+						}
 						day += ((p->CEB[1]>>8)&0x000F) + ((p->CEB[1]>>12)&0x000F)*10 - 1;
 						hour=(p->CEB[2]>>12)*10 + ((p->CEB[2]>>8)&0x0F);
 						min =(p->CEB[3]>>12)*10 + ((p->CEB[3]>>8)&0x0F);
@@ -654,7 +654,7 @@ main(int argc, char *argv[]) {
 						//hour=16;
 						//sec=10;
 						//---------------------------------------------------------
-						Time = sec + (min<<6) + (hour<<12) + (day<<17) + (years<<28);	
+						Time = sec + (min<<6) + (hour<<12) + (day<<17) + (years<<28);
 						for(s=0;s<4;s++) test_K2[27][s+4] = Time >> (s*8);
 						test_K2[27][11]=0;
 						for(s=0;s<11;s++) test_K2[27][11]+=test_K2[27][s]; //chksum
@@ -662,7 +662,7 @@ main(int argc, char *argv[]) {
 						if (verbose)
 						{
 							printf(") Команда ДанП.Т.Р отпр\n");
-							printf("\n           day=%d hour=%d min=%d sec=%d msec=%d out=%d d=%f d1=%d\n",day,hour,min,sec,p->Dout41[59],p->CEB[4]>>12,p->from_MO3.from41.D,D1);	
+							printf("\n           day=%d hour=%d min=%d sec=%d msec=%d out=%d d=%f d1=%d\n",day,hour,min,sec,p->Dout41[59],p->CEB[4]>>12,p->from_MO3.from41.D,D1);
 						}
 						break;
 			   case 39: read_kvit();
@@ -712,29 +712,29 @@ main(int argc, char *argv[]) {
 			   case 41: read_kvit();break;
  			   case 42: if (TS) {if (Tcount>Tcount_com+40) {write_com(32);printf("\n\nОБР ТЕСТ\n\n");}}
 						else N_COM++;
-						break;			   
- 			   case 43: if (TS)	
+						break;
+ 			   case 43: if (TS)
 						{
-							if (Tcount>Tcount_com+200) 
+							if (Tcount>Tcount_com+200)
 							{
 								write_com(23);
 								if (verbose) printf("-------write_com(23);---------\n");
 								//write_com(33);
 								//N_COM=37;
 							}
-							else if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}} 
+							else if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
 						}
-						else 
+						else
 						{
 							//printf("Tcount=%d Tcount_com=%d\n",Tcount,Tcount_com);
-							if (Tcount>Tcount_com+240) 
+							if (Tcount>Tcount_com+240)
 							{
 								write_com(23);
 								printf("-------write_com(23);---------\n");
 								//write_com(33);
 								//N_COM++;
 							}
-							else if (Tcount>Tcount_com+40) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}} 
+							else if (Tcount>Tcount_com+40) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
 						}
 						break;
 			   case 44: read_kvit();
@@ -744,7 +744,7 @@ main(int argc, char *argv[]) {
 			}
 			//if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
 		}
-		if (kbhit()) 
+		if (kbhit())
 		{
 			getch();
 			write_com(23);
@@ -752,7 +752,7 @@ main(int argc, char *argv[]) {
 			write_com(23);
 			//write_com(33);
 			N_COM=0;
-			p->toPR1[3]=0x0000;//8000-onn 0 dBm 0000-off TVK 
+			p->toPR1[3]=0x0000;//8000-onn 0 dBm 0000-off TVK
 		}//printf("%d",getch());
 	}
 	close(fd_1);

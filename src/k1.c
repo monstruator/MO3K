@@ -14,12 +14,12 @@
 
 void main( int argc, char *argv[] )
 {
-	unsigned short cr_com=0,num_com=0,data_count=0;
+	unsigned short cr_com42=0,cr_com=0,num_com=0,data_count=0;
 	unsigned int TCount=0,DTTM=0; //общий таймер, последний приход данных
 	int TC10=0; //таймер по 100 мс
 	int N;//кол-во чтений УПОС
 	int N1;//кол-во чтений УПОС на прошлом такте	
-	int Mes;
+	int Mes, TstGl= -1;
     pid_t proxy,pid;
     timer_t id;
 	unsigned int i,i2=0;
@@ -65,13 +65,11 @@ void main( int argc, char *argv[] )
 //	while((p->from_MO3.from41.num_com==0)&&(p->from_MO3.from42.num_com==0)) delay(500);
 	cr_com=p->from_MO3.from41.cr_com; //запомнили номер команды
 
-	
-
 	if ((p->from_MO3.from41.num_com==1)||(p->from_MO3.from41.num_com==2)||(p->from_MO3.from41.num_com==3)) 	
 	{
 		Init_K1(p->from_MO3.from41.num_KS-1);
 	} //если есть команда от 4.1
-	else Init_K1(1); //если есть команда от 4.2 в К2
+	else Init_K1(0); //если есть команда от 4.2 в К2
 
 	/*
 	Dopler1=60000;
@@ -97,16 +95,16 @@ void main( int argc, char *argv[] )
 	*/
 	//writePorogs(SREDN*2, SREDN*2);
 	//writePorogs(1e2, SREDN*2);
-	writePorogs(1e2, 2e9);
+	writePorogs(1e9, 2e10);
 	//writePorogs(SREDN*10, SREDN*2);
 	//writePorogs( SREDN*10, 1e2);
 
 	Dopler1=(float)p->from_MO3.from41.Fd*1000;
 	//printf("d_from_MO3.from41=%e\n",p->from_MO3.from41.Fd);
-	writeDopler(-Dopler1);
+	//writeDopler(-Dopler1);
 	//test_dpl=Dopler1;
 	//	Ubran test Glorii do uto4neni9 algoritma
-	//	ispr->k1=TestGloriya(0);
+	//TestGloriya(1);
     
 	timer.it_value.tv_sec     = 2L; //start after X sec
     timer.it_value.tv_nsec    = 0L;
@@ -116,6 +114,22 @@ void main( int argc, char *argv[] )
 
     while(1) 
 	{
+		//if ( (p->num_com==12) && (p->to_MO3.to42.Mispr & 0x0100) ) TstGl=-2;
+
+		if ( ( (p->num_com==11) || ( (p->num_com==12) && !(p->to_MO3.to42.Mispr & 0x0100) ) ) &&
+			 (cr_com42!=p->from_MO3.from42.cr_com) ) // && (TstGl>-2)
+		{
+			printf("\n 					Command for TestGL (%d) [%d]\n", 
+						p->from_MO3.from42.num_com, p->to_MO3.to42.Mispr);
+			cr_com42 = p->from_MO3.from42.cr_com;
+			//Init_K1(0);
+			//writePorogs(1e10, 1e10);
+			delay(500);
+			TstGl = TestGloriya(p->num_com-11); // 0 - test bez Gloria
+			printf("\n TestGloriya = %d \n", TstGl);
+			//writePorogs(1e2, 2e9);
+		}
+		
     	pid=Receive( 0 , 0, 0 );
 		if (pid==proxy) //обработчик таймера
 		{
@@ -184,6 +198,7 @@ void main( int argc, char *argv[] )
 				num_com=p->from_MO3.from41.num_com;
 		
 			}
+			
 			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==1))	Init_K1(p->from_MO3.from41.num_KS-1);
 			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==2))	Init_K1(p->from_MO3.from41.num_KS-1);
 			
@@ -199,7 +214,8 @@ void main( int argc, char *argv[] )
 		}
 //----------------------------чтение К1-----------------------------
 		if (pid==proxy_DRV1) {Read_K1();N++;}
-    }
+
+	}
 
     timer_delete( id );
   }
