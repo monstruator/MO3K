@@ -19,7 +19,7 @@
 #include <sys/kernel.h>
 #include "../include/tx_drv.h"
 #include "../include/Mod_B.h"
-#include "vector3.h"
+//#include "vector3.h"
 
 float oldKK,deltaKK,beta1,alfa1,grad=180.0/PI;
 short oldKOD,deltaKOD,byta2;
@@ -238,6 +238,7 @@ for(;;)//----- CEPBEP -----//
 			#endif
 
 			for(j=0;j<15;j++) p->Dout41[j]=Din_ModB[3+j]; //--- npueM HK
+
 			KK=p->Dout41[5]*pi/(1<<14);
 			KK=KK-pi;
 			//if (KK>2*pi) KK=KK-2*pi; //переворот с кормы в нос

@@ -144,7 +144,7 @@ for(;;)//----- CEPBEP -----//
 		if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
 		#else
 		if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
-		#endif	
+		#endif
 		//if((dev->tx_B[3])!=15) {break;}			//кол-во слов != 15
 		for(j=0;j<15;j++) Dout[3+j]=dev->tx_B[4+j]; //--- npueM HK
 		//puts("HK: "); for(j=0;j<32;j++) printf(" %Xh",dev->tx_B[4+j]); printf("\n"); //--- npueM HK

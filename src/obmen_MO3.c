@@ -110,12 +110,14 @@ while(1)
 	//выбор управляюще1 команды
 	if (rec4.from42.cr_com!=cr_com42)
 	{
-		printf(" New Command 4.2 = %d  cr_com = %d\n",
-			p->from_MO3.from42.num_com,p->from_MO3.from42.cr_com);
+		printf(" New Command 4.2 =%3d  cr_com = %d\n",
+				rec4.from42.num_com, rec4.from42.cr_com);
 
 		p->num_com=rec4.from42.num_com;
 		cr_com42=rec4.from42.cr_com;
 		p->from_MO3.from42=rec4.from42;
+		if ((p->num_com==12)||(p->num_com==14)) gloria_count=100;
+			
 		if (p->num_com==5)
 		{
 			p->M[0]=p->from_MO3.from42.M1;
@@ -280,13 +282,20 @@ while(1)
 	gloria_count++;
 	if (gloria_count>100)
 	{
-			if ((p->num_com==1)||(p->num_com==2))
+			switch (p->num_com)
 			{
-				if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0))
-				{	rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR); }
+				case 1 : case 2 :
+					if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0))
+						rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR); 
+					break;
+				
+				case 12 :  rez = gloriya(1,0,31);//test K1 
+							printf("rez = gloriya(1,0,31);//test K1 \n\n");
+						   break;
+				case 14 :  rez = gloriya(1,1,31);//test K2
+						   break;
 			}
-			else rez=gloriya(1,1,31);
-
+			
 			if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;
 			else 	 p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 
