@@ -51,9 +51,10 @@
 	short MK2[15];
 	short byta2,T,len_OUT,sen,j;
     div_t   vol;    // vol.quot - количество полных томов
-    char          pack_buf[1500];  // буфер задачи obm_41_31. Выходные данные в Socket
-    char                 numb_pack,     // текущий номер пакета
-                         numb_vol;      // текущий номер тома в пакете
+    char				pack_buf[1500];  // буфер задачи obm_41_31. Выходные данные в Socket
+    char                mode_gl; // режим gloriya 
+						numb_pack,     // текущий номер пакета
+						numb_vol;      // текущий номер тома в пакете
 
 struct
    {
@@ -71,6 +72,9 @@ int i1=0,i2=0;
 int rez;
 unsigned short buf[4];
 float Angle0;
+struct ispr_mo3k *ispr;
+
+
  C1=2048./pi;C2=4096.0/360.0;C3=180./pi;C4=C1*Kncu;
  C5=C2*Kncu;C6=C1*Kq;C7=C3;C8=C2*Kq;
 //поиск сервера
@@ -93,6 +97,10 @@ float Angle0;
 	delay(1000);
 
 	memset(&p->to_MO3,0,sizeof(obmen_MO3K_MO3_t));
+	p->to_MO3.to42.Mispr = 0xFFFF;
+	ispr = (struct ispr_mo3k *) & p->to_MO3.to42.Mispr;
+//printf("\n\n obmen_MO3: ispr->gl=%d \n\n",ispr->gl);
+	ispr->cvsA = 0;
 	//if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	//Angle0=4;
 	//p->jump=-1;
@@ -100,7 +108,6 @@ float Angle0;
 while(1)
   {
 	//for(i=0;i<sizeof(obmen_41_31_t);i++) bufi[i]=0;
-
 	bytes = Udp_Client_Read(&Uc41,bufi,4096);
 //	printf(" read=%d size1=%d size2=%d size3=%d sizeALL=%d\n",
 //	bytes,sizeof(obmen_42_31_2t),sizeof(obmen_41_31_2t),sizeof(obmen_AK_MN3_MO3K_t),sizeof(obmen_MO3_MO3K_t));
@@ -290,14 +297,18 @@ while(1)
 					break;
 				
 				case 12 :  rez = gloriya(1,0,31);//test K1 
-							printf("rez = gloriya(1,0,31);//test K1 \n\n");
+							printf("rez = gloriya(1,0,31);//test K1 \n\n"); 
 						   break;
 				case 14 :  rez = gloriya(1,1,31);//test K2
 						   break;
+				default : 
+							mode_gl = (mode_gl==1) ? 0 : 1;
+							rez = gloriya(1,mode_gl,31);//test K
+							printf("def: rez = gloriya(1, %d, 31);//test K \n\n", mode_gl);
 			}
 			
-			if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;
-			else 	 p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
+			if (rez) ispr->gl=0;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;
+			else 	 ispr->gl=1;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 
 			gloria_count=0;
 	}

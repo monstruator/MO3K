@@ -93,7 +93,7 @@ int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sev
 	if(regim_ou(dev,HK,AgpecHK,true)==-1) {owu6ka|=0x2000;}
 	if(regim_ou(dev,CEB,AgpecCEB,true)==-1) printf("Error OU CEB\n");
 	Init_ModB();
-	p->to_MO3.to42.Mispr=0;
+	//p->to_MO3.to42.Mispr=0;
 	p->toPR1[0]=0x07C7;
 	p->M[0]=0;
 	p->M[1]=0x000e;
@@ -130,9 +130,9 @@ for(;;)//----- CEPBEP -----//
 		//for(i=3;i<7;i++) printf(" %d=%x",i,toPR1[i]);printf(" to\n");
 		//for(i=3;i<8;i++) printf(" %x",p->PR1[i]);printf("\n");
 		//if (p->PR1[4]&0x4000) p->to_MO3.to42.priem_K2=1; else p->to_MO3.to42.priem_K2=0;
-		p->PR1[3]=p->PR1[3]|0x2000; //ОС комп
+		/*p->PR1[3]=p->PR1[3]|0x2000; //ОС комп
 		p->PR1[3]=p->PR1[3]|0x8000; //2018
-		p->PR1[4]=p->PR1[4]|0x0800; //TVP SUM
+		p->PR1[4]=p->PR1[4]|0x0800; //TVP SUM*/
 		p->PR1[4]=p->PR1[4]|0x00ff; //лишние ниже списка
 
 		p->to_MO3.to42.Ms1=p->PR1[3];   //состояние прибора 1.0
@@ -382,14 +382,14 @@ for(;;)//----- CEPBEP -----//
 
 				if (p->from_MO3.from42.Rejim_AS==1) //режим АС
 				{
-					//printf("lvl = %f r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
+					printf("lvl = %1.3f r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
 					p->to_MO3.to42.pr_rejim_AS=1;
 					if ((p->U.SUM_20>30)&&(abs(p->U.RAZN_0<1.1)))
 						 A1=-p->U.RAZN_0*31.48;
 					else A1=0;
 
 					p->toPR1[0]=(p->PR1[0]&0x0fff)+A1;
-					//printf("Pr1=%d A1=%d newPr1+%d\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
+					printf("Pr1=%d A1=%d newPr1+%d\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
 				}
 				else //если не АС
 				{
