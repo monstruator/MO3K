@@ -9,16 +9,13 @@
 #include <math.h>
 #define MS 1000000
 
- struct ispr_mo3k *ispr;
-
-
 void main( int argc, char *argv[] )
 {
 	unsigned short cr_com42=0,cr_com=0,num_com=0,data_count=0;
 	unsigned int TCount=0,DTTM=0; //общий таймер, последний приход данных
 	int TC10=0; //таймер по 100 мс
-	int N;//кол-во чтений УПОС
-	int N1;//кол-во чтений УПОС на прошлом такте	
+	int N=0;//кол-во чтений УПОС
+	int N1=0;//кол-во чтений УПОС на прошлом такте	
 	int Mes, TstGl= -1;
     pid_t proxy,pid;
     timer_t id;
@@ -58,7 +55,7 @@ void main( int argc, char *argv[] )
 	delay(500);
 	open_shmem();
 	delay(500);
-
+	
 	ispr = (struct ispr_mo3k *) & p->to_MO3.to42.Mispr;
 
 	//----------------------------------------------------
@@ -95,13 +92,14 @@ void main( int argc, char *argv[] )
 	*/
 	//writePorogs(SREDN*2, SREDN*2);
 	//writePorogs(1e2, SREDN*2);
-	writePorogs(1e9, 2e10);
+	writePorogs(1e2, 1e2);
 	//writePorogs(SREDN*10, SREDN*2);
 	//writePorogs( SREDN*10, 1e2);
 
 	Dopler1=(float)p->from_MO3.from41.Fd*1000;
 	//printf("d_from_MO3.from41=%e\n",p->from_MO3.from41.Fd);
 	//writeDopler(-Dopler1);
+	writeDopler(0);
 	//test_dpl=Dopler1;
 	//	Ubran test Glorii do uto4neni9 algoritma
 	//TestGloriya(1);
@@ -114,27 +112,26 @@ void main( int argc, char *argv[] )
 
     while(1) 
 	{
-		//if ( (p->num_com==12) && (p->to_MO3.to42.Mispr & 0x0100) ) TstGl=-2;
-
-		if ( ( (p->num_com==11) || ( (p->num_com==12) && !(p->to_MO3.to42.Mispr & 0x0100) ) ) &&
-			 (cr_com42!=p->from_MO3.from42.cr_com) ) // && (TstGl>-2)
-		{
-			printf("\n 					Command for TestGL (%d) [%d]\n", 
-						p->from_MO3.from42.num_com, p->to_MO3.to42.Mispr);
-			cr_com42 = p->from_MO3.from42.cr_com;
-			//Init_K1(0);
-			//writePorogs(1e10, 1e10);
-			delay(500);
-			TstGl = TestGloriya(p->num_com-11); // 0 - test bez Gloria
-			printf("\n TestGloriya = %d \n", TstGl);
-			//writePorogs(1e2, 2e9);
-		}
-		
     	pid=Receive( 0 , 0, 0 );
 		if (pid==proxy) //обработчик таймера
 		{
+			
+			if ( ( (p->num_com==11) || ( (p->num_com==12) && (ispr->gl==0) ) ) &&
+			 (cr_com42!=p->from_MO3.from42.cr_com) )
+			{
+				printf("\n 					Command for TestGL (%d) [%04h]\n", 
+						p->from_MO3.from42.num_com, p->to_MO3.to42.Mispr);
+				cr_com42 = p->from_MO3.from42.cr_com;
+				nastr_upos(0);
+				writePorogs(1e10, 1e10);
+				delay(500);
+				TstGl = TestGloriya(p->num_com-11); // 0 - test bez Gloria
+				printf("\n TestGloriya = %d \n", TstGl);
+				writePorogs(1e2, 2e9);
+			}
 			TCount++;
 			TC10++;
+			if ((TCount-N)>10) ispr->k1 = 1; //нет УПОСа
 			if (TC10==10) TC10=0;
 			if (p->U.c_OI!=data_count)//пришли данные
 			{
@@ -166,11 +163,14 @@ void main( int argc, char *argv[] )
 				//case 5 : Write_K1(RAZN0); break;						
 				//case 6 : Write_K1(RAZN1); break;						
 				case 9 : //раз в пол сек выполняем сервисные операции
-						test_dpl=(p->from_MO3.from41.Fd-2)*1000; //корректировка ошибки определения Доплера в ЧУПОС
+						
 						if (p->U.SUM_4>1e+8) p->to_MO3.to41.UR_sign_K1=(short)((log10(p->U.SUM_4)-8)*16);	else p->to_MO3.to41.UR_sign_K1=0;
 						
 						//	if ((abs(p->from_MO3.from41.Fd<4.5))&&(abs(p->from_MO3.from41.Fd)>5.5))
-						if (abs(test_dpl-Dopler1) > 2000) 
+						if ((p->from_MO3.from41.num_com==1)||(p->from_MO3.from41.num_com==2))
+						{
+							test_dpl=(p->from_MO3.from41.Fd-2)*1000; //корректировка ошибки определения Доплера в ЧУПОС
+							if (abs(test_dpl-Dopler1) > 2000) 
 							//if ((abs(test_dpl*1000<4500))||(abs(test_dpl*1000)>5500)) //защита от повисания ЧУПОСа
 							//if ((test_dpl<-5500)||(test_dpl>5500)||((test_dpl>-4500)&&(test_dpl<4500))) //защита от повисания ЧУПОСа
 							{
@@ -179,6 +179,7 @@ void main( int argc, char *argv[] )
 								//printf("-- %5.0f -- ",test_dpl);
 								writeDopler(-Dopler1);
 							}
+						}
 						//printf("lvl = %f data=%d\n",p->U.SUM_20,data_count);
 						//printf("n_com_from_k1 = %x \n",p->from_MO3.from41.num_com);
 						//printf("SUM_4=%3.3e LVL20=%1.1e DPL=%d hz\n",p->U.SUM_4,p->U.SUM_20,p->U.DPL_1*244);
@@ -187,9 +188,7 @@ void main( int argc, char *argv[] )
 						//printf("ZI_DATA=%x	 ZI_DOST=%x\n",p->U.ZI_DATA,p->U.ZI_DOST);
 						break;
 			}
-
-			//if (N==N1) printf("нет чтения\n");
-			N1=N;
+			
 			if ((cr_com!=p->from_MO3.from41.cr_com)&&(num_com!=p->from_MO3.from41.num_com))
 			{
 				if ((p->from_MO3.from41.num_com==1)||(p->from_MO3.from41.num_com==2))
@@ -203,17 +202,23 @@ void main( int argc, char *argv[] )
 			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==2))	Init_K1(p->from_MO3.from41.num_KS-1);
 			
 			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==77))	writePorogs(SREDN,SREDN);
-			/*if ((cr_com!=p->from_MO3.from42.cr_com)&&(p->from_MO3.from42.num_com==6))	
+			if ((cr_com42!=p->from_MO3.from42.cr_com)&&(p->from_MO3.from42.num_com==6))	
 			{
 				Dopler1=-p->from_MO3.from42.Fd*1000;
 				writeDopler(Dopler1);
+				cr_com42 = p->from_MO3.from42.cr_com;
 			}
-			*/
-			//cr_com=p->from_MO3.from41.cr_com;
+			
+			cr_com=p->from_MO3.from41.cr_com;
 			//num_com=p->from_MO3.from41.num_com;
 		}
 //----------------------------чтение К1-----------------------------
-		if (pid==proxy_DRV1) {Read_K1();N++;}
+		if (pid==proxy_DRV1) 
+		{
+			Read_K1();
+			ispr->k1 = 0; //есть УПОС
+			N=TCount;
+		}
 
 	}
 
