@@ -183,10 +183,11 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 					fprintf( stderr, "read() error. %s\n", strerror( errno ) );
 				else //если прочитали данные
 				{
+					p->to_MO3.to41.sost_CC_K2++;
 					priem=0;	//был прием
 					for(i1=0;i1<ret;i1++) DCP_K2[i1+sum_ret]=data_buff[i1];
 					sum_ret+=ret;
-					if (TM) printf("sum_ret=%d\n",sum_ret);					
+					if (TM) printf("sum_ret=%d p->to_MO3.to41.sost_CC_K2=%d\n",sum_ret,p->to_MO3.to41.sost_CC_K2);					
 				}
 			}
 		

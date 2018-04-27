@@ -160,8 +160,8 @@ void main( int argc, char *argv[] )
 				case 2 : Write_K1(SUM20); break;
 				case 3 : Write_K1(YP); break;
 				case 4 : Write_K1(DPL1); break;						
-				//case 5 : Write_K1(RAZN0); break;						
-				//case 6 : Write_K1(RAZN1); break;						
+				case 5 : Write_K1(RAZN0); break;						
+				case 6 : Write_K1(RAZN1); break;						
 				case 9 : //раз в пол сек выполняем сервисные операции
 						
 						if (p->U.SUM_4>1e+8) p->to_MO3.to41.UR_sign_K1=(short)((log10(p->U.SUM_4)-8)*16);	else p->to_MO3.to41.UR_sign_K1=0;
