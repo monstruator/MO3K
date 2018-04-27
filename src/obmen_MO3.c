@@ -52,7 +52,7 @@
 	short byta2,T,len_OUT,sen,j;
     div_t   vol;    // vol.quot - количество полных томов
     char				pack_buf[1500];  // буфер задачи obm_41_31. Выходные данные в Socket
-    char                mode_gl; // режим gloriya 
+    char                mode_gl; // режим gloriya
 						numb_pack,     // текущий номер пакета
 						numb_vol;      // текущий номер тома в пакете
 
@@ -79,13 +79,16 @@ struct ispr_mo3k *ispr;
  C5=C2*Kncu;C6=C1*Kq;C7=C3;C8=C2*Kq;
 //поиск сервера
 //qnx_name_attach(0,"4.1");
+
 //инициализация канала UDP
 #ifdef ASTRA
 	i = Udp_Client_Ini(&Uc41,"194.1.1.170",SRC_PORT41,DST_PORT41);
+	printf("ASTRA= %d \n",ASTRA);
 #else
 	i = Udp_Client_Ini(&Uc41,"194.1.1.6",SRC_PORT41,DST_PORT41);
 #endif
-	printf(" Udp_Init=%d	\n", i);
+
+	printf("  Udp_Init=%d	\n", i);
 
 	//gloriya(1,1,31);//test K2 по умолчанию
 	//gloriya(1,1,1);//work K2
@@ -104,13 +107,18 @@ struct ispr_mo3k *ispr;
 	//if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	//Angle0=4;
 	//p->jump=-1;
+	
+puts("\n do while(1)\n");
 
 while(1)
   {
+puts("\n in while(1)\n");
 	//for(i=0;i<sizeof(obmen_41_31_t);i++) bufi[i]=0;
 	bytes = Udp_Client_Read(&Uc41,bufi,4096);
-//	printf(" read=%d size1=%d size2=%d size3=%d sizeALL=%d\n",
-//	bytes,sizeof(obmen_42_31_2t),sizeof(obmen_41_31_2t),sizeof(obmen_AK_MN3_MO3K_t),sizeof(obmen_MO3_MO3K_t));
+	printf(" read=%d size1=%d size2=%d size3=%d sizeALL=%d\n",
+			bytes,sizeof(obmen_42_31_2t),sizeof(obmen_41_31_2t),sizeof(obmen_AK_MN3_MO3K_t),sizeof(obmen_MO3_MO3K_t));
+
+printf("lvl = %1.3f  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_20,p->U.RAZN_0,p->U.RAZN_1);
 
     //memcpy(&p->from_MO3,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 	memcpy(&rec4,&bufi[4],sizeof(obmen_MO3_MO3K_t));
@@ -124,7 +132,7 @@ while(1)
 		cr_com42=rec4.from42.cr_com;
 		p->from_MO3.from42=rec4.from42;
 		if ((p->num_com==12)||(p->num_com==14)) gloria_count=100;
-			
+
 		if (p->num_com==5)
 		{
 			p->M[0]=p->from_MO3.from42.M1;
@@ -293,20 +301,21 @@ while(1)
 			{
 				case 1 : case 2 :
 					if ((p->from_MO3.from41.Nkey_SHAKR<=31)&&(p->from_MO3.from41.Nkey_SHAKR>=0))
-						rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR); 
+						rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR);
 					break;
-				
-				case 12 :  rez = gloriya(1,0,31);//test K1 
-							printf("rez = gloriya(1,0,31);//test K1 \n\n"); 
+
+				case 12 :  rez = gloriya(1,0,31);//test K1
+							printf("rez = gloriya(1,0,31);//test K1 \n\n");
 						   break;
 				case 14 :  rez = gloriya(1,1,31);//test K2
 						   break;
-				default : 
-							mode_gl = (mode_gl==1) ? 0 : 1;
-							rez = gloriya(1,mode_gl,31);//test K
-							printf("def: rez = gloriya(1, %d, 31);//test K \n\n", mode_gl);
+
+			   default : rez = gloriya(1,0,31);//test K1
+						 printf("rez = gloriya(1,0,31);//test K1 \n\n");//mode_gl = (mode_gl==1) ? 0 : 1;
+						//rez = gloriya(1,mode_gl,31);//test K
+						printf("def: rez = gloriya(1, %d, 31) = %d;//test K%d \n\n", mode_gl,rez,(mode_gl+1));
 			}
-			
+
 			if (rez) ispr->gl=0;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;
 			else 	 ispr->gl=1;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 
@@ -469,4 +478,6 @@ while(1)
     }
           numb_pack ++;
   }
+	
+
 }

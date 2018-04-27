@@ -25,7 +25,7 @@ int COR_T=0; //correction time
 int TM=0; //test time mode
 int TS=0; //test signal mode
 int verbose=0; //
-
+struct ispr_mo3k *ispr;
 int rez=0;
 pid_t proxy_DRV2=0;
 chan2=3;
@@ -89,7 +89,7 @@ unsigned char c;
 div_t msec1;
 time_t time_of_day;
 char b[80];
-int N_COM=1;//,KVIT=0;//,ILS=0,LK11=0;
+int N_COM=0;//,KVIT=0;//,ILS=0,LK11=0;
 short comOK[50];
 
 
@@ -217,7 +217,7 @@ read_kvit_NUS()
 }
 
 main(int argc, char *argv[]) {
-	unsigned short cr_com=0;
+	unsigned short cr_com41=0,cr_com42=0,num_com=0;
 	unsigned int Tpr=0,Tpr1=0,Tstart=0, Time=0;
 	short OC4=0;
 	unsigned short D1=0;
@@ -241,7 +241,8 @@ main(int argc, char *argv[]) {
 
 	delay(500);
 	open_shmem();
-
+    delay(500);
+	
 	if (TS) printf("		“‘’€Ž‚‹… …†ˆŒ €Ž’› Ž ‘ˆƒ€‹“ ’‚Š\n");
 	if (TM) printf("		“‘’€Ž‚‹… …†ˆŒ €Ž’› …‡ Ž†ˆ„€ˆŸ ŠŽŒ€„› €—€‹€ ‘‘\n");
 	if (COR_T!=0) printf("		“‘’€Ž‚‹…€ ŠŽ…Š–ˆŸ Ž ‚…Œ…ˆ %d Œˆ“’\n",COR_T);
@@ -249,13 +250,7 @@ main(int argc, char *argv[]) {
 //	printf("TM=%d TS=%d COR_T=%d\n\n",TM,TS,COR_T);
 	COR_T=COR_T*60;
 
-	if (!TM)
-	{
-		//if ( ( out_fp = fopen( "//1/home/seversk/new31/k2_log", "w" ) ) == NULL )
-		//		fprintf( stderr, "Couldn't create/open file. %s\n",  strerror( errno ) );
-		printf("Ž†ˆ„€ˆ… ŠŽŒ€„› €—€‹€ ‘‘ \n");
-		while((p->from_MO3.from41.num_com!=1)&&(p->from_MO3.from41.num_com!=2)) delay(500);
-	}
+	
 
     proxy = qnx_proxy_attach( 0, 0, 0, -1 );
     if( proxy == -1 ) {
@@ -281,7 +276,8 @@ main(int argc, char *argv[]) {
 	Init_K2();
 	delay(500);
 	printf("			€‘’Ž‰Š€ Š2	ª®¬ ­¤  %d\n",p->from_MO3.from41.num_com);
-
+	ispr = (struct ispr_mo3k *) & p->to_MO3.to42.Mispr;
+	
 	while(1)
 	{
 		pid=Receive(0,0,0); //¯®«ãç¥­¨¥ ¢á¥å á¨áâ¥¬­ëå á®®¡é¥­¨©
@@ -463,10 +459,44 @@ main(int argc, char *argv[]) {
 			}
 
 			//printf("%d\n",Tcount);
-			switch (N_COM) //¯®àï¤®ª ¢ë¯®«­¥­¨ï ª®¬ ­á ¢ á¥ ­á¥
+			switch (N_COM) //¯®àï¤®ª ¢ë¯®«­¥­¨ï ª®¬ ­¤ ¢ á¥ ­á¥
 			{
-				case 0:	close(fd_1);        timer_delete(id);
-						printf("EXIT\n");   exit(0);
+				case 0:	if (!TM)
+						{
+							printf("Ž†ˆ„€ˆ… ŠŽŒ€„› €—€‹€ ‘‘ \n");
+//							while((p->from_MO3.from41.num_com!=1)&&(p->from_MO3.from41.num_com!=2)) delay(500);
+							if ( ( (p->num_com==1) ||  (p->num_com==2) ) && (cr_com41!=p->from_MO3.from41.cr_com) )
+							{
+								cr_com41=p->from_MO3.from41.cr_com; 
+								N_COM++;
+								test_K2[13][3]=0x03;
+								test_K2[13][4]=0x5D;
+							}
+							if ( ( (p->num_com==13) || ( (p->num_com==14) && (ispr->gl==0) ) ) && (cr_com42!=p->from_MO3.from42.cr_com) )
+							{
+								TS = 1;
+								cr_com42=p->from_MO3.from42.cr_com;
+								p->to_MO3.to41.sost_CC_K2=0;
+								p->Dout41[40]=0;
+								N_COM++;
+								if (p->num_com==14)
+								{
+									test_K2[13][3]=0x03;
+									test_K2[13][4]=0x5D;
+								}
+								else 
+								{
+									test_K2[13][3]=0x02;
+									test_K2[13][4]=0x5C;
+								}
+								//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]+COR_T;
+								TM=1;
+							}							
+						}
+						else N_COM++;
+						num_com=p->num_com;
+						//p->Dout41[40]=0;						
+						break;
  				case 1: write_com(0);printf(")  Š®¬ ­¤  ˆ‹‘ ®â¯à ¢«¥­ \n");break;
 				case 2: read_kvit();break;
 				case 3: if (comOK[0]>0) {comOK[0]=Ncount=0;N_COM++;break;}
@@ -738,8 +768,25 @@ main(int argc, char *argv[]) {
 						}
 						break;
 			   case 44: read_kvit();
-						if (verbose) printf("-------read_kvit---------\n");
-						N_COM=37;
+						if (verbose) printf("-------read_kvit--------- %d --------------\n",p->to_MO3.to41.sost_CC_K2);
+						if ( (p->num_com==3) && (cr_com41!=p->from_MO3.from41.cr_com) )
+							{
+								cr_com41=p->from_MO3.from41.cr_com; N_COM=0;
+							}
+						else 
+							if ( ((p->num_com==13)||(p->num_com==14)||(p->num_com==15)) && (cr_com42!=p->from_MO3.from42.cr_com) )
+								{								
+//									cr_com42=p->from_MO3.from42.cr_com; 
+									N_COM=0;
+									TM=0;
+								}
+							else N_COM=37;
+						if (((num_com==13)||(num_com==14))&& p->to_MO3.to41.sost_CC_K2)
+						{
+							printf("Test K2 OK p->to_MO3.to41.sost_CC_K2=%d\n",p->to_MO3.to41.sost_CC_K2); 
+							N_COM=0;
+							TM=0;
+						}
 						break;
 			}
 			//if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
@@ -753,6 +800,9 @@ main(int argc, char *argv[]) {
 			//write_com(33);
 			N_COM=0;
 			p->toPR1[3]=0x0000;//8000-onn 0 dBm 0000-off TVK
+			
+			close(fd_1);        timer_delete(id);
+			printf("EXIT\n");   exit(0);
 		}//printf("%d",getch());
 	}
 	close(fd_1);
