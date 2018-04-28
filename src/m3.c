@@ -380,7 +380,7 @@ for(;;)//----- CEPBEP -----//
 		        //for(i=0;i<3;i++) printf("  %x",toPR1[i]);printf("   to  \n");
 				KK1=p->from_MO3.from42.q;//-KK;//Азимут
 
-				if (p->from_MO3.from42.Rejim_AS==1) //режим АС
+				if (p->from_MO3.from42.Rejim_AS==1) //режим Авто-Сопровождения (А/С)
 				{
 					printf("lvl = %1.3f r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
 					p->to_MO3.to42.pr_rejim_AS=1;
@@ -391,7 +391,7 @@ for(;;)//----- CEPBEP -----//
 					p->toPR1[0]=(p->PR1[0]&0x0fff)+A1;
 					printf("Pr1=%d A1=%d newPr1+%d\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
 				}
-				else //если не АС
+				else //если не А/С
 				{
 			/*		if (KK1==0)
 					{

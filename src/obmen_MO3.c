@@ -35,8 +35,8 @@
   # define max_len_IP     4096*8
 
 
-	float Mc=64.*1852./32384./3600., Dbl, Flt=0;
-	int sock, length, i , count_mes=0;
+	float Mc=64.*1852./32384./3600., Dbl, Flt=0., fSumRazn0=0.,fSumRazn1=0.;
+	int sock, length, i, count_mes=0;
 	static Udp_Client_t Uc41,Uc42;
 	char bufi[1024],bufo[1024],but_buf[1024],gloria_start=0,gloria_count=90;
 	obmen_MO3_MO3K_t rec4;
@@ -49,7 +49,7 @@
 	int r,bytes,byta4;
 	pid_t pid_CEP;
 	short MK2[15];
-	short byta2,T,len_OUT,sen,j;
+	short byta2,T,len_OUT,sen,j,indx=0;
     div_t   vol;    // vol.quot - количество полных томов
     char				pack_buf[1500];  // буфер задачи obm_41_31. Выходные данные в Socket
     char                mode_gl; // режим gloriya
@@ -83,12 +83,12 @@ struct ispr_mo3k *ispr;
 //инициализация канала UDP
 #ifdef ASTRA
 	i = Udp_Client_Ini(&Uc41,"194.1.1.170",SRC_PORT41,DST_PORT41);
-	printf("ASTRA= %d \n",ASTRA);
+	printf("\n ASTRA= %d \n",ASTRA);
 #else
 	i = Udp_Client_Ini(&Uc41,"194.1.1.6",SRC_PORT41,DST_PORT41);
 #endif
 
-	printf("  Udp_Init=%d	\n", i);
+	printf("obmen_MO3:  Udp_Init=%d	\n", i);
 
 	//gloriya(1,1,31);//test K2 по умолчанию
 	//gloriya(1,1,1);//work K2
@@ -103,23 +103,31 @@ struct ispr_mo3k *ispr;
 	p->to_MO3.to42.Mispr = 0xFFFF;
 	ispr = (struct ispr_mo3k *) & p->to_MO3.to42.Mispr;
 //printf("\n\n obmen_MO3: ispr->gl=%d \n\n",ispr->gl);
-	ispr->cvsA = 0;
+	ispr->cvsA = 0;	ispr->k2 = 0;
 	//if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	//Angle0=4;
 	//p->jump=-1;
 	
-puts("\n do while(1)\n");
+//puts("\n do while(1)\n");
 
 while(1)
   {
-puts("\n in while(1)\n");
+//puts("\n in while(1)\n");
 	//for(i=0;i<sizeof(obmen_41_31_t);i++) bufi[i]=0;
 	bytes = Udp_Client_Read(&Uc41,bufi,4096);
-	printf(" read=%d size1=%d size2=%d size3=%d sizeALL=%d\n",
-			bytes,sizeof(obmen_42_31_2t),sizeof(obmen_41_31_2t),sizeof(obmen_AK_MN3_MO3K_t),sizeof(obmen_MO3_MO3K_t));
+//	printf(" read=%d size1=%d size2=%d size3=%d sizeALL=%d\n",
+//			bytes,sizeof(obmen_42_31_2t),sizeof(obmen_41_31_2t),sizeof(obmen_AK_MN3_MO3K_t),sizeof(obmen_MO3_MO3K_t));
 
-printf("lvl = %1.3f  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_20,p->U.RAZN_0,p->U.RAZN_1);
-
+/*	// вывод ср.ариф.
+	indx++;	 fSumRazn0 += p->U.RAZN_0;  fSumRazn1 += p->U.RAZN_1;
+	if (indx==100) {
+		fSumRazn0 = fSumRazn0/indx;	fSumRazn1 = fSumRazn1/indx;
+		printf("r0 = % 3.3f  r1 = % 3.3f \n",fSumRazn0,fSumRazn1);
+		fSumRazn0 = fSumRazn1 = 0.;		indx=0;
+	}
+*/	
+//	printf("lvl = %1.3f  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_20,p->U.RAZN_0,p->U.RAZN_1);
+		
     //memcpy(&p->from_MO3,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 	memcpy(&rec4,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 	//выбор управляюще1 команды
@@ -311,9 +319,9 @@ printf("lvl = %1.3f  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_20,p->U.RAZN_0,p->U.R
 						   break;
 
 			   default : rez = gloriya(1,0,31);//test K1
-						 printf("rez = gloriya(1,0,31);//test K1 \n\n");//mode_gl = (mode_gl==1) ? 0 : 1;
+						 //printf("rez = gloriya(1,0,31);//test K1 \n\n");//mode_gl = (mode_gl==1) ? 0 : 1;
 						//rez = gloriya(1,mode_gl,31);//test K
-						printf("def: rez = gloriya(1, %d, 31) = %d;//test K%d \n\n", mode_gl,rez,(mode_gl+1));
+						//printf("def: rez = gloriya(1, %d, 31) = %d;//test K%d \n\n", mode_gl,rez,(mode_gl+1));
 			}
 
 			if (rez) ispr->gl=0;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;

@@ -93,7 +93,7 @@ msg_i.act_s.t_act=k_5r;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 //printf(" K-5P \n");
 
-sleep(1);
+delay(300);
 
 msg_i.type=GET_IN; 
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
@@ -102,9 +102,9 @@ printf("ИСПР-К=%x НИ-К=%x НИ-Р=%x Готов=%x   ",msg_o.inp_r.u_inp.st_in.ISPR_K,
 msg_o.inp_r.u_inp.st_in.NI_K, msg_o.inp_r.u_inp.st_in.NI_R,
 msg_o.inp_r.u_inp.st_in.SOI_RDy);
 
-#ifndef ASTRA
-if (k_r==31) k_r=15; //для совпадения ключа и результата в контроле
-#endif
+//#ifndef ASTRA
+//if (k_r==31) k_r=15; //для совпадения ключа и результата в контроле
+//#endif
 //printf("%d %d\n",(msg_o.inp_r.u_inp.i_d>>8)&0xff,msg_o.inp_r.u_inp.i_d>>16);
 if ((((msg_o.inp_r.u_inp.i_d>>8)&0xff)==9)	&&	((msg_o.inp_r.u_inp.i_d>>16)==k_r)) {printf("Глория норма\n");return(1);}
 else {printf("Глория не норма\n");return(0);}
