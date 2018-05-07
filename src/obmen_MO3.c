@@ -34,7 +34,6 @@
   # define max_len_OUT    4096*8
   # define max_len_IP     4096*8
 
-
 	float Mc=64.*1852./32384./3600., Dbl, Flt=0., fSumRazn0=0.,fSumRazn1=0.;
 	int sock, length, i, count_mes=0;
 	static Udp_Client_t Uc41,Uc42;
@@ -75,14 +74,17 @@ float Angle0;
 struct ispr_mo3k *ispr;
 
 
- C1=2048./pi;C2=4096.0/360.0;C3=180./pi;C4=C1*Kncu;
- C5=C2*Kncu;C6=C1*Kq;C7=C3;C8=C2*Kq;
+ C1=2048./pi;	C2=4096.0/360.0;	C3=180./pi;	C4=C1*Kncu;
+ C5=C2*Kncu;	C6=C1*Kq;			C7=C3;		C8=C2*Kq;
 //поиск сервера
 //qnx_name_attach(0,"4.1");
 
 //инициализация канала UDP
 #ifdef ASTRA
-	i = Udp_Client_Ini(&Uc41,"194.1.1.170",SRC_PORT41,DST_PORT41);
+//	i = Udp_Client_Ini(&Uc41,"194.1.1.1",SRC_PORT41,DST_PORT41);	//D
+//	i = Udp_Client_Ini(&Uc41,"192.168.2.1",SRC_PORT41,DST_PORT41);	//D
+//	i = Udp_Client_Ini(&Uc41,"192.168.0.1",SRC_PORT41,DST_PORT41);	//D
+	i = Udp_Client_Ini(&Uc41,"194.1.1.170",SRC_PORT41,DST_PORT41);	//Lesha
 	printf("\n ASTRA= %d \n",ASTRA);
 #else
 	i = Udp_Client_Ini(&Uc41,"194.1.1.6",SRC_PORT41,DST_PORT41);
@@ -100,6 +102,7 @@ struct ispr_mo3k *ispr;
 	delay(1000);
 
 	memset(&p->to_MO3,0,sizeof(obmen_MO3K_MO3_t));
+	
 	p->to_MO3.to42.Mispr = 0xFFFF;
 	ispr = (struct ispr_mo3k *) & p->to_MO3.to42.Mispr;
 //printf("\n\n obmen_MO3: ispr->gl=%d \n\n",ispr->gl);
@@ -126,15 +129,20 @@ while(1)
 		fSumRazn0 = fSumRazn1 = 0.;		indx=0;
 	}
 */	
-//	printf("lvl = %1.3f  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_20,p->U.RAZN_0,p->U.RAZN_1);
+//	printf("SUM_20 = %1.3e  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_20,p->U.RAZN_0,p->U.RAZN_1);
+	printf("SUM_4 = %1.3e  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_4,p->U.RAZN_0,p->U.RAZN_1);
 		
     //memcpy(&p->from_MO3,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 	memcpy(&rec4,&bufi[4],sizeof(obmen_MO3_MO3K_t));
+
+// коррекция АЗИМУТА после получения из МО3 (перед отправкой в А.)
+	rec4.from42.q += rec4.from42.q/20; // коррекция АЗИМУТА
+
 	//выбор управляюще1 команды
 	if (rec4.from42.cr_com!=cr_com42)
 	{
-		printf(" New Command 4.2 =%3d  cr_com = %d\n",
-				rec4.from42.num_com, rec4.from42.cr_com);
+		printf(" New Command 4.2 =%3d  cr_com = %d (old cr_com42 = %d)\n",
+				rec4.from42.num_com, rec4.from42.cr_com, cr_com42);
 
 		p->num_com=rec4.from42.num_com;
 		cr_com42=rec4.from42.cr_com;
@@ -162,7 +170,7 @@ while(1)
 		pr1_c_old=p->pr1_c;	//сохраним счетчик обмена с пр.1
 		AK_c=1;
 		p->to_MO3.toAK.kzv=0;
-		printf(" New Command AK = %d , p[0]=%d , cr_com = %d\n",
+		printf(" New Command AK = %d, p[0]=%d , cr_com = %d\n",
 				p->from_MO3.fromAK.num_com,p->from_MO3.fromAK.a_params[0],p->from_MO3.fromAK.cr_com);
 		if ((p->num_com==301)&&(p->num_com==300)) p->M[2]=p->M[2]|0x0001; //РЭЛЕ АК
 		bM4=0;
@@ -302,6 +310,7 @@ while(1)
 		if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	}*/
 
+gloria_count=0;	// временное откл. запросов к Глории
 	gloria_count++;
 	if (gloria_count>100)
 	{
@@ -449,6 +458,9 @@ while(1)
 	//printf("num_com=%d kzv=%x\n",
 	//    p->from_MO3.fromAK.num_com,p->to_MO3.toAK.kzv);
 
+// коррекция АЗИМУТА перед передачей на Пульт
+	p->to_MO3.to42.q -= p->to_MO3.to42.q * 0.0475; // при q=180гр -> 180.0гр
+//	p->to_MO3.to42.q -= p->to_MO3.to42.q * 0.0459; // идёт подбор под 10гр
 
 //////////////////////////////////////////////////////////////////////
   	len_OUT = sizeof(obmen_MO3K_MO3_t); //!!!!
@@ -489,3 +501,9 @@ while(1)
 	
 
 }
+
+
+
+
+
+

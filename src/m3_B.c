@@ -141,9 +141,9 @@ for(;;)//----- CEPBEP -----//
 
 		if((dev->tx_B[3])!=32)  {owu6ka|=512;printf("error: read= %d\n",dev->tx_B[3]);break;}
 		#ifdef ASTRA
-		if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
+			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
 		#else
-		if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
+			if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
 		#endif
 		//if((dev->tx_B[3])!=15) {break;}			//кол-во слов != 15
 		for(j=0;j<15;j++) Dout[3+j]=dev->tx_B[4+j]; //--- npueM HK
