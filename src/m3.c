@@ -171,15 +171,13 @@ for(;;)//----- CEPBEP -----//
 		if (SIMF[0]==60000) SIMF[0]=0;
 		if(ou_read(dev,HK,nogAgpecHK)){owu6ka|=8;break;}
    		if((dev->tx_B[3])!=32)  {owu6ka|=512;printf("error=%d\n",dev->tx_B[3]);break;}
-		#ifdef ASTRA
-			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
-		#else
-			if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
-		#endif
 		//printf("ModA simf- "); 	for(j=0;j<dev->tx_B[3]+4;j++) printf("%x ",dev->tx_B[j]);printf("\n");
     	for(j=0;j<15;j++) p->Dout41[j]=dev->tx_B[4+j]; //--- npueM HK
 		#ifdef ASTRA
 			for(j=0;j<32;j++) p->to_MO3.toNT.oHK[j]=dev->tx_B[4+j];
+			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
+		#else
+			if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
 		#endif
 		//printf("ModA simf- "); 	for(j=0;j<15;j++) printf("%x ",p->Dout41[j]);printf("\n");
 	    KK=p->Dout41[5]*pi/(1<<14);
@@ -187,16 +185,21 @@ for(;;)//----- CEPBEP -----//
 		//if (KK>2*pi) KK=KK-2*pi; //переворот с кормы в нос
 		//	printf("KK=%f ",KK);
 
-		//КАЧКИ 3C-30
-//		if (p->Dout41[3]&0x8000) PSI=-(p->Dout41[3])*NAVtoRAD/4;
-//		    else PSI=(float)p->Dout41[4]*NAVtoRAD/4;
-//		if (p->Dout41[1]&0x8000) TETA=-(p->Dout41[2])*NAVtoRAD/4;
-//		    else TETA=(float)p->Dout41[2]*NAVtoRAD/4;
-//			if (dev->tx_B[6]==0x8000) PSI=0;
-//			if (dev->tx_B[7]==0x8000) TETA=0;
-	//	if (abs(PSI)>1/4)  PSI=oldPSI;
-	//	if (abs(TETA)>1/4) TETA=oldTETA;
-	//	printf("KK=%1.3f PSI=%1.3f(%1.3f) TETA=%1.3f(%1.3f)\n",KK,PSI,PSI*57.32,TETA,TETA*57.32);
+//КАЧКИ 3C-30
+/*
+		if (p->Dout41[3]&0x8000) PSI=-(p->Dout41[3])*NAVtoRAD/4;
+		    else PSI=(float)p->Dout41[4]*NAVtoRAD/4;
+		if (p->Dout41[1]&0x8000) TETA=-(p->Dout41[2])*NAVtoRAD/4;
+		    else TETA=(float)p->Dout41[2]*NAVtoRAD/4;
+
+		if (dev->tx_B[6]==0x8000) PSI=0;
+		if (dev->tx_B[7]==0x8000) TETA=0;
+		if (abs(PSI)>1/4)  PSI=oldPSI;
+		if (abs(TETA)>1/4) TETA=oldTETA;
+		printf("KK=%1.3f PSI=%1.3f(%1.3f) TETA=%1.3f(%1.3f)\n",KK,PSI,PSI*57.32,TETA,TETA*57.32);
+*/
+//КАЧКИ 3C-30 ?
+
 	//	printf(" A_simf "); 	for(j=0;j<9;j++) printf("%04x ",p->Dout41[j]);printf("\n");
   		break;
 
@@ -232,9 +235,9 @@ for(;;)//----- CEPBEP -----//
 			// копируем на позиции по протоколу Скорость, Широту, Долготу
 
 			#ifdef ASTRA
-			p->to_MO3.toNT.oHK[25]=Din_ModB[3+12]; //Скорость
-			for(j=8;j<12;j++) p->to_MO3.toNT.oHK[11+j]=Din_ModB[3+j]; //Широта + Долгота
-			for(j=0;j<11;j++) p->to_MO3.toNT.oHK[j]=Din_ModB[3+j]; //копируем остальные данные
+				p->to_MO3.toNT.oHK[25]=Din_ModB[3+12]; //Скорость
+				for(j=8;j<12;j++) p->to_MO3.toNT.oHK[11+j]=Din_ModB[3+j]; //Широта + Долгота
+				for(j=0;j<11;j++) p->to_MO3.toNT.oHK[j]=Din_ModB[3+j]; //копируем остальные данные
 			#endif
 
 			for(j=0;j<15;j++) p->Dout41[j]=Din_ModB[3+j]; //--- npueM HK
@@ -345,7 +348,8 @@ for(;;)//----- CEPBEP -----//
 
 				if (p->Dout41[3]&0x8000) TETA=(0xffff-p->Dout41[3])*pi/(1<<14);
 					else TETA=-p->Dout41[3]*pi/(1<<14); //бортовая
-				/*
+//качки ?
+/*
 				x=(double)KK1; //азимут от 4-1
 				if (x<0) {x+=2*PI;minus_x=1;} else minus_x=0;
 				y=(double)p->from_MO3.from41.beta;
@@ -361,7 +365,8 @@ for(;;)//----- CEPBEP -----//
 				if (minus_x==1) x1=x1-2*PI;
 				x2=x-x1; //дельта по x
 				y2=y-y1; //дельта по y
-				*/
+//качки ?
+*/
 				x1=KK1;
 				y1=p->from_MO3.from41.beta;
 				printf("KK=%3.1f x0=%3.1f y0=%3.1f PSI=%3.1f TETA=%3.1f x1=%3.1f y1=%3.1f\n\n",
@@ -382,7 +387,7 @@ for(;;)//----- CEPBEP -----//
 
 				if (p->from_MO3.from42.Rejim_AS==1) //режим Авто-Сопровождения (А/С)
 				{
-					printf("lvl = %1.3f r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
+					printf("SUM_20 = %1.2e r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
 					p->to_MO3.to42.pr_rejim_AS=1;
 					if ((p->U.SUM_20>30)&&(abs(p->U.RAZN_0<1.1)))
 						 A1=-p->U.RAZN_0*31.48;

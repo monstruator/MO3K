@@ -125,7 +125,8 @@ void main( int argc, char *argv[] )
 				nastr_upos(0);
 				writePorogs(1e10, 1e10);
 				delay(500);
-				TstGl = TestGloriya(p->num_com-11); // 0 - test bez Gloria
+// временное откл. запросов к Глории
+//				TstGl = TestGloriya(p->num_com-11); // 0 - test bez Gloria
 				printf("\n TestGloriya = %d \n", TstGl);
 				writePorogs(1e2, 2e9);
 			}
