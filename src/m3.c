@@ -61,7 +61,11 @@ const Cq=16,C42np1=10;//cMeweHue gaHHblx B Dout
 unsigned pci_index=0;
 unsigned char s,pewuM_K1;
 int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sevA
+
+float fAC_dAz=0.,fAC_dUM=0., fAC_dAz_r=0.,fAC_dUM_r=0.; //для Авто-Сопровождения
+
 //----- onucaHue daHHblx npu pa6ome c np.4-1,4-2 -----//
+
 	C1=2048./pi;	C2=4096.0/360.0;	C3=180./pi;	C4=C1*Kncu;
 	C5=C2*Kncu;		C6=C1*Kq;			C7=C3;		C8=C2*Kq;
 
@@ -129,6 +133,8 @@ for(;;)//----- CEPBEP -----//
 		//for(i=3;i<7;i++) printf(" %d=%04x",i,dev->tx_B[10+i]);printf(" from\n");
 		//for(i=3;i<7;i++) printf(" %d=%x",i,toPR1[i]);printf(" to\n");
 		//for(i=3;i<8;i++) printf(" %x",p->PR1[i]);printf("\n");
+
+
 		//if (p->PR1[4]&0x4000) p->to_MO3.to42.priem_K2=1; else p->to_MO3.to42.priem_K2=0;
 		/*p->PR1[3]=p->PR1[3]|0x2000; //ОС комп
 		p->PR1[3]=p->PR1[3]|0x8000; //2018
@@ -263,13 +269,14 @@ for(;;)//----- CEPBEP -----//
 			if (TIMER10<10)	ispr->mo1k=0; //есть пр1.0
 			else			ispr->mo1k=1; //нет пр1.0
 
-			if (p->num_com==3) //конец СС
+			if (p->num_com==3) //конец сеанса связи
 			{
 				setANT=0;
 				p->jump=0;
 				p->toPR1[0]=1991;
 				p->toPR1[2]=0;
 			}
+
 			if (p->num_com==1) //подготовка к сеансу связи
 			{
 				KK1=p->from_MO3.from41.P_ANT_1-KK;
@@ -297,12 +304,12 @@ for(;;)//----- CEPBEP -----//
 				KK1=KK1+2*p->jump*pi;
 				printf("KK1=%f j=%d dir=%d \n",KK1*57.32,p->jump,direction);
 
-				oldKK=KK1; //сохраним установленный азимут
+				//oldKK=KK1; //сохраним установленный азимут [не используется]
 	    		if (p->from_MO3.from41.beta_1>=0)	p->toPR1[2]=-p->from_MO3.from41.beta_1*C1;//Угол места
 			    else								p->toPR1[2]=(360+(-p->from_MO3.from41.beta_1*C3))*C2;//
 
 				p->toPR1[0]=KK1*RADtoGRAD/2+1991;//Азимут
-				oldKOD=p->toPR1[0];//сохранение кода угла
+				//oldKOD=p->toPR1[0];//сохранение кода угла [не используется]
 				setANT=1;//была настройка углов перед сеансом
 			}
 			else
@@ -351,18 +358,24 @@ for(;;)//----- CEPBEP -----//
 //качки ?
 /*
 				x=(double)KK1; //азимут от 4-1
-				if (x<0) {x+=2*PI;minus_x=1;} else minus_x=0;
+				if (x<0) {	x+=2*PI;	minus_x=1;	}
+				else 					minus_x=0;
+
 				y=(double)p->from_MO3.from41.beta;
 				r1=cos(y);			r3=sin(y);
 				r2=r1*cos(x);		r1=r1*sin(x);
-				C=cos(-PSI);S=sin(-PSI);
+				C=cos(-PSI);		S=sin(-PSI);
 				x1=C*r2+S*r3;		r3=C*r3-S*r2;
 				S=sin(-TETA)*r1+cos(-TETA)*r3;
 				y1=asin(S);
-				prim=x1/cos(y1);	if (prim>1) prim=1;
+
+				prim=x1/cos(y1);
+				if (prim>1) prim=1;
+
 				x1=acos(prim);
-				if (abs(x1-x)>abs(2*PI-x1-x)) x1=2*PI-x1;
+				if (abs(x1-x) > abs(2*PI-x1-x)) x1=2*PI-x1;
 				if (minus_x==1) x1=x1-2*PI;
+
 				x2=x-x1; //дельта по x
 				y2=y-y1; //дельта по y
 //качки ?
@@ -387,14 +400,51 @@ for(;;)//----- CEPBEP -----//
 
 				if (p->from_MO3.from42.Rejim_AS==1) //режим Авто-Сопровождения (А/С)
 				{
-					printf("SUM_20 = %1.2e r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
 					p->to_MO3.to42.pr_rejim_AS=1;
+					/* AC от Павла
+//					printf("SUM_20 = %1.2e r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
 					if ((p->U.SUM_20>30)&&(abs(p->U.RAZN_0<1.1)))
 						 A1=-p->U.RAZN_0*31.48;
 					else A1=0;
 
 					p->toPR1[0]=(p->PR1[0]&0x0fff)+A1;
-					printf("Pr1=%d A1=%d newPr1+%d\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
+//					printf("Pr1=%d A1=%d newPr1+%d\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
+					*/
+
+				// Авто-Сопровождение от ЮЮ+Д
+//					if (p->U.SUM_20 > 30)
+//					if (p->U.SUM_4 > 1000000000000)
+					{
+					//АС по Азимуту: fAC_dAz - поправка в градусах
+						fAC_dAz = fAC_dAz_r = 0.;
+						if ( p->U.RAZN_0 <  -3.)							fAC_dAz =  3.;
+						if ((p->U.RAZN_0 >= -3.)  && (p->U.RAZN_0 <  -2.))	fAC_dAz =  2.;
+						if ((p->U.RAZN_0 >= -2.)  && (p->U.RAZN_0 <= -1.))	fAC_dAz =  1.5;
+						if ((p->U.RAZN_0 >=  1.)  && (p->U.RAZN_0 <   2.))	fAC_dAz = -1.5;
+						if ((p->U.RAZN_0 >=  2.)  && (p->U.RAZN_0 <   3.))	fAC_dAz = -2.;
+						if ( p->U.RAZN_0 >=  3.)							fAC_dAz = -3.;
+
+						if (fAC_dAz != 0.)	{
+							// перевод поправки к Азимуту из градусов в код
+							fAC_dAz_r = fAC_dAz * pi/180.; // гр. -> рад
+							p->toPR1[0] = (fAC_dAz_r + KK1) * RADtoGRAD/2 + 1991; //Азимут
+						}
+
+					//AC по УМ: fAC_dUM - поправка в градусах
+						fAC_dUM = fAC_dUM_r = 0.;
+					 	if ( p->U.RAZN_1 < -1.)							fAC_dUM = -2.;
+						if ((p->U.RAZN_1 >  1.) && (p->U.RAZN_1 <= 2.))	fAC_dUM =  2.;
+						if ( p->U.RAZN_1 >  2.)							fAC_dUM =  3.;
+
+						if (fAC_dUM != 0.)	{
+							// перевод поправки к Углу Места из градусов в код
+							fAC_dUM_r = fAC_dUM * pi/180.; // гр. -> рад
+							if (p->from_MO3.from42.beta >= 0)
+								p->toPR1[2] = 		  (fAC_dUM_r - p->from_MO3.from42.beta) * C1;
+							else
+								p->toPR1[2] = (360 + ((fAC_dUM_r - p->from_MO3.from42.beta) * C3)) * C2;
+						}
+					} // end AC от ЮЮ+Д
 				}
 				else //если не А/С
 				{
@@ -464,6 +514,8 @@ for(;;)//----- CEPBEP -----//
 		for(i=0;i<3;i++) p->toPR1[i]=p->toPR1[i]&0x0fff;
 		//-------------------------- 1 Pr -------------------------
 		for(i=0;i<8;i++) toPR1[i]=p->toPR1[i];
+
+		//for(i=0;i<3;i++) printf("  %x",p->toPR1[i]);	printf("   to  \n"); // коды углов -> в А.
 		//for(i=3;i<4;i++) printf("  %x",p->toPR1[i]);printf("   to  \n");
 		//printf("toPR1=%x from42=%f\n",toPR1[2],p->from_MO3.from41.beta);
 	 	if((KK_frame(dev,Ynp_np1,2,acmd))==-1){owu6ka|=16;break;}
