@@ -130,11 +130,6 @@ void main( int argc, char *argv[] )
 				printf("\n TestGloriya = %d \n", TstGl);
 				writePorogs(1e2, 2e9);
 			}
-			if (  (p->num_com==14)  && (ispr->gl==0) && (cr_com42!=p->from_MO3.from42.cr_com) )
-			{
-				nastr_upos(1); //настройка УПОС на К2
-				cr_com42 = p->from_MO3.from42.cr_com;
-			}
 			TCount++;
 			TC10++;
 			if ((TCount-N)>10) ispr->k1 = 1; //нет УПОСа

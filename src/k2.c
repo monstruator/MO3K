@@ -372,9 +372,9 @@ main(int argc, char *argv[]) {
 										case 0x010: printf("  Œ - ");
 													if (buffer[i+4]&0x01) printf(" ‘");
 													if (buffer[i+4]&0x02) printf(" ‘‘");
-													if (buffer[i+4]&0x04) {printf(" ‡‘");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=0;
+													if (buffer[i+4]&0x04) {printf(" ‡‘");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
 
-													if (buffer[i+4]&0x08) {printf(" ‘!!!!!!");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=0;
+													if (buffer[i+4]&0x08) printf(" ‘");
 													if (buffer[i+4]&0x10) {printf(" ˆ„Š");p->to_MO3.to41.Pr_ZI_K2=1;}else p->to_MO3.to41.Pr_ZI_K2=0;
 													if (buffer[i+4]&0x20) printf(" ˆ„„");
 													if (buffer[i+4]&0x40) printf(" ‚ˆ");
@@ -463,9 +463,9 @@ main(int argc, char *argv[]) {
 			{
 				case 0:	if (!TM)
 						{
-							printf("-----     Ž†ˆ„€ˆ… ŠŽŒ€„› 		-----\n");
+							printf("Ž†ˆ„€ˆ… ŠŽŒ€„› €—€‹€ ‘‘ \n");
 //							while((p->from_MO3.from41.num_com!=1)&&(p->from_MO3.from41.num_com!=2)) delay(500);
-							if ( ( (p->num_com==1) ||  (p->num_com==2) ) && (cr_com41!=p->from_MO3.from41.cr_com) && (p->from_MO3.from41.num_KS==2))
+							if ( ( (p->num_com==1) ||  (p->num_com==2) ) && (cr_com41!=p->from_MO3.from41.cr_com) )
 							{
 								cr_com41=p->from_MO3.from41.cr_com; 
 								N_COM++;
@@ -619,7 +619,7 @@ main(int argc, char *argv[]) {
 						if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 						Tstart=p->from_MO3.from41.T_SS-8; //¢à¥¬ï áâ àâ  §  10 á¥ª ¤® á¥ ­á 
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //¢à¥¬ï ¯à¨¡®à  ¨§ ‘…‚
-					    p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
+							    p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
 						p->Dout41[30]+=(p->CEB[2]>>12)*10;     //hours
 						p->Dout41[31]=(p->CEB[3]>>8)&0x000F;
 						p->Dout41[31]+=(p->CEB[3]>>12)*10;	//minutes
@@ -633,20 +633,11 @@ main(int argc, char *argv[]) {
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 			   case 37: if (TM) {N_COM++;break;}
-						p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
-						p->Dout41[30]+=(p->CEB[2]>>12)*10;     //hours
-						p->Dout41[31]=(p->CEB[3]>>8)&0x000F;
-						p->Dout41[31]+=(p->CEB[3]>>12)*10;	//minutes
-						p->Dout41[32]=p->CEB[3]&0x000F;
-						p->Dout41[32]+=((p->CEB[3]>>4)&0x000f)*10; //seconds
 						Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]+COR_T; //¢à¥¬ï ¯à¨¡®à  ¨§ ‘…‚
 						if ((verbose)&&(Tpr1!=Tpr)) printf("---- Ž†ˆ„€ˆ… €—€‹€ ‘‘   Ts=%d  Tpr=%d-----\n",Tstart,Tpr);
 						//printf("Tpr=%d Tstart=%d Tpr1=%d ",Tpr,Tstart,Tpr1);
 						Tpr1=Tpr;
-						if ( (p->num_com==3) && (cr_com41!=p->from_MO3.from41.cr_com) )
-						{
-							cr_com41=p->from_MO3.from41.cr_com; N_COM=0;
-						}
+
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //¢à¥¬ï ¯à¨¡®à  ¨§ ‘…‚
 						if (Tpr==Tstart) //¥á«¨ ¢à¥¬ï ­ ç «  á¥ ­á  á®¢¯ «®
 						{
@@ -788,15 +779,13 @@ main(int argc, char *argv[]) {
 //									cr_com42=p->from_MO3.from42.cr_com; 
 									N_COM=0;
 									TM=0;
-									p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=0;
 								}
 							else N_COM=37;
 						if (((num_com==13)||(num_com==14))&& p->to_MO3.to41.sost_CC_K2)
 						{
-							printf("\n\n-------   Test K2 OK sost_CC_K2=%d\n\n",p->to_MO3.to41.sost_CC_K2); 
+							printf("Test K2 OK p->to_MO3.to41.sost_CC_K2=%d\n",p->to_MO3.to41.sost_CC_K2); 
 							N_COM=0;
 							TM=0;
-							p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=0;
 						}
 						break;
 			}
