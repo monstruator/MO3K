@@ -63,6 +63,7 @@ unsigned char s,pewuM_K1;
 int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sevA
 
 float fAC_dAz=0.,fAC_dUM=0., fAC_dAz_r=0.,fAC_dUM_r=0.; //для Авто-Сопровождения
+float fAz=0., fUM=0., R0=0., R1=0.; //для контроля Авто-Сопровождения
 
 //----- onucaHue daHHblx npu pa6ome c np.4-1,4-2 -----//
 
@@ -134,6 +135,41 @@ for(;;)//----- CEPBEP -----//
 		//for(i=3;i<7;i++) printf(" %d=%x",i,toPR1[i]);printf(" to\n");
 		//for(i=3;i<8;i++) printf(" %x",p->PR1[i]);printf("\n");
 
+//вывод текущих для Авто-Сопровождения
+		if ( (p->U.RAZN_0 != R0) || (p->U.RAZN_1 != R1) )
+		{
+		  R0=p->U.RAZN_0;	R1=p->U.RAZN_1;
+		  
+//			if ( (fAC_dAz != 0.) || (fAC_dUM != 0.) )	{
+				fAz = (p->PR1[0]-1991)*2/RADtoGRAD; //АЗИМУТ
+				fAz -= fAz * 0.0475; // при q=180гр -> 180.0гр
+				if (p->PR1[2]&0x800)	fUM =  (360 - p->PR1[2]/C2)/C3; //УГОЛ МЕСТА
+				else					fUM = -(p->PR1[2]/C1);
+
+				printf("\nS4=%4.2e  S20=%4.2e  r0=% 4.2f  r1=% 4.2f  Аз=% 5.1f  УМ=% 5.1f  AC=%1d",
+					p->U.SUM_4, p->U.SUM_20, R0, R1, (fAz*180/pi), (fUM*180/pi), p->from_MO3.from42.Rejim_AS);
+
+//		if ( (p->from_MO3.from42.Rejim_AS==1) ) {
+//			printf("\n r0 = % 3.3f  r1 = % 3.3f  ",p->U.RAZN_0,p->U.RAZN_1);
+
+			if ( (p->from_MO3.from42.Rejim_AS==1) && ((fAC_dAz != 0.) || (fAC_dUM != 0.)) )
+			{
+				//fAz = 2*(p->toPR1[0] - 1991)/RADtoGRAD - KK1; // = fAC_dAz_r
+				fAz = (p->toPR1[0]-1991)*2/RADtoGRAD; //АЗИМУТ
+				fAz -= fAz * 0.0475; // при q=180гр -> 180.0гр
+
+				// if (p->toPR1[2]&0x800)	fUM = (p->toPR1[2]/C2 - 360)/C3 + p->toPR1[2]; //= fAC_dUM_r;
+				// else 					fUM = p->toPR1[2]/C1 + p->toPR1[2]; //= fAC_dUM_r
+
+				if (p->toPR1[2]&0x800)	fUM =  (360 - p->toPR1[2]/C2)/C3;
+				else					fUM = -(p->toPR1[2]/C1);
+
+				printf("\n dAz=% 4.2f  dUM=% 4.2f  toAz=% 4.2f  toUM=% 4.2f",
+						fAC_dAz, fAC_dUM, (fAz*180/pi), (fUM*180/pi)); // toPR1[0-3]
+			}
+		//}
+		}
+// конец вывода
 
 		//if (p->PR1[4]&0x4000) p->to_MO3.to42.priem_K2=1; else p->to_MO3.to42.priem_K2=0;
 		/*p->PR1[3]=p->PR1[3]|0x2000; //ОС комп
