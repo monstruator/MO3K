@@ -107,7 +107,7 @@ void main( int argc, char *argv[] )
 	timer.it_value.tv_sec     = 2L; //start after X sec
     timer.it_value.tv_nsec    = 0L;
     timer.it_interval.tv_sec  = 0;
-    timer.it_interval.tv_nsec = 100*MS;  //100
+    timer.it_interval.tv_nsec = 75*MS;  //100
     timer_settime( id, 0, &timer, NULL );
 
     while(1) 
@@ -162,7 +162,7 @@ void main( int argc, char *argv[] )
 			switch (TC10)
 			{
 				case 0 : Write_K1(SUM4); break;
-				//case 1 : Write_K1(ZI); break;
+				case 1 : Write_K1(RAZN0); break;
 				case 2 : Write_K1(SUM20); break;
 				case 3 : Write_K1(YP); break;
 				case 4 : Write_K1(DPL1); break;						
