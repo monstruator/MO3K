@@ -62,8 +62,8 @@ unsigned pci_index=0;
 unsigned char s,pewuM_K1;
 int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sevA
 
-float fAC_dAz=0.,fAC_dUM=0., fAC_dAz_r=0.,fAC_dUM_r=0.; //для Авто-Сопровождения
-float fAz=0., fUM=0., R0=0., R1=0.; //для контроля Авто-Сопровождения
+float old_RAZN=0., fAC_dAz=0.,fAC_dUM=0., fAC_dAz_r=0.,fAC_dUM_r=0., fAz=0., fUM=0., fA=0., fM=0.; //для Авто-Сопровождения
+float R0=0., R1=0.; //для контроля Авто-Сопровождения
 
 //----- onucaHue daHHblx npu pa6ome c np.4-1,4-2 -----//
 
@@ -136,7 +136,7 @@ for(;;)//----- CEPBEP -----//
 		//for(i=3;i<8;i++) printf(" %x",p->PR1[i]);printf("\n");
 
 //вывод текущих для Авто-Сопровождения
-		if ( (p->U.RAZN_0 != R0) || (p->U.RAZN_1 != R1) )
+//		if ( (p->U.RAZN_0 != R0) || (p->U.RAZN_1 != R1) )
 		{
 		  R0=p->U.RAZN_0;	R1=p->U.RAZN_1;
 		  
@@ -146,8 +146,8 @@ for(;;)//----- CEPBEP -----//
 				if (p->PR1[2]&0x800)	fUM =  (360 - p->PR1[2]/C2)/C3; //УГОЛ МЕСТА
 				else					fUM = -(p->PR1[2]/C1);
 
-				printf("\nS4=%4.2e  S20=%4.2e  r0=% 4.2f  r1=% 4.2f  Аз=% 5.1f  УМ=% 5.1f  AC=%1d",
-					p->U.SUM_4, p->U.SUM_20, R0, R1, (fAz*180/pi), (fUM*180/pi), p->from_MO3.from42.Rejim_AS);
+				printf("\nS4=%4.2e  K1=% 3d  r0=% 5.3f  r1=% 5.3f  Аз=% 5.1f  УМ=% 5.1f  AC=%1d",
+						p->U.SUM_4, p->to_MO3.to41.UR_sign_K1, R0, R1, (fAz*180/pi), (fUM*180/pi), p->from_MO3.from42.Rejim_AS);
 
 //		if ( (p->from_MO3.from42.Rejim_AS==1) ) {
 //			printf("\n r0 = % 3.3f  r1 = % 3.3f  ",p->U.RAZN_0,p->U.RAZN_1);
@@ -164,8 +164,9 @@ for(;;)//----- CEPBEP -----//
 				if (p->toPR1[2]&0x800)	fUM =  (360 - p->toPR1[2]/C2)/C3;
 				else					fUM = -(p->toPR1[2]/C1);
 
-				printf("\n dAz=% 4.2f  dUM=% 4.2f  toAz=% 4.2f  toUM=% 4.2f",
-						fAC_dAz, fAC_dUM, (fAz*180/pi), (fUM*180/pi)); // toPR1[0-3]
+				printf("\n dAz=% 4.2f  dUM=% 4.2f  ", fAC_dAz, fAC_dUM);
+				//printf("\n dAz=% 4.2f  dUM=% 4.2f  toAz=% 4.2f  toUM=% 4.2f",
+					//	fAC_dAz, fAC_dUM, (fAz*180/pi), (fUM*180/pi)); // toPR1[0-3]
 			}
 		//}
 		}
@@ -437,19 +438,36 @@ for(;;)//----- CEPBEP -----//
 				if (p->from_MO3.from42.Rejim_AS==1) //режим Авто-Сопровождения (А/С)
 				{
 					p->to_MO3.to42.pr_rejim_AS=1;
-					/* AC от Павла
+				// AC от Павла
+				/* v.1
 //					printf("SUM_20 = %1.2e r0 = %f ",p->U.SUM_20,p->U.RAZN_0);
 					if ((p->U.SUM_20>30)&&(abs(p->U.RAZN_0<1.1)))
 						 A1=-p->U.RAZN_0*31.48;
 					else A1=0;
-
+					
 					p->toPR1[0]=(p->PR1[0]&0x0fff)+A1;
 //					printf("Pr1=%d A1=%d newPr1+%d\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
-					*/
+				*/
+				// v.2
+					//printf("SUM_20 = %d r0 = %f  abs=%f to41=%x",p->to_MO3.to41.UR_sign_K1,p->U.RAZN_0,fabs(p->U.RAZN_0),p->toPR1[0]);
+					if ((p->to_MO3.to41.UR_sign_K1>40)&&(fabs(p->U.RAZN_0)>0.3)&&(old_RAZN != p->U.RAZN_0) )
+					{
+						A1=-p->U.RAZN_0*5;//31.48;
+						p->toPR1[0]=(p->PR1[0]&0x0fff)+A1;
+						old_RAZN = p->U.RAZN_0;
+						printf("\n from1=%x A1=%d newPr1=%x\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
 
+					}
+					else A1=0;
+					
+					//p->toPR1[0]=(p->PR1[0]&0x0fff)+A1;
+					//printf(" from1=%x A1=%d newPr1=%x\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
+				
+/*
 				// Авто-Сопровождение от ЮЮ+Д
-//					if (p->U.SUM_20 > 30)
-//					if (p->U.SUM_4 > 1000000000000)
+					//if (p->U.SUM_20 > 30)
+					if (p->to_MO3.to41.UR_sign_K1 > 30)
+					//if (p->U.SUM_4 > 1e+10) // 10000000000
 					{
 					//АС по Азимуту: fAC_dAz - поправка в градусах
 						fAC_dAz = fAC_dAz_r = 0.;
@@ -461,9 +479,12 @@ for(;;)//----- CEPBEP -----//
 						if ( p->U.RAZN_0 >=  3.)							fAC_dAz = -3.;
 
 						if (fAC_dAz != 0.)	{
+							fAz = p->to_MO3.to41.P_FACT; // p->to_MO3.to42.q; // p->PR1[0]; // p->from_MO3.from42.q; // (v.1)
 							// перевод поправки к Азимуту из градусов в код
 							fAC_dAz_r = fAC_dAz * pi/180.; // гр. -> рад
-							p->toPR1[0] = (fAC_dAz_r + KK1) * RADtoGRAD/2 + 1991; //Азимут
+							p->toPR1[0] = (fAC_dAz_r + fAz) * RADtoGRAD/2 + 1991; //Азимут
+
+							printf("\nАС: dAz=% 4.2f  toAz=% 4.2f",	fAC_dAz, (fAz*180/pi) );
 						}
 
 					//AC по УМ: fAC_dUM - поправка в градусах
@@ -473,14 +494,16 @@ for(;;)//----- CEPBEP -----//
 						if ( p->U.RAZN_1 >  2.)							fAC_dUM =  3.;
 
 						if (fAC_dUM != 0.)	{
+							fUM = p->to_MO3.to41.beta_FACT; //p->to_MO3.to42.beta; // p->PR1[2]; //p->from_MO3.from42.beta; // v.1
 							// перевод поправки к Углу Места из градусов в код
 							fAC_dUM_r = fAC_dUM * pi/180.; // гр. -> рад
-							if (p->from_MO3.from42.beta >= 0)
-								p->toPR1[2] = 		  (fAC_dUM_r - p->from_MO3.from42.beta) * C1;
-							else
-								p->toPR1[2] = (360 + ((fAC_dUM_r - p->from_MO3.from42.beta) * C3)) * C2;
+							if (fUM >= 0)	p->toPR1[2] = 		  (fAC_dUM_r - fUM) * C1;
+							else			p->toPR1[2] = (360 + ((fAC_dUM_r - fUM) * C3)) * C2;
+
+						printf("\nАС: dUM=% 4.2f  toUM=% 4.2f",	fAC_dUM, (fUM*180/pi));
 						}
 					} // end AC от ЮЮ+Д
+*/
 				}
 				else //если не А/С
 				{
