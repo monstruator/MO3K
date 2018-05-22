@@ -89,15 +89,6 @@ struct ispr_mo3k *ispr;
 //инициализация канала UDP
  i = Udp_Client_Ini(&Uc41,IP_ADR,SRC_PORT41,DST_PORT41);
 
-/*
-  #ifdef ASTRA
-	i = Udp_Client_Ini(&Uc41,"194.1.1.170",SRC_PORT41,DST_PORT41);	//PC Lesha
-	//i = Udp_Client_Ini(&Uc41,"194.1.1.1",SRC_PORT41,DST_PORT41);	//PC Demyan
-	// printf("\n ASTRA= %d \n",ASTRA);
- #else
-	 i = Udp_Client_Ini(&Uc41,"194.1.1.6",SRC_PORT41,DST_PORT41);
- #endif
-*/
  printf("IP= %s  obmen_MO3:  Udp_Init=%d	\n\n", IP_ADR, i);
 
  C1=2048./pi;	C2=4096.0/360.0;	C3=180./pi;	C4=C1*Kncu;
@@ -242,7 +233,7 @@ while(1)
 			case 15 : p->M[3]=0x8210;break;
 
 		}
-		printf("M=%d\n",paramAKcom);
+		//printf("M=%d\n",paramAKcom);
 	}
 
 	if (rec4.from41.cr_com!=cr_com41)
