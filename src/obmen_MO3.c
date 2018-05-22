@@ -166,8 +166,8 @@ while(1)
 		pr1_c_old=p->pr1_c;	//сохраним счетчик обмена с пр.1
 		AK_c=1;
 		p->to_MO3.toAK.kzv=0;
-		printf(" New Command AK = %d, p[0]=%d , cr_com = %d\n",
-				p->from_MO3.fromAK.num_com,p->from_MO3.fromAK.a_params[0],p->from_MO3.fromAK.cr_com);
+		// printf(" New Command AK = %d, p[0]=%d , cr_com = %d\n",
+				// p->from_MO3.fromAK.num_com,p->from_MO3.fromAK.a_params[0],p->from_MO3.fromAK.cr_com);
 		if ((p->num_com==301)&&(p->num_com==300)) p->M[2]=p->M[2]|0x0001; //РЭЛЕ АК
 		bM4=0;
 		paramAKcom=0;
@@ -238,8 +238,8 @@ while(1)
 
 	if (rec4.from41.cr_com!=cr_com41)
 	{
-		if (p->num_com!=rec4.from41.num_com)
-			printf(" New Command 4.1 = %d\n",rec4.from41.num_com);
+		// if (p->num_com!=rec4.from41.num_com)
+			// printf(" New Command 4.1 = %d\n",rec4.from41.num_com);
 
 		p->from_MO3.from41=rec4.from41;
 		p->num_com=p->from_MO3.from41.num_com;

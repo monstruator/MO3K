@@ -333,8 +333,6 @@ int Read_K1()
 					for(i=1;i<CK1;i++) massivK1[i-1]=massivK1[i];
 					CK1-=1;
 					/*
-
-
 					for(i=0;i<CK1;i++)
 					{
 						printf(" %02x",massivK1[i]);
@@ -345,7 +343,6 @@ int Read_K1()
 					return b;
 					*/
 	}
-
   }
   return b;
 }
@@ -357,7 +354,6 @@ int DDRead_K1()
 	short inDP[2];
 	int ii=0;
 	float RAZN;
-
 	float urov_1, urov_2;
 
 	rd_cpcs_s.type=4;
@@ -591,7 +587,7 @@ test[115]=0x88888;	test[116]=0x88888;	test[117]=0x88888;	test[118]=0x88888;	test
 	printf("¥à¥¢®¤ ¢ ¡®¥¢®© à¥¦¨¬!\n");
 
 	/*if (rd_cpcs_r = otvetGlor){
-		printf("’¥áâ ƒ«®¨¨ “‘…?Ž Ž‰„…!\n\n");
+		printf("’¥áâ ƒ«®¨¨ “‘…˜Ž Ž‰„…!\n\n");
 	}
 	else{
 		printf("’¥áâ ƒ«®à¨¨ … Ž‰„…!\n");
