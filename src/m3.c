@@ -63,9 +63,9 @@ unsigned char s,pewuM_K1;
 int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sevA
 
 //для Авто-Сопровождения:
-float old_RAZN=0., old_RAZN_1=0., fUM=0.;
-float fAz=0., R0=0., R1=0.; //для контроля Авто-Сопровождения
-//float fAC_dAz=0.,fAC_dUM=0.,fAC_dAz_r=0.,fAC_dUM_r=0., fA=0., fM=0.;
+float old_RAZN_0=0., old_RAZN_1=0., fUM=0., fDUM=0.;
+float fA=0.,fAz=0., R0=0., R1=0.; //для контроля Авто-Сопровождения
+//float	fM=0., fAC_dAz=0.,fAC_dUM=0.,fAC_dAz_r=0.,fAC_dUM_r=0.;
 
 //----- onucaHue daHHblx npu pa6ome c np.4-1,4-2 -----//
 
@@ -147,8 +147,10 @@ for(;;)//----- CEPBEP -----//
 			if (p->PR1[2]&0x800)	fUM =  (360 - p->PR1[2]/C2)/C3; //УГОЛ МЕСТА
 			else					fUM = -(p->PR1[2]/C1);
  */
-//			printf("\nS4=%4.2e  K1=% 3d  r0=% 5.3f  r1=% 5.3f  Аз=% 5.1f  УМ=% 5.1f  AC=%1d",
-//					p->U.SUM_4, p->to_MO3.to41.UR_sign_K1, R0, R1, (fAz*180/pi), (fUM*180/pi), p->from_MO3.from42.Rejim_AS);
+			// printf("\nS4=%4.2e  K1=% 3d  r0=% 5.3f  r1=% 5.3f  Аз=% 5.1f  УМ=% 5.1f",
+					// p->U.SUM_4, p->to_MO3.to41.UR_sign_K1, R0, R1, (fAz*180/pi), (fUM*180/pi));
+
+			// if (p->from_MO3.from42.Rejim_AS) printf("  AC");
 
 /* 			if (p->from_MO3.from42.Rejim_AS==1) 
 			{
@@ -438,35 +440,44 @@ for(;;)//----- CEPBEP -----//
 				//printf("Az=%f Um=%f ",p->from_MO3.from42.q,p->from_MO3.from42.beta);
 		        //for(i=0;i<3;i++) printf("  %x",toPR1[i]);printf("   to  \n");
 				KK1=p->from_MO3.from42.q;//-KK;//Азимут
-
-				if (p->from_MO3.from42.Rejim_AS==1) //режим Авто-Сопровождения (А/С)
+	//режим Авто-Сопровождения (А/С)
+				if (p->from_MO3.from42.Rejim_AS==1)
 				{
 					p->to_MO3.to42.pr_rejim_AS=1;
 				// AC от Павла
 					//printf("SUM_20 = %d r0 = %f  abs=%f to41=%x",p->to_MO3.to41.UR_sign_K1,p->U.RAZN_0,fabs(p->U.RAZN_0),p->toPR1[0]);
-					if (p->to_MO3.to41.UR_sign_K1 > 40) 
+
+					//if (p->U.SUM_4 > 5e11) 
+					if (p->to_MO3.to41.UR_sign_K1 > 39)
 					{// АС по Азимуту:
-						if ((fabs(p->U.RAZN_0) > 0.3) && (old_RAZN != p->U.RAZN_0))
-						{
+						if ((fabs(p->U.RAZN_0) > 0.3) && (old_RAZN_0 != p->U.RAZN_0))
+						{	A1=0;
+							old_RAZN_0 = p->U.RAZN_0;
 							A1 = -p->U.RAZN_0 * 3;//31.48;
 							p->toPR1[0] = (p->PR1[0]&0x0fff) + A1;
-	//printf("AC P-2: Az= %x\n",p->toPR1[0]);
-							old_RAZN = p->U.RAZN_0;
-				//printf("\n PR1= %x  dAz= % d  newPr1= %x\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
+
+						// fA  = (p->PR1[0]  -1991) * 2/RADtoGRAD;  fA  -= fA  * 0.0475; // коррекция вывода
+						// fAz = (p->toPR1[0]-1991) * 2/RADtoGRAD;  fAz -= fAz * 0.0475; // коррекция вывода
+					// printf("\n\nКоррекция по Азимуту: Old Az= % 5.1f  dAz= % 5.1f  new Az= % 5.1f\n",
+							// (fAz*180/pi), ((fAz-fA)*180/pi), (fAz*180/pi) ); // вывод в гр.
 						}
 						else A1=0;
 					// АС по УМ
 						if ((fabs(p->U.RAZN_1) > 0.3) && (old_RAZN_1 != p->U.RAZN_1))
-						{
-							if (p->PR1[2]&0x800)	fUM =  (360 - p->PR1[2]/C2)/C3; //УГОЛ МЕСТА
-							else					fUM = -(p->PR1[2]/C1); // УМ в рад.
-
-							fUM = fUM - 0.007*p->U.RAZN_1; // +1гр.
-							if (fUM >= 0) p->toPR1[2] = -fUM*C1;//Угол места
-							else 		  p->toPR1[2]=(360+(-fUM*C3))*C2;//
-
+						{	fUM=0;  fDUM=0.;
 							old_RAZN_1 = p->U.RAZN_1;
-				//printf("\n PR1= %x  dUM= % d  newPR1=%x\n",p->PR1[2]&0x0fff, A1, p->toPR1[2]);
+							if (p->PR1[2]&0x800)	fUM =  (360 - p->PR1[2]/C2)/C3; //УМ код в рад.
+							else					fUM = -(p->PR1[2]/C1);
+
+					//printf("\n\nКоррекция по У.Места: Old UM= % 5.1f",(fUM*180/pi)); // вывод в гр.
+
+							fDUM = 0.007 * p->U.RAZN_1; // 0.5гр.(в рад.) * U.RAZN_1
+							fUM = fUM - fDUM;
+
+					//printf("  dUM= % 5.1f  new UM= % 5.1f\n", ((-fDUM)*180/pi), (fUM*180/pi)); // вывод в гр.
+
+							if (fUM >= 0) p->toPR1[2] = -fUM*C1;			//перевод в код
+							else 		  p->toPR1[2]=(360+(-fUM*C3))*C2;//
 						}
 						else fUM=0;
 					}
