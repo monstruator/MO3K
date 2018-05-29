@@ -4,10 +4,10 @@
 
 	#if   ASTRA==1
 		#define IP_ADR	"194.1.1.170"	//PC Lesha
-		#define UPR	"PC Lesha"			//упр-е с PC Lesha
+		#define UPR	"ASTRA PC A"		//упр-е с PC Lesha
 	#elif ASTRA==2
 		#define IP_ADR	"194.1.1.1"		//PC Demyan
-		#define UPR	"PC Demyan"			//упр-е с PC Demyan
+		#define UPR	"ASTRA PC D"		//упр-е с PC Demyan
 	#endif
 
   #else // ASTRA not defined
@@ -137,8 +137,8 @@ while(1)
 	//выбор управляюще1 команды
 	if (rec4.from42.cr_com != cr_com42)
 	{
-//		printf("\nNew Command 4.2=%3d  cr_com New = %3d  cr_com Old = %3d  AC = %1d",
-	//			rec4.from42.num_com, rec4.from42.cr_com, cr_com42, rec4.from42.Rejim_AS);
+		printf("New Command 4.2 = %3d  cr_com New = %3d\n", // cr_com Old = %3d  AC = %1d",
+				rec4.from42.num_com, rec4.from42.cr_com);	//, cr_com42, rec4.from42.Rejim_AS);
 
 		p->num_com=rec4.from42.num_com;
 		cr_com42=rec4.from42.cr_com;
@@ -306,7 +306,7 @@ while(1)
 		if (rez) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	}*/
 
-gloria_count=0;	// временное откл. запросов к Глории
+//gloria_count=0;	// временное откл. запросов к Глории
 	gloria_count++;
 	if (gloria_count>100)
 	{

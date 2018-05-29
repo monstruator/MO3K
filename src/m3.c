@@ -48,7 +48,7 @@ unsigned short q=1,ncu=2,mema=3;
 float 	C1,C2,C3,C4,C5,C6,C7,C8;
 int A1, direction=0;
 int TIMESEV,setANT=0,minus_x;
-	double PSI=0,TETA=0,oldPSI,oldTETA;
+	double PSI=0,TETA=0,oldPSI=0,oldTETA=0;
 	double x,y,x1,y1,C,S,ri,r1,r2,r3,
 	x2=0,y2=0;//дельты по качкам
 	double prim,primq,primcos;
@@ -63,9 +63,9 @@ unsigned char s,pewuM_K1;
 int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sevA
 
 //для Авто-Сопровождения:
-float old_RAZN_0=0., old_RAZN_1=0., fUM=0., fDUM=0.;
-float fA=0.,fAz=0., R0=0., R1=0.; //для контроля Авто-Сопровождения
-//float	fM=0., fAC_dAz=0.,fAC_dUM=0.,fAC_dAz_r=0.,fAC_dUM_r=0.;
+float old_RAZN_0=0, old_RAZN_1=0, fUM=0, fDUM=0;
+float fA=0,fAz=0, R0=0, R1=0; //для контроля Авто-Сопровождения
+//float	fM=0, fAC_dAz=0,fAC_dUM=0,fAC_dAz_r=0,fAC_dUM_r=0;
 
 //----- onucaHue daHHblx npu pa6ome c np.4-1,4-2 -----//
 
@@ -137,22 +137,23 @@ for(;;)//----- CEPBEP -----//
 		//for(i=3;i<7;i++) printf(" %d=%x",i,toPR1[i]);printf(" to\n");
 		//for(i=3;i<8;i++) printf(" %x",p->PR1[i]);printf("\n");
 
-//вывод текущих для Авто-Сопровождения
+//вывод текущих данных для Авто-Сопровождения
 //		if ( (p->U.RAZN_0 != R0) || (p->U.RAZN_1 != R1) )
-//		{
+		{
 /* 			R0=p->U.RAZN_0;	R1=p->U.RAZN_1;
 		  
 			fAz = (p->PR1[0]-1991)*2/RADtoGRAD; //АЗИМУТ
 			fAz -= fAz * 0.0475; // при q=180гр -> 180.0гр
 			if (p->PR1[2]&0x800)	fUM =  (360 - p->PR1[2]/C2)/C3; //УГОЛ МЕСТА
 			else					fUM = -(p->PR1[2]/C1);
- */
-			// printf("\nS4=%4.2e  K1=% 3d  r0=% 5.3f  r1=% 5.3f  Аз=% 5.1f  УМ=% 5.1f",
-					// p->U.SUM_4, p->to_MO3.to41.UR_sign_K1, R0, R1, (fAz*180/pi), (fUM*180/pi));
 
-			// if (p->from_MO3.from42.Rejim_AS) printf("  AC");
+			printf("\nS4=%4.2e  K1=% 3d  r0=% 5.3f  r1=% 5.3f  Аз=% 5.1f  УМ=% 5.1f",
+					p->U.SUM_4, p->to_MO3.to41.UR_sign_K1, R0, R1, (fAz*180/pi), (fUM*180/pi));
 
-/* 			if (p->from_MO3.from42.Rejim_AS==1) 
+			if (p->from_MO3.from42.Rejim_AS) printf("  AC");
+*/
+/*
+ 			if (p->from_MO3.from42.Rejim_AS==1) 
 			{
 			 //if ( (fAC_dAz != 0.) || (fAC_dUM != 0.) ) {
 				//fAz = 2*(p->toPR1[0] - 1991)/RADtoGRAD - KK1; // = fAC_dAz_r
@@ -171,7 +172,7 @@ for(;;)//----- CEPBEP -----//
 			 //}
 			}
 */
-// 		}
+ 		}
 // конец вывода
 
 		//if (p->PR1[4]&0x4000) p->to_MO3.to42.priem_K2=1; else p->to_MO3.to42.priem_K2=0;
@@ -218,13 +219,15 @@ for(;;)//----- CEPBEP -----//
    		if((dev->tx_B[3])!=32)  {owu6ka|=512;printf("error=%d\n",dev->tx_B[3]);break;}
 		//printf("ModA simf- "); 	for(j=0;j<dev->tx_B[3]+4;j++) printf("%x ",dev->tx_B[j]);printf("\n");
     	for(j=0;j<15;j++) p->Dout41[j]=dev->tx_B[4+j]; //--- npueM HK
+
+		//printf("\nAdrKach= %x \n",dev->tx_B[1]);
+		if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки (сейчас одинаковый для ASTRA и Пульта)
 		#ifdef ASTRA
 			for(j=0;j<32;j++) p->to_MO3.toNT.oHK[j]=dev->tx_B[4+j];
-			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
-		#else
+//			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
+//		#else
 //			if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
-			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
-
+//			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
 		#endif
 		
 		//printf("ModA simf- "); 	for(j=0;j<15;j++) printf("%x ",p->Dout41[j]);printf("\n");
@@ -234,17 +237,22 @@ for(;;)//----- CEPBEP -----//
 		//	printf("KK=%f ",KK);
 
 //КАЧКИ 3C-30
-		if (p->Dout41[3]&0x8000) PSI=-(p->Dout41[3])*NAVtoRAD/4;
-		    else PSI=(float)p->Dout41[4]*NAVtoRAD/4;
-		if (p->Dout41[1]&0x8000) TETA=-(p->Dout41[2])*NAVtoRAD/4;
-		    else TETA=(float)p->Dout41[2]*NAVtoRAD/4;
+		oldPSI = PSI;	oldTETA = TETA;
+		if (p->Dout41[3]&0x8000) 	TETA=		-(p->Dout41[4])*NAVtoRAD/4; // Кр<0
+		    else				 	TETA=  (float)p->Dout41[4] *NAVtoRAD/4;
+		if (p->Dout41[1]&0x8000) 	PSI =		-(p->Dout41[2])*NAVtoRAD/4; // УМ<0 
+		    else				 	PSI =  (float)p->Dout41[2] *NAVtoRAD/4;
 
-		if (dev->tx_B[6]==0x8000) PSI=0;
-		if (dev->tx_B[7]==0x8000) TETA=0;
-		if (abs(PSI)>1/4)  PSI=oldPSI;
+		if (p->Dout41[1]==0x8000) PSI=0;	// ? (D)
+		if (p->Dout41[3]==0x8000) TETA=0;	// ?
+
+//		if (p->Dout41[7] == 0) PSI=0;	// при V качки по УМ =0 - нет качек
+//		if (p->Dout41[8] == 0) TETA=0;	// при V качки по Крену =0 - нет качек
+
+		if (abs(PSI) >1/4)  PSI=oldPSI;		//защита от больших волн
 		if (abs(TETA)>1/4) TETA=oldTETA;
-		//printf("KK=%1.3f PSI=%1.3f(%1.3f) TETA=%1.3f(%1.3f)\n",KK,PSI,PSI*57.32,TETA,TETA*57.32);
-//КАЧКИ 3C-30 ?
+//		printf("KK=%1.3f PSI=%1.3f(%1.3f) TETA=%1.3f(%1.3f)\n",KK,PSI,PSI*57.32,TETA,TETA*57.32);
+//КАЧКИ 3C-30
 
 	//	printf(" A_simf "); 	for(j=0;j<9;j++) printf("%04x ",p->Dout41[j]);printf("\n");
   		break;
@@ -397,7 +405,7 @@ for(;;)//----- CEPBEP -----//
 
 				if (p->Dout41[3]&0x8000) TETA=(0xffff-p->Dout41[3])*pi/(1<<14);
 					else TETA=-p->Dout41[3]*pi/(1<<14); //бортовая
-//качки ?
+//качки ? (D)
 /*
 				x=(double)KK1; //азимут от 4-1
 				if (x<0) {	x+=2*PI;	minus_x=1;	}
@@ -481,15 +489,13 @@ for(;;)//----- CEPBEP -----//
 						}
 						else fUM=0;
 					}
-					//p->toPR1[0]=(p->PR1[0]&0x0fff)+A1;
-					//printf(" from1=%x A1=%d newPr1=%x\n",p->PR1[0]&0x0fff,A1,p->toPR1[0]);
+	//режим Авто-Сопровождения (А/С)
 				}
 				else //если не А/С
-				{	//printf("KK1=%1.3f\n",KK1);
-					if (KK1==0)	// КАЧКИ
-					{
-						//printf("PSI=%f TETA=%f\n",PSI,TETA);
-
+				{	
+					if (KK1==0)
+					{// при работе с Угловыми скоростями качек убрать условие и ветку else
+	// КАЧКИ
 						beta1=p->from_MO3.from42.beta-PSI;
 						if (beta1>=0)	p->toPR1[2]=-beta1*C1;//Угол места
 						else 			p->toPR1[2]=(360+(-beta1*C3))*C2;//
@@ -499,8 +505,11 @@ for(;;)//----- CEPBEP -----//
 						else 			p->toPR1[1]=0xFFF+(alfa1*RADtoGRAD)*12.27;
 
 						p->toPR1[0]=KK1*RADtoGRAD/2+1991;//Азимут
-						//printf("alfa1=%f beta1=%f \n",alfa1,beta1);
-					} // КАЧКИ
+
+						//printf("PSI=%1.3f(%1.3f) TETA=%1.3f(%1.3f)  alfa1=%1.3f beta1=%1.3f  Vum= %d Vkr=%d\n",
+						//		PSI,PSI*57.3,TETA,TETA*57.3,alfa1,beta1,p->Dout41[7],p->Dout41[8]);
+	// КАЧКИ
+					}
 					else
 					{
 						if (p->from_MO3.from42.beta>=0)	p->toPR1[2]=-p->from_MO3.from42.beta*C1;//Угол места
@@ -509,9 +518,7 @@ for(;;)//----- CEPBEP -----//
 						if (p->from_MO3.from42.alfa>=0)	p->toPR1[1]=p->from_MO3.from42.alfa*C4;//KPEH
 						else 							p->toPR1[1]=0xFFF+(p->from_MO3.from42.alfa*RADtoGRAD)*12.27;
 
-						//printf("			KK1=%f \n", KK1*57.32);
 						p->toPR1[0]=KK1*RADtoGRAD/2+1991;//Азимут
-		//printf("num_com = 4 (Not AC): Az= %x\n",p->toPR1[0]);
 					}
 				}
 				p->to_MO3.to42.pr_rejim_AS=p->from_MO3.from42.Rejim_AS;
@@ -556,6 +563,7 @@ for(;;)//----- CEPBEP -----//
 		for(i=0;i<8;i++) toPR1[i]=p->toPR1[i];
 
 	//for(i=0;i<3;i++) printf("  %x",p->toPR1[i]);	printf("   to  \n"); // коды углов -> в А.
+	//printf("  UMto=%x",p->toPR1[2]);
 		//for(i=3;i<4;i++) printf("  %x",p->toPR1[i]);printf("   to  \n");
 		//printf("toPR1=%x from42=%f\n",toPR1[2],p->from_MO3.from41.beta);
 	 	if((KK_frame(dev,Ynp_np1,2,acmd))==-1){owu6ka|=16;break;}
