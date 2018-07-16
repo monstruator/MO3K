@@ -21,6 +21,7 @@
 #define DPL1  7
 #define DPL2 10
 
+int iGlTrue = 100; // 117 // порог успешного теста Глории
 //-------k2----
 pid_t proxy_DRV2=0,
 	  proxy_RS; // Mod_B
@@ -32,21 +33,28 @@ unsigned short DATA_K1[15000];
 unsigned int test[130];
 //-------------
 UPOS upos;
-//char nastroika[]={0xB8, 0x00, 0x40, 0x00, 0x9f, 0x08, 0xB9, 0x4B, 0xFE, 0x03};
-//char nastroika[]={0xB8, 0x00, 0x40, 0x00, 0x9f, 0x08, 0xB9, 0x4B, 0x00, 0x00}; //25c preim
-char nastroika[]={0xB8, 0x00, 0x40, 0x00, 0x9f, 0x08, 0xB9, 0x4B, 0x7E, 0x03};  //50 sec priem
+//char nastroika[]=	{0xB8, 0x00, 0x40, 0x00, 0x9f, 0x08, 0xB9, 0x4B, 0xFE, 0x03};
+//char nastroika[]=	{0xB8, 0x00, 0x40, 0x00, 0x9f, 0x08, 0xB9, 0x4B, 0x00, 0x00}; //25c preim
+  char nastroika[]=	{0xB8, 0x00, 0x40, 0x00, 0x9f, 0x08, 0xB9, 0x4B, 0x7E, 0x03}; //50 sec priem
+
 char nastr1[]={0x9F, 0x08};
 char nastr2[]={0xB8, 0x13, 0x01, 0x00};
-char testG[]=	 {0xB8, 0x00, 0x00, 0x00, 0xB9, 0x4b, 0x00, 0x00, 0xB8, 0x03, 0x01, 0x00}; ///4b //63
-char testbezG[]= {0xB8, 0x00, 0x00, 0x00, 0xB9, 0x00, 0x00, 0x00, 0xB8, 0x13, 0x01, 0x02};
+
+	char testG[]=	{0xB8, 0x00, 0x00, 0x00, 0xB9, 0x4b, 0x00, 0x00, 0xB8, 0x03, 0x01, 0x00}; ///4b
+//	char testG[]=	{						 0xB9, 0x4b, 0x00, 0x00, 0xB8, 0x03, 0x01, 0x00}; ///4b
+
+//	char testbezG[]={0xB8, 0x00, 0x00, 0x00, 0xB9, 0x00, 0x00, 0x00, 0xB8, 0x03, 0x01, 0x02};
+	char testbezG[]={0xB8, 0x00, 0x00, 0x00, 0xB9, 0x00, 0x00, 0x00, 0xB8, 0x13, 0x01, 0x02};
+//	char testbezG[]={						 0xB9, 0x00, 0x00, 0x00, 0xB8, 0x13, 0x01, 0x02};
+	
 char BoevRezim[]={0xB8, 0x00, 0x40, 0x00};// зп массива 4 байт
 char Okno[]={0xD6, 0x50, 0x00, 0x00, 0x71, 0x30, 0x04}; // зп массива 4 байт
 char reset_u[]={0x86, 0x41};
+
 struct ispr_mo3k *ispr;
 pid_t pid;
 
-int SR = 0;
-int PR = 0;
+int SR=0, PR=0;
 
 pid_t proxy_DRV1=0;
 int msg=25,rmsg,cntl_code=0,ii=1;
@@ -71,7 +79,7 @@ float porog_sf = 0;
 float SREDN;
 float porog_df = 0;
 pid_t pid;
-
+//--------------------------------------------------------
 void Init_K1(NASTR)
 {
 	int i;
@@ -144,8 +152,8 @@ void Init_K1(NASTR)
 		//printf("%d\n",rd_cpcs_r.cnt);
 		delay(10);
 	}
-}
-
+} // end Init_K1()
+//--------------------------------------------------------
 void nastr_upos (NASTR)
 {
 	int i;
@@ -158,8 +166,10 @@ void nastr_upos (NASTR)
 	nastroika[3]=NASTR; // 0-УПОС, 1-ПОСТ-3Ц
 	printf("							УПОС ИНИТ K%d\n",NASTR+1);
 	delay(50);
-	for(i=0;i<10;i++) wr_cpcs_s.uom.dt[i]=nastroika[i];// зп массива 6 байт
+	for(i=0;i<10;i++) wr_cpcs_s.uom.dt[i]=nastroika[i];// зп массива 10 байт
+	
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
+	
 	printf("Настройка канала =");
 	for(i=0;i<10;i++) printf(" %02x",wr_cpcs_s.uom.dt[i]); printf("\n");
 	delay(100);
@@ -170,11 +180,11 @@ void nastr_upos (NASTR)
 	wr_cpcs_s.cnl=chan1;
 	wr_cpcs_s.cnt=7;
 	for(i=0;i<7;i++) wr_cpcs_s.uom.dt[i]=Okno[i];
+	
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 	delay(100);
-
 }
-
+//--------------------------------------------------------
 void reset_upos ()
 {
 int i;
@@ -184,10 +194,10 @@ int i;
 	wr_cpcs_s.cnt=2;
 	for(i=0;i<2;i++) wr_cpcs_s.uom.dt[i]=reset_u[i];
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
+
 	delay(100);
-
 }
-
+//--------------------------------------------------------
 Write_K1(n_com)
 {
 	wr_cpcs_s.type=5;
@@ -197,8 +207,7 @@ Write_K1(n_com)
 	wr_cpcs_s.uom.dt[1]=n_com;
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 }
-
-
+//--------------------------------------------------------
 int Read_K1()
 {
 	unsigned int massiv[6]={0,0,0,0,0,0},i,b;
@@ -333,6 +342,8 @@ int Read_K1()
 					for(i=1;i<CK1;i++) massivK1[i-1]=massivK1[i];
 					CK1-=1;
 					/*
+
+
 					for(i=0;i<CK1;i++)
 					{
 						printf(" %02x",massivK1[i]);
@@ -343,10 +354,11 @@ int Read_K1()
 					return b;
 					*/
 	}
+
   }
   return b;
-}
-
+} // end Read_K1()
+//--------------------------------------------------------
 int DDRead_K1()
 {
 	//int f = 0;
@@ -354,6 +366,7 @@ int DDRead_K1()
 	short inDP[2];
 	int ii=0;
 	float RAZN;
+
 	float urov_1, urov_2;
 
 	rd_cpcs_s.type=4;
@@ -434,12 +447,13 @@ int DDRead_K1()
   }
 
   return b;
-
-}
-
-void writePorogs(float porog_si, float porog_d) {
+} // end DDRead_K1()
+//--------------------------------------------------------
+void writePorogs(float porog_si, float porog_d) 
+{
 int i;
-printf("Установлены пороги СИ=%e & ИНФ=%e\n", porog_si, porog_d);
+ 
+printf("Установлены пороги СИ=%1.2e & ИНФ=%8.2e\n", porog_si, porog_d);
 
 memcpy(&porog_i,&porog_si,4);
 POROGS[2]=porog_i & 0x7f;porog_i=porog_i>>7;
@@ -455,11 +469,13 @@ POROGD[3]=porog_i & 0x7f;porog_i=porog_i>>7;
 POROGD[4]=porog_i & 0x7f;porog_i=porog_i>>7;
 POROGD[5]=porog_i & 0x7f;porog_i=porog_i>>7;
 POROGD[6]=porog_i & 0x7f;
+
 	// Посылка порога в DSP порога для синхроимпульса
 	wr_cpcs_s.type=5;
 	wr_cpcs_s.cnl=chan1;
 	wr_cpcs_s.cnt=7;
 	for(i=0;i<7;i++) wr_cpcs_s.uom.dt[i]=POROGS[i];// зп массива 7 байт
+
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 	delay(50);
 
@@ -468,13 +484,15 @@ POROGD[6]=porog_i & 0x7f;
 	wr_cpcs_s.cnl=chan1;
 	wr_cpcs_s.cnt=7;
 	for(i=0;i<7;i++) wr_cpcs_s.uom.dt[i]=POROGD[i];// зп массива 7 байт
+
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 	delay(50);
 }
-
+//--------------------------------------------------------
 void writeDopler(float dpl)
 {
 int i;
+
 printf("Установлено значение Доплера %4.0f \n", dpl);
 
 memcpy(&porog_i,&dpl,4);
@@ -489,20 +507,18 @@ POROGS[6]=porog_i & 0x7f;
 	wr_cpcs_s.cnl=chan1;
 	wr_cpcs_s.cnt=7;
 	for(i=2;i<7;i++) wr_cpcs_s.uom.dt[i]=POROGS[i];// зп массива 7 байт
+	
 	wr_cpcs_s.uom.dt[0]=0xD6;
 	wr_cpcs_s.uom.dt[1]=0x48;
 
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 	delay(50);
 }
-
 /////////////////////////////////////////////////////////////////////////////////////////
 int TestGloriya(int gl)
 {
-	int i,st;
-	int j = 0;
-	unsigned int c_OI_tek=0;
-	int old=0;
+ int i=0, st=0, j=0, old=0;
+ unsigned int c_OI_tek=0;
 
 test[0]  =0x0;		test[1]  =0x0; 		test[2]  =0x0;
 test[3]  =0x1;		test[4]  =0x1; 		test[5]  =0x1;		test[6]  =0x1;
@@ -526,73 +542,88 @@ test[103]=0x22222;	test[104]=0x22222;	test[105]=0x22222;	test[106]=0x22222;	test
 test[109]=0x44444;	test[110]=0x44444;	test[111]=0x44444;	test[112]=0x44444;	test[113]=0x44444;	test[114]=0x44444;
 test[115]=0x88888;	test[116]=0x88888;	test[117]=0x88888;	test[118]=0x88888;	test[119]=0x88888;	test[120]=0x88888; test[121]=0x88888;
 
-	wr_cpcs_s.type=5;
-	wr_cpcs_s.cnl=chan1;
-	wr_cpcs_s.cnt=12;
-
 	if (gl == 0) //test bez Gloria
-	{
-		for(i=0;i<12;i++) wr_cpcs_s.uom.dt[i]=testbezG[i];// зп массива 8 байт
+	{	
+		j = sizeof(testbezG);
+		for(i=0;i<j;i++) wr_cpcs_s.uom.dt[i]=testbezG[i]; // запись массива j байт с командой
 		printf("Тест без Глории\n");
 	}
 	else		 //test s Gloria
 	{
-		for(i=0;i<12;i++) wr_cpcs_s.uom.dt[i]=testG[i];// зп массива 8 байт
+		j = sizeof(testG);
+		for(i=0;i<j;i++) wr_cpcs_s.uom.dt[i]=testG[i]; // запись массива j байт с командой
 		printf("Тест c Глорией\n");
 	}
+	printf("Команда на тест (%d байт)", j);
+	for(i=0;i<j;i++) printf(" %02x",wr_cpcs_s.uom.dt[i]); printf("\n");
+
+	wr_cpcs_s.type=5;
+	wr_cpcs_s.cnl=chan1;
+	wr_cpcs_s.cnt=j;
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
-	printf("Команда на тест ");
-	for(i=0;i<12;i++) printf(" %02x",wr_cpcs_s.uom.dt[i]); printf("\n");
+	
 	delay(100);
 	// начало теста
 //	printf(" 													PR=%d \n",p->to41.GL_priem);
 //	printf(" 													SR=%d \n",p->to41.GL_CP);
 
-	for (i=0; i<300; i++)
-	{
+//	j=70;	//- из seversk
+	for (i=0; i<300; i++) {
+//- из seversk
+/*		if (j>20) {
+ 			Write_K1(YP);
+			j=0;
+			//printf(" \nYP\n", j);
+		}
+		j++;
+*/ //- из seversk
 		Read_K1();
 		delay(12);
 		SR=p->to_MO3.to41.GL_CP;
 		PR=p->to_MO3.to41.GL_priem;
 	}
 
-	for(i=0;i<p->U.c_OI;i++)
-	{
+	for(i=0;i<p->U.c_OI;i++) {
 		//printf("[%d] = %x", i, p->U.OI[i]);
 		if (old!=p->U.OI[i]) { printf("\n");  old=p->U.OI[i]; }
+		
 		printf(" %x", p->U.OI[i]);
-		delay(10);
+		delay(5); //10
 	}
+	
 	if (p->U.c_OI==0) printf("Данные не получены\n");
-
-	for (j=0;j<128;j++) if (p->U.OI[j]==1) { st=j;	break; }
-	j=0;
-
-	for(i=0;i<121;i++)
+	else
 	{
-		if (p->U.OI[st+i]==test[i+2]) j++;
-		//printf("%x %x\n",p->U.OI[st+i],test[i+2]);
-	}
+		printf("\n");
+		for (j=0;j<128;j++) if (p->U.OI[j]==1) { st=j;	break; } // поиск 1го элемента =1
 
-	printf("\nсовпадение %d/128\n",j);
+		j=0;
+		for(i=0;i<122;i++) { // 121
+			if (p->U.OI[st+i]==test[i+2]) j++;	// test[i+ 3 ] ?
+		
+//			printf("Сравнеие: пришло= %x  ушло= %x\n",p->U.OI[st+i],test[i+2]);
+		}
+		printf("\nСовпадение %d/122\n",j);	// 128
+//		delay(5000);	//	для чтения с экрана
+	}
+	
 	p->U.c_OI=0;
 	for(i=0;i<130;i++)	p->U.OI[i]=0;
 
 	wr_cpcs_s.type=5;
 	wr_cpcs_s.cnl=chan1;
 	wr_cpcs_s.cnt=4;
-
 	for (i=0;i<4; i++) wr_cpcs_s.uom.dt[i]=BoevRezim[i];// зп массива 4 байт
+
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
-	printf("Перевод в боевой режим!\n");
 
-	/*if (rd_cpcs_r = otvetGlor){
-		printf("Тест Глоии УСПЕШНО ПРОЙДЕН!\n\n");
-	}
-	else{
-		printf("Тест Глории НЕ ПРОЙДЕН!\n");
-	}*/
-	if (j>117)  return 1;
-	else 		return 0;
+	i = (j>iGlTrue) ? 1 : 0;
+	
+	//if (rd_cpcs_r = otvetGlor)
+	if (i)	printf("Тест Глории УСПЕШНО ПРОЙДЕН !\n");
+	else	printf("Тест Глории НЕ ПРОЙДЕН !\n");
+
+//	printf("\nПеревод в боевой режим!\n");
+	
+	return i;
 }
-

@@ -92,8 +92,8 @@ char b[80];
 int N_COM=0;//,KVIT=0;//,ILS=0,LK11=0;
 short comOK[50];
 
-
-void Init_K2()
+//-------------------------------------------------------------------
+void Init_K2 ()
 {
    int i,i1;
 // Проверка запуска драйвера модуля ПЦС ЦВС-3-1
@@ -113,7 +113,7 @@ void Init_K2()
 	init_pcs_s.speed=19200;			// скорость передачи данных
 	init_pcs_s.b_info=8;			// кол-во бит в информационном байте
 	init_pcs_s.b_StrStp=1;			// кол-во стоп-бит
-	init_pcs_s.b_prt=0;			// наличие и тип паритета (нет) ПОСТ-3Ц
+	init_pcs_s.b_prt=0;				// наличие и тип паритета (нет) ПОСТ-3Ц
 	init_pcs_s.dev=0; 				// тип у-ва (0 - обычный RS канал)
 	init_pcs_s.lvl_inp=45;			// уровень заполнения FIFO до прерывания
 
@@ -139,7 +139,7 @@ void Init_K2()
 			exit(2);
 		}
 		else { proxy_DRV2=start_pcs_r.Proxy;
-		  printf("Старт канала %d выполнен, proxy=%d\n", 3, proxy_DRV2);
+			printf("Старт канала %d выполнен, proxy=%d\n", 3, proxy_DRV2);
 		}
 	}
 
@@ -150,15 +150,15 @@ void Init_K2()
 		Send(pid_drv,&rd_cpcs_s,&rd_cpcs_r,sizeof(rd_cpcs_s),sizeof(rd_cpcs_r));
 		delay(50);
 	}
-}
-
-
+} // end Init_K2 ()
+//-------------------------------------------------------------------
 write_com (Ncom)
 {
 	wr_cpcs_s.type=5;
 	wr_cpcs_s.cnl=chan2;
 	wr_cpcs_s.cnt=test_K2[Ncom][1]+1;
 	for(i=0;i<test_K2[Ncom][1]+1;i++) wr_cpcs_s.uom.dt[i]=test_K2[Ncom][i];
+	
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 
 	//printf("время : %d  <---  (",Tcount);
@@ -174,31 +174,38 @@ write_com (Ncom)
 	N_COM++;Ncount++;
 	Tcount_com=Tcount;
 }
-
+//-------------------------------------------------------------------
 //посылка команды ДанИ.V.dV не проверяет ответную квитaнцию
 write_com24 (Ncom)
 {
 	int i1;
 	short V=0;
 	int i;
+	
 	V=(short)p->from_MO3.from41.Vr;
 	if (TS) V=0;
+	
 	test_K2[24][4]=V&0x00ff;
 	test_K2[24][5]=V>>8;
 	if (verbose) printf(" V=%d",V);
+	
 	V=(short)(p->from_MO3.from41.Ar/1.5625);
 	if (TS) V=0;
+	
 	test_K2[24][6]=V&0x00ff;
 	test_K2[24][7]=V>>8;
 	if (verbose) printf(" A=%d\n",V);
+	
 	test_K2[24][8]=0; //check sum
 	for (i1=0;i1<8;i1++) test_K2[24][8]+=test_K2[24][i1]; //test sum
+	
 	wr_cpcs_s.type=5;	wr_cpcs_s.cnl=chan2;	wr_cpcs_s.cnt=9;
 	for(i=0;i<test_K2[24][1]+1;i++) wr_cpcs_s.uom.dt[i]=test_K2[24][i];
+	
 	Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
 //	for(i1=0;i1<9;i1++) printf(" %x.",wr_cpcs_s.uom.dt[i1]);printf("\n");
 }
-
+//-------------------------------------------------------------------
 read_kvit()
 {
 	//printf("Tcount-Tcount_com=%d\n",Tcount-Tcount_com);
@@ -206,7 +213,7 @@ read_kvit()
 	if (Tcount>Tcount_com+50) {printf("Timeout 5 sec (квитанция)\n");N_COM--;}
 	if (Ncount>10) {printf("TPO not responding\n");N_COM=0;}
 }
-
+//-------------------------------------------------------------------
 read_kvit_NUS()
 {
 	//printf("Tcount-Tcount_com=%d\n",Tcount-Tcount_com);
@@ -215,7 +222,7 @@ read_kvit_NUS()
 	//if (Tcount>Tcount_com+2000) {printf("Timeout 5 sec (квитанция)\n");N_COM--;}
 	//if (Ncount>10) {printf("TPO not responding\n");N_COM=0;}
 }
-
+/////////////////////////////////////////////////////////////////////
 main(int argc, char *argv[]) {
 	unsigned short cr_com41=0,cr_com42=0,num_com=0;
 	unsigned int Tpr=0,Tpr1=0,Tstart=0, Time=0;
@@ -228,14 +235,15 @@ main(int argc, char *argv[]) {
 	unsigned char chkSUM=0,N=0;
 	struct itimerspec timer;
     struct sigevent event;
-
 	int K2count=0;//счетчик бафтов в буфере К2
-	while( (i=getopt(argc, argv, "t:s:v:") )!=-1)	{
+
+//	while( (i=getopt(argc, argv, "t:s:v:") )!=-1) {
+	while( (i=getopt(argc, argv, "tsvc:") )!=-1)	{ // ключи вводить без значений, кроме "c"
 		switch(i){
 			case 't' :	TM=1; break;
 			case 's' :	TS=1; break;
 			case 'v' :	verbose=1; break;
-			//case 'c' :	sscanf(optarg,"%d",COR_T); break;
+			case 'c' :	sscanf(optarg,"%d",COR_T); break;
 		}//switch
 	}//while
 
@@ -249,8 +257,6 @@ main(int argc, char *argv[]) {
 
 //	printf("TM=%d TS=%d COR_T=%d\n\n",TM,TS,COR_T);
 	COR_T=COR_T*60;
-
-	
 
     proxy = qnx_proxy_attach( 0, 0, 0, -1 );
     if( proxy == -1 ) {
@@ -317,7 +323,7 @@ main(int argc, char *argv[]) {
 					//strftime(b, 40 , "%T", localtime(&time_of_day));//D T
 					msec1=div(Tcount,10);
 					//printf("%s:%03d -->",b,msec1.rem*100);
-					if (verbose) printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
+//					if (verbose) printf("%02x:%02x:%02x ", p->CEB[2]>>8,p->CEB[3]>>8,p->CEB[3]&0x00ff);
 
 					for(i1=0;i1<N;i1++) chkSUM+=buffer[i+i1]; //подсчет контр суммы
 					//printf("i=%d chkSUM=%x\n",i,chkSUM);
@@ -393,12 +399,16 @@ main(int argc, char *argv[]) {
 													if (verbose) printf(" %6.3f м/с ",OC4*0.582);
 													break;
 													//printf(" ОСЧ - %d м/с ",OC4);break;
-										case 0x11 : if (verbose) printf(" Pтек - %d ",buffer[i+4]);
+										case 0x11 : if (verbose) printf(" Pтек=%d ",buffer[i+4]);
+									//					printf(" Pтек= %d ",buffer[i+4]);
 													if (buffer[i+4]>0)	p->to_MO3.to41.UR_sign_K2=buffer[i+4]*3;
 													else p->to_MO3.to41.UR_sign_K2=0;
 													break;
 										case 0x73 : if (buffer[i+4]&0x04) {printf(" ЗС");p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=1;}else p->to_MO3.to41.PrM_K2=0;
 													if (buffer[i+4]&0x10) {printf(" ИДК");p->to_MO3.to41.Pr_ZI_K2=1;}else p->to_MO3.to41.Pr_ZI_K2=0;
+
+												if (buffer[i+4]&0x20) printf(" ИДД");
+
 													if (verbose)
 													{
 														printf(" ПРМ1 - ");
@@ -427,10 +437,12 @@ main(int argc, char *argv[]) {
 									switch(buffer[i+3])
 									{
 										case 0x014: printf(" НУС Сообщение принято - ");
-													if (buffer[i+4]==0) {printf("норма");comOK[10]=1;}
-													else printf("ненорма");
-													comOK[10]=1;//!!!
-													break;
+													comOK[10]=1;	//!!!
+													if (buffer[i+4]==0) printf("норма");	//comOK[10]=1;
+													else				printf("ненорма");
+													
+printf("\n M1= %xh\n", p->toPR1[3]);  if (p->toPR1[3]&0x8000) printf("ТВК+\n");
+													break;													
 									}
 								}
 								else printf(" Получен неизвестный пакет");
@@ -463,7 +475,7 @@ main(int argc, char *argv[]) {
 			{
 				case 0:	if (!TM)
 						{
-							printf("-----     ОЖИДАНИЕ КОМАНДЫ 		-----\n");
+//							printf("-----     ОЖИДАНИЕ КОМАНДЫ 		-----\n");
 //							while((p->from_MO3.from41.num_com!=1)&&(p->from_MO3.from41.num_com!=2)) delay(500);
 							if ( ( (p->num_com==1) ||  (p->num_com==2) ) && (cr_com41!=p->from_MO3.from41.cr_com) && (p->from_MO3.from41.num_KS==2))
 							{
@@ -554,15 +566,17 @@ main(int argc, char *argv[]) {
 
 			   case 23: if (TS) //!!!!!!!!!!!!!!!!!!!!!!!!
 						{
-							printf("\n---- ВКЛЮЧЕН ТВК С МАХ ОСЛАБЛЕНИЕМ -----\n");
 							//p->toPR1[3]=0xFC00;
 							p->toPR1[3]=0x0000;
+							printf("\n---- ВКЛЮЧЕН ТВК С МАХ ОСЛАБЛЕНИЕМ -----\n");
+							//printf("\n---- ВКЛЮЧЕН ТВК С МАХ ОСЛАБЛЕНИЕМ ----- M1= %xh\n", p->toPR1[3]);
 						}
 						N_COM++;break;
 			   case 24:	N_COM++;break;
 						//if(kbhit()) {N_COM++;getch();}break;
 			   case 25:	write_com(10);printf(")  Команда НУС отправлена\n");break;
-			   case 26: read_kvit_NUS();break;
+			   case 26: read_kvit_NUS();
+						break;
 			   case 27: if (comOK[10]>0) {comOK[10]=Ncount=0;N_COM++;break;}//9
 						if (Tcount>Tcount_com+500) {printf("Timeout 50 sec\n");N_COM=-2;}
 						if (Ncount>10) {printf("TPO not responding\n");N_COM=0;}
@@ -617,6 +631,8 @@ main(int argc, char *argv[]) {
 						if (verbose) printf("  Начата посылка команды ДанИ.V.dV\n");
 						comOK[24]=1;N_COM++;
 						if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
+printf("\nTS= %d M1= %xh\n",TS, p->toPR1[3]);  if (p->toPR1[3]&0x8000) printf("ТВК+\n");
+
 						Tstart=p->from_MO3.from41.T_SS-8; //время старта за 10 сек до сеанса
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //время прибора из СЕВ
 					    p->Dout41[30]=(p->CEB[2]>>8)&0x000F;
@@ -761,7 +777,11 @@ main(int argc, char *argv[]) {
 								//write_com(33);
 								//N_COM=37;
 							}
-							else if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
+							else
+								if (comOK[24] > 0) {
+									comOK[24]++;
+									if (comOK[24] > 10) { comOK[24]=1; write_com24(24); }
+								}
 						}
 						else
 						{
@@ -773,35 +793,49 @@ main(int argc, char *argv[]) {
 								//write_com(33);
 								//N_COM++;
 							}
-							else if (Tcount>Tcount_com+40) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
+							else
+								if (Tcount > Tcount_com+40) {
+									comOK[24]++;
+									if (comOK[24] > 10) { comOK[24]=1; write_com24(24); }
+								}
 						}
 						break;
 			   case 44: read_kvit();
-						if (verbose) printf("-------read_kvit--------- %d --------------\n",p->to_MO3.to41.sost_CC_K2);
-						if ( (p->num_com==3) && (cr_com41!=p->from_MO3.from41.cr_com) )
-							{
-								cr_com41=p->from_MO3.from41.cr_com; N_COM=0;
-							}
-						else 
-							if ( ((p->num_com==13)||(p->num_com==14)||(p->num_com==15)) && (cr_com42!=p->from_MO3.from42.cr_com) )
-								{								
-//									cr_com42=p->from_MO3.from42.cr_com; 
-									N_COM=0;
-									TM=0;
-									p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=0;
-								}
-							else N_COM=37;
-						if (((num_com==13)||(num_com==14))&& p->to_MO3.to41.sost_CC_K2)
+						if (verbose) printf("\n\n======== read_kvit -- sost_CC_K2= %d -- p->num_com= %d ** num_com= %d\n\n",p->to_MO3.to41.sost_CC_K2,p->num_com,num_com);
+	printf("\n\n======== read_kvit -- sost_CC_K2= %d --------- \n\n",p->to_MO3.to41.sost_CC_K2);
+						if ( (p->num_com==3) && (cr_com41 != p->from_MO3.from41.cr_com) )
 						{
-							printf("\n\n-------   Test K2 OK sost_CC_K2=%d\n\n",p->to_MO3.to41.sost_CC_K2); 
-							N_COM=0;
-							TM=0;
-							p->to_MO3.to42.priem_K2=p->to_MO3.to41.PrM_K2=0;
+							cr_com41 = p->from_MO3.from41.cr_com;	N_COM=0;
+						}
+						else 
+							if ( ((p->num_com==13)||(p->num_com==14)||(p->num_com==15)) && (cr_com42 != p->from_MO3.from42.cr_com) )
+							{								
+//								cr_com42=p->from_MO3.from42.cr_com; 
+								N_COM=0;	TM=0;
+								p->to_MO3.to42.priem_K2 = p->to_MO3.to41.PrM_K2 = 0;
+							}
+							else N_COM=37;
+
+						if ( ((num_com==13) || (num_com==14)) && p->to_MO3.to41.sost_CC_K2)
+						{
+							printf("\n\n-------  Test K2 OK sost_CC_K2= %d\n\n",p->to_MO3.to41.sost_CC_K2);
+							N_COM=0;	TM=0;
+							p->to_MO3.to42.priem_K2 = p->to_MO3.to41.PrM_K2 = 0;
+							p->to_MO3.to42.status_test=2;	p->to_MO3.to42.count_test++; // Ok
+printf("\n GL k2 Г Ok: com= %d  status= %d  counter= %d  sost_CC_K2= %d",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test,p->to_MO3.to41.sost_CC_K2);
+printf("\n M1= %xh\n", p->toPR1[3]);  if (p->toPR1[3]&0x8000) printf("ТВК+\n");
+						}
+						else
+						{
+							p->to_MO3.to42.status_test=3;	p->to_MO3.to42.count_test++; // Fail
+printf("\n GL k2 else Г Error!: com= %d  status= %d  counter= %d  sost_CC_K2= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test,p->to_MO3.to41.sost_CC_K2);
+printf("\n M1= %xh\n", p->toPR1[3]);  if (p->toPR1[3]&0x8000) printf("ТВК+\n");
 						}
 						break;
 			}
 			//if (comOK[24]>0) {comOK[24]++;if (comOK[24]>10) {comOK[24]=1;write_com24(24);}}
 		}
+
 		if (kbhit())
 		{
 			getch();
@@ -822,4 +856,3 @@ main(int argc, char *argv[]) {
 	printf("EXIT\n");
 	exit(0);
 }
-

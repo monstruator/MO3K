@@ -11,6 +11,7 @@
 	#endif
 
   #else // ASTRA not defined
+
 		#define IP_ADR	"194.1.1.6"		//PULT
 		#define UPR	"PULT"				//упр-е с ПУЛЬТа
 
@@ -116,34 +117,35 @@ struct ispr_mo3k *ispr;
 	//Angle0=4;
 	//p->jump=-1;
 
-//puts("\n do while(1)\n");
-
 while(1)
 {
-//puts("\n in while(1)\n");
 	//for(i=0;i<sizeof(obmen_41_31_t);i++) bufi[i]=0;
 	bytes = Udp_Client_Read(&Uc41,bufi,4096);
 //	printf(" read=%d size1=%d size2=%d size3=%d sizeALL=%d\n", bytes,sizeof(obmen_42_31_2t),sizeof(obmen_41_31_2t),sizeof(obmen_AK_MN3_MO3K_t),sizeof(obmen_MO3_MO3K_t));
 
-//	printf("SUM_20 = %1.3e  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_20,p->U.RAZN_0,p->U.RAZN_1);
-//	printf("SUM_4 = %1.3e  r0 = % 3.3f  r1 = % 3.3f \n",p->U.SUM_4,p->U.RAZN_0,p->U.RAZN_1);
-
     //memcpy(&p->from_MO3,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 	memcpy(&rec4,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 
-// коррекция АЗИМУТА после получения из МО3 (перед отправкой в А.)
-	rec4.from42.q += rec4.from42.q/20; // коррекция АЗИМУТА
+	rec4.from42.q += rec4.from42.q/20; // коррекция АЗИМУТА после получения из МО3 (перед отправкой в А.)
 
-	//выбор управляюще1 команды
+	//выбор управляющей команды
 	if (rec4.from42.cr_com != cr_com42)
 	{
-		printf("New Command 4.2 = %3d  cr_com New = %3d\n", // cr_com Old = %3d  AC = %1d",
+		printf("\n\nNew Command 4.2 = %3d  cr_com New = %3d\n", // cr_com Old = %3d  AC = %1d",
 				rec4.from42.num_com, rec4.from42.cr_com);	//, cr_com42, rec4.from42.Rejim_AS);
 
 		p->num_com=rec4.from42.num_com;
 		cr_com42=rec4.from42.cr_com;
 		p->from_MO3.from42=rec4.from42;
 		if ((p->num_com==12)||(p->num_com==14)) gloria_count=100;
+		
+		if ((p->num_com>=11)&&(p->num_com<=15)) {
+			p->to_MO3.to42.status_test=1; // команды тестов Глории (ФК) Выполняются
+			if (p->to_MO3.to42.count_test>65000)	p->to_MO3.to42.count_test=1;
+			else									p->to_MO3.to42.count_test++; //надо тут?
+
+printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
+		}
 
 		if (p->num_com==5)
 		{
@@ -151,14 +153,22 @@ while(1)
 			p->M[1]=p->from_MO3.from42.M2;
 			p->M[2]=p->from_MO3.from42.M3&0xFFFE;
 			p->M[3]=p->from_MO3.from42.M4;
-			buf[0]=0;	//переворачиваем управляющие слова пр. 1
+			buf[0]=0;	//переворачиваем управляющие слова пр.1
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[0]>>i1)&1)<<(15-i1);} p->M[0]=buf[0];buf[0]=0;
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[1]>>i1)&1)<<(15-i1);} p->M[1]=buf[0];buf[0]=0;
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[2]>>i1)&1)<<(15-i1);} p->M[2]=buf[0];buf[0]=0;
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[3]>>i1)&1)<<(15-i1);} p->M[3]=buf[0];buf[0]=0;
 		}
-	}
-	if ((rec4.fromAK.cr_com!=cr_comAK)&&(rec4.fromAK.num_com!=0))
+		
+		// #ifdef ASTRA		// автоВкл ТВК для Astra для аналогии с Пультом
+			// if ((p->num_com>=13)&&(p->num_com<=14)) p->M[0] ||= 0x8000;	// вкл. ТВК
+		// #endif
+		
+//	if (p->M[0] & 0x8000) printf("ТВК+\n");
+//	printf("\n\n M[0]= %xh\n\n",p->M[0]);
+	} // if (rec4.from42.cr_com != cr_com42)
+		
+	if ( (rec4.fromAK.cr_com != cr_comAK) && (rec4.fromAK.num_com != 0))
 	{
 		p->num_com=rec4.fromAK.num_com;
 		cr_comAK=rec4.fromAK.cr_com;
@@ -169,6 +179,7 @@ while(1)
 		// printf(" New Command AK = %d, p[0]=%d , cr_com = %d\n",
 				// p->from_MO3.fromAK.num_com,p->from_MO3.fromAK.a_params[0],p->from_MO3.fromAK.cr_com);
 		if ((p->num_com==301)&&(p->num_com==300)) p->M[2]=p->M[2]|0x0001; //РЭЛЕ АК
+
 		bM4=0;
 		paramAKcom=0;
 		switch(p->num_com)
@@ -220,18 +231,17 @@ while(1)
 
 		switch(paramAKcom)
 		{
-			case 1  : p->M[3]=0x8400;break;
-			case 2  : p->M[3]=0x8000;break;
-			case 3  : p->M[3]=0xEC30;break;
-			case 4  : p->M[3]=0xE800;break;
-			case 5  : p->M[3]=(p->M[3]&0xF87F)|(p->from_MO3.fromAK.a_params[0]<<7);break;
-			case 6  : case 12 : p->M[3]=0x9450;break;
-			case 7  : case 13 : p->M[3]=0x8C30;break;
-			case 8  : case 11 : case 14 : p->M[3]=0x8410;break;
-			case 9  : p->M[3]=0x8400;break;
+			case  1 : p->M[3]=0x8400;break;
+			case  2 : p->M[3]=0x8000;break;
+			case  3 : p->M[3]=0xEC30;break;
+			case  4 : p->M[3]=0xE800;break;
+			case  5 : p->M[3]=(p->M[3]&0xF87F)|(p->from_MO3.fromAK.a_params[0]<<7);break;
+			case  6 : case 12 : p->M[3]=0x9450;break;
+			case  7 : case 13 : p->M[3]=0x8C30;break;
+			case  8 : case 11 : case 14 : p->M[3]=0x8410;break;
+			case  9 : p->M[3]=0x8400;break;
 			case 10 : p->M[3]=0x0400;break;
 			case 15 : p->M[3]=0x8210;break;
-
 		}
 		//printf("M=%d\n",paramAKcom);
 	}
@@ -317,18 +327,21 @@ while(1)
 						rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR);
 					break;
 
-				case 12 :  rez = gloriya(1,0,31);//test K1
-							printf("rez = gloriya(1,0,31);//test K1 \n\n");
-						   break;
-				case 14 :  rez = gloriya(1,1,31);//test K2
-						   break;
+				case 12 :	rez = gloriya(1,0,31);//test K1
+							printf("rez = gloriya(1,0,31) = %1d;//test K1 \n\n", rez);
+							break;
+				case 13 :
+				case 14 :	rez = gloriya(1,1,31);//test K2
+							printf("rez = gloriya(1,1,31) = %1d;//test K2 \n\n", rez);
+							break;
 
-			   default : rez = gloriya(1,0,31);//test K1
-						 //printf("rez = gloriya(1,0,31);//test K1 \n\n");//mode_gl = (mode_gl==1) ? 0 : 1;
+				default : rez = gloriya(1,0,31);//test K1
+						//printf("rez = gloriya(1,0,31);//test K1 \n\n");//mode_gl = (mode_gl==1) ? 0 : 1;
 						//rez = gloriya(1,mode_gl,31);//test K
 						//printf("def: rez = gloriya(1, %d, 31) = %d;//test K%d \n\n", mode_gl,rez,(mode_gl+1));
 			}
 
+			//ispr->gl = (rez==1) ? 0 : 1;
 			if (rez) ispr->gl=0;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;
 			else 	 ispr->gl=1;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 
@@ -497,9 +510,3 @@ while(1)
 
 
 }
-
-
-
-
-
-

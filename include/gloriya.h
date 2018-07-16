@@ -95,20 +95,26 @@ rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 
 sleep(1);
 
-msg_i.type=GET_IN; 
+msg_i.type=GET_IN;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
+
 printf("‚å. á¨£­ «ë=%x   ", msg_o.inp_r.u_inp.i_d);
 printf("ˆ‘-Š=%x ˆ-Š=%x ˆ-=%x ƒ®â®¢=%x   ",msg_o.inp_r.u_inp.st_in.ISPR_K, 
 msg_o.inp_r.u_inp.st_in.NI_K, msg_o.inp_r.u_inp.st_in.NI_R,
 msg_o.inp_r.u_inp.st_in.SOI_RDy);
 
 #ifndef ASTRA
-	if (k_r==31) k_r=15; //¤«ï á®¢¯ ¤¥­¨ï ª«îç  ¨ à¥§ã«ìâ â  ¢ ª®­âà®«¥
+//	if (k_r==31) k_r=15; //¤«ï á®¢¯ ¤¥­¨ï ª«îç  ¨ à¥§ã«ìâ â  ¢ ª®­âà®«¥ (¤«ï ƒ®àèª®¢ )
+//	printf("\ntmp: not ASTRA : k_r= %d\n",k_r);// tmp
 #endif
-//printf("%d %d\n",(msg_o.inp_r.u_inp.i_d>>8)&0xff,msg_o.inp_r.u_inp.i_d>>16);
-if ((((msg_o.inp_r.u_inp.i_d>>8)&0xff)==9)	&&	((msg_o.inp_r.u_inp.i_d>>16)==k_r)) {printf("ƒ«®à¨ï ­®à¬ \n");return(1);}
-else {printf("ƒ«®à¨ï ­¥ ­®à¬ \n");return(0);}
 
+if ( ( ( (msg_o.inp_r.u_inp.i_d >> 8) & 0xff) == 9)	&& ( (msg_o.inp_r.u_inp.i_d >> 16) == k_r) ) 
+{		printf("ƒ«®à¨ï ­®à¬ \n");		i=1; }
+else {	printf("ƒ«®à¨ï ­¥ ­®à¬ \n");	i=0; }
+
+//printf("\ntmp: %d %d k_r= %d\n",(msg_o.inp_r.u_inp.i_d>>8)&0xff,msg_o.inp_r.u_inp.i_d>>16,k_r);// tmp
+
+return(i);
 //return(msg_o.inp_r.u_inp.i_d);
 }
 
