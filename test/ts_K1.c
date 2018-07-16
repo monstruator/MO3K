@@ -15,7 +15,7 @@
 #include <fcntl.h>
 #include <sys/dev.h>
 #include "ts.h"
-#include "my_pcs.h"
+#include "../include/my_pcs.h" // "my_pcs.h"
 
 char test_K1[5][4]={{0x9F, 0x08},
 					{0xB8, 0x00, 0x00, 0x40},
@@ -141,13 +141,13 @@ oopen();
 	{
 		printf("otv OK \n");
 		printf("CVS3.1 - A\n");
-	    system("cvs_a");
+	    system("//9/home/cvs_a");
 	}
 	else 
 	{
 		printf("otv not OK \n");
 		printf("CVS3.1 - B\n");
-		system("cvs_b");
+		system("//9/home/cvs_b");
 	}
 //------------------------------------
 

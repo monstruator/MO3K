@@ -11,7 +11,11 @@
 void main(int argc, char *argv[])
 {
 printf("module a start\n");
-delay(500);
+delay(1000);
+
+system("//9/bin/devu-ft245 -b 200 -p 20 &");
+system("//9/home/KRK12P &");
+
 system("//9/home/m3 &");
 system("//9/home/obmen_MO3 &");
 system("//9/home/k1 &");
