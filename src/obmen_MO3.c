@@ -12,8 +12,8 @@
 
   #else // ASTRA not defined
 
-		#define IP_ADR	"194.1.1.6"		//PULT
-		#define UPR	"PULT"				//упр-е с ПУЛЬТа
+		#define IP_ADR	"194.1.1.6"	//PULT
+		#define UPR	"PULT"			//упр-е с ПУЛЬТа
 
 	#define SRC_PORT41 8208
 	#define DST_PORT41 8208

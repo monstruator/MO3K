@@ -1,4 +1,4 @@
-//--- Ynoc K1 ---// 21.06.11
+//--- Ynoc K1 --- // 21.06.11
 #include <unistd.h>
 #include <sys/osinfo.h>
 #include <time.h>

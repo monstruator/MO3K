@@ -13,7 +13,7 @@
 #define CVS_NODE 9
 #define CVS_NODE_STEND 2
 #define TIME 3
-//#define PARENT_NODE 1
+//#define PARENT_NODE  1
 //#define IND_BU 0x4255  //Žâ ts_usoi_pr_BU
 //#define IND_R999 0x9099 //Žâ ts_usoi_pr_P
 

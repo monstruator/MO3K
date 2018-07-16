@@ -10,7 +10,7 @@
 #include "IO_DT_SOI.h"
 int current_key=0;
 
-//*********************************************************************
+//********************************************************************
 int gloriya(UN char work, UN char mode, UN char k_r) {
 
 UN char k_1r, k_2r, k_3r, k_4r, k_5r;

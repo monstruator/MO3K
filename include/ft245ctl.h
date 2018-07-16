@@ -11,7 +11,7 @@
 
 #include <ioctl.h>
 
-#define IOCTL_FT245_FIFO_RESET			  _IO( 'T', 1 )						// reset device and driver rx buffer
+#define IOCTL_FT245_FIFO_RESET			  _IO( 'T', 1 )			// reset device and driver rx buffer
 #define IOCTL_FT245_RXSTATUS			  _IOR( 'T', 2, unsigned long )     // get number of bytes currently in the driver rx buffer
 #define IOCTL_FT245_RXTIMEOUT			  _IOW( 'T', 3, unsigned long )     // set read timeout in ms
 #define IOCTL_FT245_GETLATENCY			  _IOR( 'T', 4, unsigned char )     // get device latency timer value

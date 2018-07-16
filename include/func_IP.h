@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 
 #if (LONG_MAX !=0x7fffffffUL)
-#error "Unsupported platform, using long type isn't 32 bits"
+#error "Unsupported platform, using long type isn't 32 bits "
 #endif
 
 //=====================================================================================
