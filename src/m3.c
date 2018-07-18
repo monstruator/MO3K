@@ -239,7 +239,7 @@ for(;;)//----- CEPBEP -----//
 		if (SIMF[2]==60000) SIMF[2]=0;
 
 		i=Read_ModB(); //читаем данные из Мод Б
-		//if (i!=48) break; //если не целый пакет - выход
+		if (i!=48) break; //если не целый пакет - выход
 
 		ispr->nkB  = (Din_ModB[1]==1) ? 0 : 1; //признак наличия HK  в Мод Б
 		ispr->sevB = (Din_ModB[2]==1) ? 0 : 1; //признак наличия CEB в Мод Б
@@ -509,8 +509,8 @@ for(;;)//----- CEPBEP -----//
 		//-------------------------- 1 Pr -------------------------
 		for(i=0;i<8;i++) toPR1[i]=p->toPR1[i];
 
-		//for(i=0;i<3;i++) printf("  %x",p->toPR1[i]);	printf("   to  \n"); // коды углов -> в А.
-		//printf("  UMto=%x",p->toPR1[2]);
+	//for(i=0;i<3;i++) printf("  %x",p->toPR1[i]);	printf("   to  \n"); // коды углов -> в А.
+	//printf("  UMto=%x",p->toPR1[2]);
 		//for(i=3;i<4;i++) printf("  %x",p->toPR1[i]);printf("   to  \n");
 		//printf("toPR1=%x from42=%f\n",toPR1[2],p->from_MO3.from41.beta);
 
