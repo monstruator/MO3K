@@ -1,4 +1,4 @@
-//tx_common.h 
+//tx_common.h
 #define LED 0x326
 
 #define N_B 1200

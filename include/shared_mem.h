@@ -1,17 +1,17 @@
- #include "headers.h" 
- #include "obmen_VS_MO3K.h"
- #define MAX_SHMEM_COUNT 20
+#include "../include/headers.h"
+#include "../include/obmen_VS_MO3K.h"
 
-#define  SHMEM_NAME  "PR31v10" //z
-#define  SHMEM_t  SHMEM_31
+#define	MAX_SHMEM_COUNT	20
+#define	SHMEM_NAME		"PR31v10" //z
+#define	SHMEM_t			SHMEM_31
 
-SHMEM_31 *p;      
+SHMEM_31 *p;
 
 int	create_shmem ( void )
 	{
 	int 	i1;
 	int		result;
-	
+
 	shm_unlink ( SHMEM_NAME );			// Закрытие ранее созданного ОПП
 
 	i1 = shm_open ( SHMEM_NAME, O_RDWR | O_CREAT, 0777 );
@@ -27,7 +27,7 @@ int	create_shmem ( void )
 		printf ("error ltrunc ( i1, %d, SEEK_SET ) = %s \n", sizeof(SHMEM_t), strerror(errno));
 		return ( -2 );				// Аварийный выход
 		}
-		
+
 	p = (SHMEM_t*) mmap ( 0, sizeof(SHMEM_t), PROT_READ|PROT_WRITE, MAP_SHARED, i1, 0);
 	if ( p == NULL )
 		{
@@ -46,13 +46,13 @@ int	open_shmem ( void )
 		{
 		i1 = shm_open ( SHMEM_NAME, O_RDWR, 0777 );
 		if ( i1 == -1 )
-			{ 
+			{
 			printf ("errno shm_open( %s, O_RDWR, 0777 ) = %s, count = %d \n", SHMEM_NAME, strerror(errno), countS );
 			delay ( 200 );
 			countS++;
 			}
 		}
-		
+
 	if ( countS >= MAX_SHMEM_COUNT )
 		{
 		printf ("errno shm_open( %s, O_RDWR, 0777 ) = %s\n", SHMEM_NAME, strerror(errno));
@@ -67,4 +67,4 @@ int	open_shmem ( void )
 		}
 	return ( 0 );					// Корректный выход
 	}
-	
+

@@ -1,4 +1,4 @@
-//tx_drv.h 
+//tx_drv.h
 //файл tx_drv.h подключается к пользовательской программе. 
 #include <stdio.h>
 #include <fcntl.h>

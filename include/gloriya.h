@@ -7,10 +7,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/dev.h>
-#include "IO_DT_SOI.h"
+#include "../include/IO_DT_SOI.h"
+
 int current_key=0;
 
-//********************************************************************
+//*********************************************************************
 int gloriya(UN char work, UN char mode, UN char k_r) {
 
 UN char k_1r, k_2r, k_3r, k_4r, k_5r;
@@ -26,7 +27,7 @@ k_4r=(k_r>>3)&1; k_5r=(k_r>>4)&1;
 //printf("work=%d  mode=%d  K_1R=%d  K_2R=%d  K_3R=%d  K_4R=%d  K_5R=%d\n",
 //work, mode, k_1r, k_2r, k_3r, k_4r, k_5r);
 
-//определяем наличие сервера разовых сигналов 
+//определяем наличие сервера разовых сигналов
 pid_O=qnx_name_locate(0,"MS_SOI_IO", 0, NULL);
 if(pid_O==-1) {
 	printf("Драйвер разовых сигналов не готов!\n");
@@ -42,7 +43,7 @@ rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 //разрешить вых. буфера ПОСТ
 	    msg_i.type=ED_B_POST; // вых. буфер ПОСТ
 //	    msg_i.type=ED_B_OUT; // вых. буфер
-	    msg_i.act_s.t_act=ON; 
+	    msg_i.act_s.t_act=ON;
 	    rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 //printf("Разрешение вых. буфера ПОСТ = %d\n", rez1);
 
@@ -99,20 +100,17 @@ msg_i.type=GET_IN;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 
 printf("Вх. сигналы=%x   ", msg_o.inp_r.u_inp.i_d);
-printf("ИСПР-К=%x НИ-К=%x НИ-Р=%x Готов=%x   ",msg_o.inp_r.u_inp.st_in.ISPR_K, 
+printf("ИСПР-К=%x НИ-К=%x НИ-Р=%x Готов=%x   ",msg_o.inp_r.u_inp.st_in.ISPR_K,
 msg_o.inp_r.u_inp.st_in.NI_K, msg_o.inp_r.u_inp.st_in.NI_R,
 msg_o.inp_r.u_inp.st_in.SOI_RDy);
 
-#ifndef ASTRA
+//#ifndef ASTRA
 //	if (k_r==31) k_r=15; //для совпадения ключа и результата в контроле (для Горшкова)
-//	printf("\ntmp: not ASTRA : k_r= %d\n",k_r);// tmp
-#endif
+//#endif
 
-if ( ( ( (msg_o.inp_r.u_inp.i_d >> 8) & 0xff) == 9)	&& ( (msg_o.inp_r.u_inp.i_d >> 16) == k_r) ) 
+if ( ( ( (msg_o.inp_r.u_inp.i_d >> 8) & 0xff) == 9)	&& ( (msg_o.inp_r.u_inp.i_d >> 16) == k_r) )
 {		printf("Глория норма\n");		i=1; }
 else {	printf("Глория не норма\n");	i=0; }
-
-//printf("\ntmp: %d %d k_r= %d\n",(msg_o.inp_r.u_inp.i_d>>8)&0xff,msg_o.inp_r.u_inp.i_d>>16,k_r);// tmp
 
 return(i);
 //return(msg_o.inp_r.u_inp.i_d);
@@ -126,7 +124,7 @@ int i, rez=0, err=0, rez1=0;
 
 if (current_key==0) return(1);
 
-//определяем наличие сервера разовых сигналов 
+//определяем наличие сервера разовых сигналов
 pid_O=qnx_name_locate(0,"MS_SOI_IO", 0, NULL);
 if(pid_O==-1) {
 	printf("Драйвер разовых сигналов не готов!\n");
@@ -142,7 +140,7 @@ rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 //разрешить вых. буфера ПОСТ
 	    msg_i.type=ED_B_POST; // вых. буфер ПОСТ
 //	    msg_i.type=ED_B_OUT; // вых. буфер
-	    msg_i.act_s.t_act=ON; 
+	    msg_i.act_s.t_act=ON;
 	    rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 //printf("Разрешение вых. буфера ПОСТ = %d\n", rez1);
 
@@ -153,13 +151,13 @@ rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 */
 //sleep(300);
 
-msg_i.type=GET_IN; 
+msg_i.type=GET_IN;
 rez1=Send(pid_O, &msg_i, &msg_o, sizeof(msg_i),sizeof(msg_o));
 printf("Вх. сигналы=%x\n", msg_o.inp_r.u_inp.i_d);
-printf("ИСПР-К=%x НИ-К=%x НИ-Р=%x Готов=%x\n",msg_o.inp_r.u_inp.st_in.ISPR_K, 
+printf("ИСПР-К=%x НИ-К=%x НИ-Р=%x Готов=%x\n",msg_o.inp_r.u_inp.st_in.ISPR_K,
 msg_o.inp_r.u_inp.st_in.NI_K, msg_o.inp_r.u_inp.st_in.NI_R,
 msg_o.inp_r.u_inp.st_in.SOI_RDy);
- 
+
 if ((((msg_o.inp_r.u_inp.i_d>>8)&0xff)==9)	&&	((msg_o.inp_r.u_inp.i_d>>16)==current_key)) {printf("Глория норма\n");return(1);}
 else {printf("Глория не норма\n");return(0);}
 

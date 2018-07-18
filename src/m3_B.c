@@ -1,4 +1,4 @@
-//----- M3_B.c -----// 12.04.18
+//----- M3_B.c -----//  12.04.18
 //----- np.3.1 u3g.3u30.0: y3.A->y3.B  -----//
 //----- CEPBEP -----//
 #include <unistd.h>
@@ -142,7 +142,7 @@ for(;;)//----- CEPBEP -----//
 		if((dev->tx_B[3])!=32)  {owu6ka|=512;printf("error: read= %d\n",dev->tx_B[3]);break;}
 
 //		#ifdef ASTRA
-			if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки
+		if((dev->tx_B[1])!=0x11)  break; //адрес кормовой качки (сейчас одинаковый для ASTRA и Пульта)
 //		#else
 //			if((dev->tx_B[1])!=0x12)  break; //адрес кормовой качки
 //		#endif

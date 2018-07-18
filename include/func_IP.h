@@ -11,7 +11,7 @@
 #include <arpa/inet.h>
 
 #if (LONG_MAX !=0x7fffffffUL)
-#error "Unsupported platform, using long type isn't 32 bits "
+#error "Unsupported platform, using long type isn't 32 bits"
 #endif
 
 //=====================================================================================
@@ -27,10 +27,10 @@ typedef struct
           int y;          //состояние клиента
           char *serv_name;//указатель на имя сервера
           struct hostent *host;    //указатель для поиска
-                                  //IP-адреса по имени сервера 
+                                  //IP-адреса по имени сервера
           struct sockaddr_in serv;      //адрес сервера
-          struct sockaddr_in serv_from; //адрес, по которому слушаем 
-          struct sockaddr_in from;      //адрес, откуда фактически получили 
+          struct sockaddr_in serv_from; //адрес, по которому слушаем
+          struct sockaddr_in from;      //адрес, откуда фактически получили
          }Udp_Client_t;
 //=====================================================================================
 //=============   функции  приемо-передачи сервера и клиента   ========================
@@ -41,7 +41,7 @@ int Udp_Client_Ini(Udp_Client_t *Uc,char *serv_name,int port_out,int port_inp)
  {
   int broadcast;
   int dl;
-  int x; 
+  int x;
   Uc->port_out=port_out;
   Uc->port_inp=port_inp;
   Uc->y=1;
@@ -49,7 +49,7 @@ int Udp_Client_Ini(Udp_Client_t *Uc,char *serv_name,int port_out,int port_inp)
   Uc->soc=socket(AF_INET,SOCK_DGRAM,0);
   if(Uc->soc<0)Uc->y=-1; //неудача при создании socket-а
   else
-    {//socket создан  
+    {//socket создан
      Uc->host=(struct hostent*)gethostbyname(Uc->serv_name);
      if(Uc->host==NULL)
       {//неудача при определении IP адреса
@@ -81,7 +81,7 @@ int Udp_Client_Ini(Udp_Client_t *Uc,char *serv_name,int port_out,int port_inp)
     if(x<0)
      {//неудача при назначении порта
       printf("Udp_Client_Ini : bind(...)=%d\n",x);
-      fflush(stdout); 
+      fflush(stdout);
       Uc->y=-4;
      }//неудача при назначении порта
      else
@@ -91,14 +91,14 @@ int Udp_Client_Ini(Udp_Client_t *Uc,char *serv_name,int port_out,int port_inp)
 //      printf("gethostname=%d\n",x);
 //      printf("Udp_Client_Ini fr_port=%d\n",ntohs(Uc->serv_from.sin_port));
 //      fflush(stdout);
-     }//порт назначен нормально     
+     }//порт назначен нормально
      }//настройка приемника
   return(Uc->y);
  }
 //---------------------------------------------------
 int Udp_Client_Send(Udp_Client_t *Uc,void *otkuda,int skolko)
  {
-  int x; 
+  int x;
 //  if((otkuda!=NULL)&&(skolko<=UDP_KADR_MAX)&&(skolko>0))
   if((otkuda!=NULL)&&(skolko>0))
    {//данные корректны, можно передавать
@@ -116,7 +116,7 @@ int Udp_Client_Read(Udp_Client_t *Uc,void *kuda,int limit)
        dfr=sizeof(Uc->serv_from);
        memcpy(&Uc->from,&Uc->serv_from,sizeof(Uc->serv_from));
        x=recvfrom(Uc->soc,kuda,limit,0,(struct sockaddr*)&Uc->from,&dfr);
-     //  printf("sin_port=%d\n",ntohs(Uc->from.sin_port)); 
+     //  printf("sin_port=%d\n",ntohs(Uc->from.sin_port));
 //      printf("Udp_Client_Read from_addr=%d\n",ntohs(Uc->from.sin_addr.s_addr));
      //  fflush(stdout);
      }//ожидание пакета по UDP
@@ -125,8 +125,8 @@ int Udp_Client_Read(Udp_Client_t *Uc,void *kuda,int limit)
     printf("Udp_Client_Read: ожидание данных от ненастроенного приемника\n");
     fflush(stdout);
     delay(1000);
-    x=0;   
-  }//приемник не настроен 
+    x=0;
+  }//приемник не настроен
   return(x);
  }//блокирующее чтение ответа
 //-----------------------------------------------------

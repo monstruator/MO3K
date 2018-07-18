@@ -12,8 +12,8 @@
 
   #else // ASTRA not defined
 
-		#define IP_ADR	"194.1.1.6"	//PULT
-		#define UPR	"PULT"			//упр-е с ПУЛЬТа
+		#define IP_ADR	"194.1.1.6"		//PULT
+		#define UPR	"PULT"				//упр-е с ПУЛЬТа
 
 	#define SRC_PORT41 8208
 	#define DST_PORT41 8208
@@ -62,11 +62,11 @@
 	pid_t pid_CEP;
 	short MK2[15];
 	short byta2,T,len_OUT,sen,j,indx=0;
-    div_t   vol;    // vol.quot - количество полных томов
-    char				pack_buf[1500];  // буфер задачи obm_41_31. Выходные данные в Socket
-    char                mode_gl; // режим gloriya
-						numb_pack,     // текущий номер пакета
-						numb_vol;      // текущий номер тома в пакете
+    div_t	vol;	// vol.quot - количество полных томов
+    char	pack_buf[1500];	// буфер задачи obm_41_31. Выходные данные в Socket
+    char	mode_gl,		// режим gloriya
+			numb_pack,		// текущий номер пакета
+			numb_vol;		// текущий номер тома в пакете
 
 	struct {
 		char	out_buf[max_len_OUT];  // данные для Socket'a
@@ -85,12 +85,10 @@ unsigned short buf[4];
 float Angle0;
 struct ispr_mo3k *ispr;
 
- printf("\n Управление: %s  ", UPR);
-
 //инициализация канала UDP
+ printf("\n Управление: %s  ", UPR);
  i = Udp_Client_Ini(&Uc41,IP_ADR,SRC_PORT41,DST_PORT41);
-
- printf("IP= %s  obmen_MO3:  Udp_Init=%d	\n\n", IP_ADR, i);
+ printf("IP= %s  obmen_MO3:  Udp_Init= %d\n", IP_ADR, i);
 
  C1=2048./pi;	C2=4096.0/360.0;	C3=180./pi;	C4=C1*Kncu;
  C5=C2*Kncu;	C6=C1*Kq;			C7=C3;		C8=C2*Kq;
@@ -98,14 +96,10 @@ struct ispr_mo3k *ispr;
 //поиск сервера
 //qnx_name_attach(0,"4.1");
 
-	//gloriya(1,1,31);//test K2 по умолчанию
-	//gloriya(1,1,1);//work K2
-	//gloriya(1,0,2);//work K1
-	//gloriya(1,1,31);//test K2 по умолчанию
-
 	delay(2000);
 	open_shmem();
 	delay(1000);
+	printf("\n Obmen_MO3 Start\n\n");
 
 	memset(&p->to_MO3,0,sizeof(obmen_MO3K_MO3_t));
 
@@ -131,15 +125,17 @@ while(1)
 	//выбор управляющей команды
 	if (rec4.from42.cr_com != cr_com42)
 	{
-		printf("\n\nNew Command 4.2 = %3d  cr_com New = %3d\n", // cr_com Old = %3d  AC = %1d",
+		printf("\nNew Command 4.2 = %3d  cr_com New = %3d\n", // cr_com Old = %3d  AC = %1d",
 				rec4.from42.num_com, rec4.from42.cr_com);	//, cr_com42, rec4.from42.Rejim_AS);
 
 		p->num_com=rec4.from42.num_com;
 		cr_com42=rec4.from42.cr_com;
 		p->from_MO3.from42=rec4.from42;
+
 		if ((p->num_com==12)||(p->num_com==14)) gloria_count=100;
-		
-		if ((p->num_com>=11)&&(p->num_com<=15)) {
+
+		if ((p->num_com>=11)&&(p->num_com<=15))
+		{
 			p->to_MO3.to42.status_test=1; // команды тестов Глории (ФК) Выполняются
 			if (p->to_MO3.to42.count_test>65000)	p->to_MO3.to42.count_test=1;
 			else									p->to_MO3.to42.count_test++; //надо тут?
@@ -159,15 +155,8 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[2]>>i1)&1)<<(15-i1);} p->M[2]=buf[0];buf[0]=0;
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[3]>>i1)&1)<<(15-i1);} p->M[3]=buf[0];buf[0]=0;
 		}
-		
-		// #ifdef ASTRA		// автоВкл ТВК для Astra для аналогии с Пультом
-			// if ((p->num_com>=13)&&(p->num_com<=14)) p->M[0] ||= 0x8000;	// вкл. ТВК
-		// #endif
-		
-//	if (p->M[0] & 0x8000) printf("ТВК+\n");
-//	printf("\n\n M[0]= %xh\n\n",p->M[0]);
 	} // if (rec4.from42.cr_com != cr_com42)
-		
+
 	if ( (rec4.fromAK.cr_com != cr_comAK) && (rec4.fromAK.num_com != 0))
 	{
 		p->num_com=rec4.fromAK.num_com;
@@ -341,10 +330,7 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 						//printf("def: rez = gloriya(1, %d, 31) = %d;//test K%d \n\n", mode_gl,rez,(mode_gl+1));
 			}
 
-			//ispr->gl = (rez==1) ? 0 : 1;
-			if (rez) ispr->gl=0;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;
-			else 	 ispr->gl=1;//p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
-
+			ispr->gl = (!rez) ? 1 : 0;	//	ispr->gl = (rez==1) ? 0 : 1;
 			gloria_count=0;
 	}
 
@@ -469,7 +455,7 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 
 // коррекция АЗИМУТА перед передачей на Пульт
 	p->to_MO3.to42.q -= p->to_MO3.to42.q * 0.0475; // при q=180гр -> 180.0гр
-//	p->to_MO3.to42.q -= p->to_MO3.to42.q * 0.0459; // идёт подбор под 10гр
+	//printf("Az korr = % 6.2f\n", p->to_MO3.to42.q);
 
 //////////////////////////////////////////////////////////////////////
   	len_OUT = sizeof(obmen_MO3K_MO3_t); //!!!!
@@ -503,10 +489,8 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
          }
 
          for (j = 0; j<vol.rem; j++) pack_buf[j+4] = ip_out.out_buf[(1400*(vol.quot))+j];
-          Udp_Client_Send(&Uc41,pack_buf,(vol.rem + 4));
+         Udp_Client_Send(&Uc41,pack_buf,(vol.rem + 4));
     }
           numb_pack ++;
   }
-
-
 }

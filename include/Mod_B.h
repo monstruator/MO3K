@@ -1,4 +1,4 @@
-//--- Ynoc K1 --- // 21.06.11
+//--- Ynoc K1 ---// 21.06.11
 #include <unistd.h>
 #include <sys/osinfo.h>
 #include <time.h>
@@ -10,6 +10,7 @@
 #include <sys/dev.h>
 #include "../include/my_pcs.h"
 #include "../include/shared_mem.h"
+
 #define TIMEOUT 500
 
 //-------k2----

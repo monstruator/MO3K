@@ -1,7 +1,7 @@
-/*************************************************************************** 
+/***************************************************************************
  *                                                                         *
  * File      : read_ft245.c                                                *
- * Comment   : devu-ft245 test program                                     * 
+ * Comment   : devu-ft245 test program                                     *
  * Copyright : (c) CBD BC, 2011                                            *
  *                                                                         *
  ***************************************************************************/
@@ -21,10 +21,10 @@ Options are:
    -l                  Set device latency in msec (range 2-255).
    -s psize            Set packet size. Default 4096.
    -p num              Number of packets to read. Default 1.
-   -t 				   Test mode	
-	
+   -t 				   Test mode
+
 Examples:
-    read_ft245 
+    read_ft245
     read_ft245 -f /home /data.dat -n
     read_ft245 -d /dev/ft245 -f /home/data.dat -s 1024 -p 8
     read_ft245  -t 6000 -s 8192 -l50
@@ -67,20 +67,20 @@ int get_dev_info( int fd )
 {
 	struct _dev_info_entry		info;
 	int							ret = 0;
-	
+
 	if ( dev_info( fd, &info ) == 0 ) {
 		printf( "Dev Info form ft245rl driver:\n" );
 		printf( "  Driver nid :%d\n", info.nid  );
 		printf( "  Driver pid :%d\n", info.driver_pid  );
 		printf( "  Open count :%d\n", info.open_count  );
 		printf( "  Driver type :%s\n", info.driver_type );
-		printf( "  Driver prefix :%s\n", info.tty_name ); 
+		printf( "  Driver prefix :%s\n", info.tty_name );
 	}
 	else {
 		fprintf( stderr, "dev_info() failed. %s\n", strerror( errno ) );
 		ret = -1;
 	}
-	
+
 	return ( ret );
 }
 
@@ -90,7 +90,7 @@ int set_rx_timeout( int fd, unsigned long tval )
 		fprintf( stderr, "qnx_ioctl(IOCTL_FT245_FIFO_RXTIMEOUT) is failed. %s\n", strerror( errno ) );
 		return ( -1 );
 	}
-	
+
 	printf( "Set rx timeout timer to %ldms\n", tval );
 	return ( 0 );
 }
@@ -101,19 +101,19 @@ int set_latency( int fd, unsigned char latency )
 		fprintf( stderr, "qnx_ioctl(IOCTL_FT245_FIFO_SETLATENCY) is failed. %s\n", strerror( errno ) );
 		return ( -1 );
 	}
-	
+
 	return ( 0 );
 }
 
 unsigned char get_latency( int fd )
 {
 	unsigned char 	latency;
-	
+
 	if ( qnx_ioctl( fd, IOCTL_FT245_GETLATENCY, NULL, 0, &latency, sizeof(latency) ) == -1 ) {
 		fprintf( stderr, "qnx_ioctl(IOCTL_FT245_FIFO_SETLATENCY) is failed. %s\n", strerror( errno ) );
 		return ( -1 );
 	}
-	
+
 	return ( latency );
 }
 
@@ -121,14 +121,14 @@ unsigned char get_latency( int fd )
 int reset_device( int fd )
 {
 	unsigned long		in_buf;
-	
+
 	if ( qnx_ioctl( fd, IOCTL_FT245_RXSTATUS, NULL, 0,
 					&in_buf, sizeof(in_buf) ) == -1 ) {
 		fprintf( stderr, "qnx_ioctl(IOCTL_FT245_RXSTATUS) is failed. %s\n", strerror( errno ) );
 	}
 	else
 		printf( "In driver rx buffer before reset: %d bytes\n", in_buf );
-	
+
 	if ( qnx_ioctl( fd, IOCTL_FT245_FIFO_RESET, NULL, 0,
 					NULL, 0 ) == -1 ) {
 		fprintf( stderr, "qnx_ioctl(IOCTL_FT245_FIFO_RESET) is failed. %s\n", strerror( errno ) );
@@ -166,21 +166,21 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 	}
 
 	//if (TM)
-	//	if ( ( out_fp = fopen( "//1/home/user/mo3k/src/usb_log", "w" ) ) == NULL ) 
+	//	if ( ( out_fp = fopen( "//1/home/user/mo3k/src/usb_log", "w" ) ) == NULL )
 	//		fprintf( stderr, "Couldn't create/open file %s. %s\n", fname, strerror( errno ) );
-	
 
-	while (i) 
+
+	while (i)
 	{
 		delay(100);
 		if ( qnx_ioctl( fd, IOCTL_FT245_RXSTATUS, NULL, 0,
-					&in_buf, sizeof(in_buf) ) == -1 ) 
+					&in_buf, sizeof(in_buf) ) == -1 )
 		fprintf( stderr, "qnx_ioctl(IOCTL_FT245_RXSTATUS) is failed. %s\n", strerror( errno ) );
-		else 
-			if ( in_buf > 0 ) 
+		else
+			if ( in_buf > 0 )
 			{	//printf("in_buf=%d\n",in_buf);
 				//if ((in_buf+ret)>SUM_DCP_K2*2) in_buf=SUM_DCP_K2*2 - ret; //обрежем лишнее
-				if ( ( ret = read( fd, data_buff, in_buf ) ) == -1 ) 
+				if ( ( ret = read( fd, data_buff, in_buf ) ) == -1 )
 					fprintf( stderr, "read() error. %s\n", strerror( errno ) );
 				else //если прочитали данные
 				{
@@ -191,9 +191,9 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 					if (TM) printf("sum_ret=%d   p->to_MO3.to41.sost_CC_K2= %d\n",sum_ret,p->to_MO3.to41.sost_CC_K2);
 				}
 			}
-		
+
 		//if (kbhit()&&TM) i=0;
-		
+
 		priem++;	//не было приема 4 cek
 
 		if ((priem>40)&&(sum_ret>0)) //{printf("reset\n");priem=0;reset_device(fd);}
@@ -205,14 +205,14 @@ int read_data_nonblock1( int fd, unsigned long psize, unsigned long npackets, ch
 			{
 				if (sum_ret>SUM_DCP_K2*2) sum_ret=SUM_DCP_K2*2; //обрежем лишнее
 		    	memcpy(&p->to_MO3.to41.DCP_K2,&DCP_K2,sum_ret);
-				p->to_MO3.to41.sum_DCP=sum_ret/2;			
+				p->to_MO3.to41.sum_DCP=sum_ret/2;
 				p->to_MO3.to41.cr_SEANCE++;
-				printf("Сформирован массив К2 N%d. Кол-во данных %d слов\n",p->to_MO3.to41.cr_SEANCE,p->to_MO3.to41.sum_DCP);				
+				printf("Сформирован массив К2 N%d. Кол-во данных %d слов\n",p->to_MO3.to41.cr_SEANCE,p->to_MO3.to41.sum_DCP);
 			}
 			sum_ret=0;
 			printf("Очистка массива\n");
 		}
-		delay(300);	
+		delay(300);
 	}
 	printf( "\n" );
 	free( data_buff );
@@ -238,7 +238,7 @@ int main( int argc, char *argv[] )
 	oparams.verbose = 0;
 	oparams.reset = 0;
 	oparams.latency = 0;
-	
+
 	while ( ( c = getopt( argc, argv, "d:f:nivrs:p:t:l:" ) ) != -1 ) {
 		switch( c )  {
 			case 'd':
@@ -281,10 +281,11 @@ int main( int argc, char *argv[] )
 		}
 	}
 
-	printf( "read_ft245 test program is started\n" );	
+	//printf( "read_ft245 test program is started\n" );
 	delay(5000);
 	open_shmem();
-//delay(5000);
+	//delay(5000);
+	printf("\n Read_ft245 Start\n" );
 
 #ifdef ASTRA
 	printf("\nASTRA ON!!!\n\n");
@@ -292,34 +293,34 @@ int main( int argc, char *argv[] )
 
 	// open device in block or nonblock mode
 	oflag = O_RDONLY | O_NONBLOCK;
-		
+
 	if ( ( fd = open( oparams.dev_name, oflag ) ) == -1 ) {
 		fprintf( stderr, "open() failed. %s\n", strerror( errno ) );
 		return ( -1 );
 	}
-	
+
 	//if ( oparams.reset )		reset_device( fd );
 
-	if ( oparams.devinfo ) 
+	if ( oparams.devinfo )
 		get_dev_info( fd );
-	
+
 	// timeout test
-	if ( oparams.rx_timeout ) 
+	if ( oparams.rx_timeout )
 		set_rx_timeout( fd, oparams.rx_timeout );
 
-	if ( oparams.latency ) 
-		set_latency( fd, oparams.latency ); 
-	
+	if ( oparams.latency )
+		set_latency( fd, oparams.latency );
+
 	printf( "Device latency time is %d\n", get_latency( fd ) );
-	
-	//if ( oparams.reset )	
+
+	//if ( oparams.reset )
 	//reset_device( fd );
-	
+
 	printf( "Start data read. \n");
 
 	read_data_nonblock1( fd, oparams.psize, oparams.npackets, oparams.fname );
-	
-	printf( "read_ft245 test program is finished %d\n",sum_ret );	
+
+	printf( "read_ft245 test program is finished %d\n",sum_ret );
 
 	close( fd );
 	return( 0 );

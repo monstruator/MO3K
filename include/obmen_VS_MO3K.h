@@ -1,5 +1,5 @@
-#include "obmenVS_AK_MO3K.h" 
-#include "obmen_220113.h"
+#include "../include/obmenVS_AK_MO3K.h"
+#include "../include/obmen_220113.h"
 
 #define PI			3.14159
 #define NAVtoRAD	PI/(65356)
