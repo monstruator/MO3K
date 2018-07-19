@@ -414,9 +414,10 @@ for(;;)//----- CEPBEP -----//
 					if (p->to_MO3.to41.UR_sign_K1 > 49) // 39
 					{
 				// €‘ ¯® €§¨¬ãâã:
-						if ((fabs(p->U.RAZN_0) > 0.3) && (old_RAZN_0 != p->U.RAZN_0))
+						//if ((fabs(p->U.RAZN_0) > 0.3) && (old_RAZN_0 != p->U.RAZN_0))
+						if (fabs(p->U.RAZN_0) > 0.3)	// && (fabs(p->U.RAZN_0) < 3)
 						{
-							old_RAZN_0 = p->U.RAZN_0;
+							//old_RAZN_0 = p->U.RAZN_0;
 
 							A1 = p->U.RAZN_0; //* 3;	// delta Az (kod)
 							p->toPR1[0] = (p->PR1[0]&0x0fff) - A1;
@@ -424,9 +425,10 @@ for(;;)//----- CEPBEP -----//
 							A1=0;
 						}
 				// €‘ ¯® “Œ
-						if ((fabs(p->U.RAZN_1) > 0.3) && (old_RAZN_1 != p->U.RAZN_1))
+						//if ((fabs(p->U.RAZN_1) > 0.3) && (old_RAZN_1 != p->U.RAZN_1))
+						if (fabs(p->U.RAZN_1) > 0.3) // && (fabs(p->U.RAZN_1) < 3)
 						{
-							old_RAZN_1 = p->U.RAZN_1;
+							//old_RAZN_1 = p->U.RAZN_1;
 							if (p->PR1[2]&0x800)	fUM =  (360 - p->PR1[2]/C2)/C3; //“Œ ª®¤ -> ¢ à ¤.
 							else					fUM = -(p->PR1[2]/C1);
 
