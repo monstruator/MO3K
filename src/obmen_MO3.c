@@ -414,13 +414,10 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 //	p->to_MO3.to42.Ms3=p->PR1[5];
 	p->to_MO3.to42.USign=p->PR1[6]; //уровень сигнала ПРД из сост ПР1.0
 
-	p->to_MO3.to42.sum_K1=p->U.SUM_4;
-//	p->to_MO3.to42.sum_K1=p->U.SUM_20; //выводить после логарифма
-
-
 	p->to_MO3.to42.D_K1=(float)p->U.DPL_1*244.14;
 
 	//printf("DPL=%x\n",p->U.DPL_1);
+
     //УГЛЫ
 	p->to_MO3.to42.q=(p->PR1[0]-1991)*2/RADtoGRAD; //АЗИМУТ
 	if (p->PR1[2]&0x800) p->to_MO3.to42.beta=(360-p->PR1[2]/C2)/C3; //УГОЛ МЕСТА
@@ -487,6 +484,12 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 // коррекция АЗИМУТА перед передачей на Пульт
 	p->to_MO3.to42.q -= p->to_MO3.to42.q * 0.0475; // при q=180гр -> 180.0гр
 	//printf("Az korr = % 6.2f\n", p->to_MO3.to42.q);
+
+//	p->to_MO3.to42.sum_K1=p->U.SUM_4;
+//	p->to_MO3.to42.sum_K1=p->U.SUM_20; //выводить после логарифма
+	if (p->U.SUM_4>0)	p->to_MO3.to42.sum_K1=10*log10(p->U.SUM_4)-170; // уровень сигнала в dbm
+	else				p->to_MO3.to42.sum_K1=0;
+	//printf("SUM_4= % 4.2e  sum_K1= % 6.2f\n", p->U.SUM_4, p->to_MO3.to42.sum_K1);
 
 //////////////////////////////////////////////////////////////////////
   	len_OUT = sizeof(obmen_MO3K_MO3_t); //!!!!
