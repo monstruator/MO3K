@@ -33,6 +33,7 @@
   #include "../include/gloriya.h"
   #include "../include/IO_DT_SOI.h"
   #include "../include/func_IP.h"
+  #include "../include/my_pcs.h"
 
   #define PKDMV 0x0001
   #define PKVH  0x0002
@@ -67,6 +68,7 @@
     char	mode_gl,		// режим gloriya
 			numb_pack,		// текущий номер пакета
 			numb_vol;		// текущий номер тома в пакете
+	int pid_drv=0;	// для <Отключ. ФК> - команда 15
 
 	struct {
 		char	out_buf[max_len_OUT];  // данные для Socket'a
@@ -141,6 +143,35 @@ while(1)
 			else									p->to_MO3.to42.count_test++; //надо тут?
 
 printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
+
+			if (p->num_com==15)
+			{
+				// Проверка запуска драйвера модуля ПЦС ЦВС-3-1
+				pid_drv=get_pid_process("PCS",0);
+				if (!pid_drv)
+					printf("!!! Драйвер ПЦС ЦВС-3-1 не запущен\n"); // err++; rez=2; // exit(rez);
+				else
+				{
+					printf("\nФК=4:\n");
+					//p->toPR1[3]=0x0000;	//ТВК ВЫКЛ
+					wr_cpcs_s.type=5;	wr_cpcs_s.cnl=8;	wr_cpcs_s.cnt=2;
+					wr_cpcs_s.uom.dt[0]=0x86;	wr_cpcs_s.uom.dt[1]=0x41;
+					Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
+					delay(100);
+					printf("Reset УПОС !\n");
+
+					wr_cpcs_s.type=5;	wr_cpcs_s.cnl=8;	wr_cpcs_s.cnt=4;
+					wr_cpcs_s.uom.dt[0]=0xB8;	wr_cpcs_s.uom.dt[1]=0x00;//BoevRezim[]={0xB8, 0x00, 0x40, 0x00};
+					wr_cpcs_s.uom.dt[2]=0x40;	wr_cpcs_s.uom.dt[3]=0x00;
+					Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));// зп массива 4 байт
+					delay(100);//
+					printf("Перевод в БОЕВОЙ Режим!\n");
+					//p->toPR1[3]=0x8000;	// ТВК ВКЛ
+
+					// p->to_MO3.to42.status_test=2;	// OK
+					// p->to_MO3.to42.count_test++;
+				}
+			}
 		}
 
 		if (p->num_com==5)
