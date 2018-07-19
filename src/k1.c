@@ -261,7 +261,7 @@ printf("\n GL Not  num_com= %d  status_test= %d  count_test= %d\n",p->num_com,p-
 		if (pid==proxy_DRV1)
 		{
 			Read_K1();
-			ispr->k1 = 0; //есть УПОС
+			//ispr->k1 = 0; //есть УПОС (но исправность зависит от датчиков в PR1)
 			N=TCount;
 		}
 	} // while(1)

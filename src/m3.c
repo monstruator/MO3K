@@ -145,6 +145,9 @@ for(;;)//----- CEPBEP -----//
 		p->to_MO3.to42.Ms2=p->PR1[4];
 		p->to_MO3.to42.Ms3=p->PR1[5];
 
+		ispr->k1 = ((p->PR1[3]&0xFFF0)==0xFFF0) ? 0 : 1;// датчики К1
+		ispr->k2 = ((p->PR1[4]&0x0F00)==0x0F00) ? 0 : 1;// датчики К2 (ТВП)
+
 		p->Dout41[Cq]=	p->PR1[0];  // q
 		p->Dout41[Cq+1]=p->PR1[1];// ncu
 		p->Dout41[Cq+2]=p->PR1[2];// mema
