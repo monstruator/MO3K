@@ -47,11 +47,12 @@ unsigned short q=1,ncu=2,mema=3;
 float 	C1,C2,C3,C4,C5,C6,C7,C8;
 int direction=0;
 int TIMESEV,setANT=0,minus_x;
-	double PSI=0,TETA=0,oldPSI=0,oldTETA=0;
-	double x,y,x1,y1,C,S,ri,r1,r2,r3,
-	x2=0,y2=0;//дельты по качкам
-	double prim,primq,primcos;
-float KK=0,KK1=0;  //курс корабля
+double PSI=0,TETA=0,oldPSI=0,oldTETA=0;
+double x,y,x1,y1,C,S,ri,r1,r2,r3,
+		x2=0,y2=0;//дельты по качкам
+double prim,primq,primcos;
+float KK=0,KK1=0;	//курс корабля
+float AKPeleng;		//Пеленг аненны из АК с корректировкой, рад
 //const AgpecHK=28,AgpecCEB=31,nogAgpecHK=0,nogAgpecCEB=0;// agpeca OY
 const AgpecHK=18,AgpecCEB=18,nogAgpecHK=0,nogAgpecCEB=0;// agpeca OY ???(CEB=17,18)
 const Ynp_np1=1,HK=2,CEB=0;// No KAH MK
@@ -60,7 +61,6 @@ const Cq=16,C42np1=10;//cMeweHue gaHHblx B Dout
 unsigned pci_index=0;
 unsigned char s,pewuM_K1;
 int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sevA
-
 //для Авто-Сопровождения:
 int A1=0;
 float old_RAZN_0=0, old_RAZN_1=0, fUM=0, fDUM=0;
@@ -475,19 +475,28 @@ for(;;)//----- CEPBEP -----//
 				}
 				p->to_MO3.to42.pr_rejim_AS=p->from_MO3.from42.Rejim_AS;
 
-			}
+//	printf("com=4: Az= %x  KK=%1.2f  KK1=%1.2f\n",p->toPR1[0], KK, KK1);
+//	printf("AK: Peleng= % 2.2f  AKPeleng= % 2.2f  KK1 Korr= % 2.2f\n", KK1, (KK1-KK), (AKPeleng + AKPeleng * 0.0475));
+			} // p->num_com==4
+
 			if (p->num_com==301) //
 			{	//
     			if (p->from_MO3.fromAK.beta>=0)	p->toPR1[2]=-p->from_MO3.fromAK.beta*C1;//Угол места
 		    	else 							p->toPR1[2]=(360+(-p->from_MO3.fromAK.beta*C3))*C2;//
-				//p->toPR1[0]=p->from_MO3.fromAK.Peleng*RADtoGRAD/2+1991;//Азимут
-				KK1=p->from_MO3.fromAK.Peleng-KK;
+
+				//AKPeleng = p->from_MO3.fromAK.Peleng - p->from_MO3.fromAK.Peleng * 0.0475; // для МО3
+				//AKPeleng = p->from_MO3.fromAK.Peleng + p->from_MO3.fromAK.Peleng/20;	// для МО1К
+				//KK1=AKPeleng-KK;
+				
+				KK1 = (p->from_MO3.fromAK.Peleng - KK) * 1.0475;
+				//KK1=(p->from_MO3.fromAK.Peleng-KK)*1.2;
+				//KK1=p->from_MO3.fromAK.Peleng-KK;
 				//if (KK1>pi) KK1=-KK1;
-				if (KK1> 4.71225) KK1=KK1-2*PI;
-				if (KK1<-4.71225) KK1=KK1+2*PI;
-				//printf("Peleng=%2.2f KK=%1.2f KK1=%1.2f\n", p->from_MO3.fromAK.Peleng, KK, KK1);
+				if (KK1> 4.71225) KK1=KK1-2*PI*1.0475;	// KK1=KK1-2*PI;
+				if (KK1<-4.71225) KK1=KK1+2*PI*1.0475;	// KK1=KK1+2*PI;
+			//printf("Peleng=%2.2f KK=%1.2f KK1=%1.2f\n", p->from_MO3.fromAK.Peleng, KK, KK1);
 				p->toPR1[0]=KK1*RADtoGRAD/2+1991;//Азимут
-			//printf("num_com = 301: Az= %x\n",p->toPR1[0]);
+	printf("com=301: Az= %0X  Peleng=%2.2f  KK=%1.2f  KK1=%1.2f\n",p->toPR1[0], p->from_MO3.fromAK.Peleng, KK, KK1);
 			}
 				//-------------------------------------------------------------
 			TIMER41=0;

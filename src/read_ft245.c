@@ -285,11 +285,11 @@ int main( int argc, char *argv[] )
 	delay(5000);
 	open_shmem();
 	//delay(5000);
-	printf("\n Read_ft245 Start\n" );
+	printf("\n Read_ft245 Start\n\n" );
 
-#ifdef ASTRA
-	printf("\nASTRA ON!!!\n\n");
-#endif
+// #ifdef ASTRA
+	// printf("\nASTRA ON!!!\n\n");
+// #endif
 
 	// open device in block or nonblock mode
 	oflag = O_RDONLY | O_NONBLOCK;

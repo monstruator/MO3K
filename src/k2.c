@@ -436,6 +436,8 @@ main(int argc, char *argv[]) {
 													if (buffer[i+4]==0) printf("­®à¬ ");	//comOK[10]=1;
 													else				printf("­¥­®à¬ ");
 
+if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
+						
 													if (wDOut) printf("\n“‘ ®â¢. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
 													break;
 									}
@@ -469,6 +471,7 @@ main(int argc, char *argv[]) {
 			{
 				case 0:	if (!TM)
 						{
+							p->toPR1[3]=0x0000;	 // ’‚Š ‚›Š‹ž—… !
 //							printf("-----     Ž†ˆ„€ˆ… ŠŽŒ€„› 		-----\n"); /*¨«¨*/ // printf(">");
 //							while((p->from_MO3.from41.num_com!=1)&&(p->from_MO3.from41.num_com!=2)) delay(500);
 							if ( ( (p->num_com==1) ||  (p->num_com==2) ) && (cr_com41!=p->from_MO3.from41.cr_com) && (p->from_MO3.from41.num_KS==2))
@@ -562,7 +565,6 @@ main(int argc, char *argv[]) {
 						{
 //							p->toPR1[3]=0xFC00;	printf("\n----- ‚Š‹ž—… ’‚Š ‘ Œ€• Ž‘‹€‹…ˆ…Œ -----\n");
 							p->toPR1[3]=0x0000;	printf("\n----- ’‚Š ‚›Š‹ž—… ! -----\n");
-
 							if (wDOut) printf("\n’‚Š OFF. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
 						}
 						N_COM++;break;
@@ -570,7 +572,6 @@ main(int argc, char *argv[]) {
 						//if(kbhit()) {N_COM++;getch();}break;
 			   case 25:	write_com(10);
 						printf(")  Š®¬ ­¤  “‘ ®â¯à ¢«¥­ \n");
-
 						if (wDOut) printf("\n“‘ ®â¯à. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
 						break;
 			   case 26: read_kvit_NUS();

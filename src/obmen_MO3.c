@@ -79,7 +79,7 @@ main ()
 {
 float 	C1,C2,C3,C4,C5,C6,C7,C8;
 unsigned short cr_com; //порядковый номер предыдущей команды
-		short		V,dV;
+short	V,dV;
 int cnt=0;
 int i1=0,i2=0;
 int rez;
@@ -185,6 +185,14 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[1]>>i1)&1)<<(15-i1);} p->M[1]=buf[0];buf[0]=0;
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[2]>>i1)&1)<<(15-i1);} p->M[2]=buf[0];buf[0]=0;
 			for(i1=0;i1<16;i1++) {buf[0]+=((p->M[3]>>i1)&1)<<(15-i1);} p->M[3]=buf[0];buf[0]=0;
+/*
+			printf("PR1:     %4X  %4X  %4X  %4X\n", p->PR1[3], p->PR1[4], p->PR1[5], p->PR1[6]);
+			printf("toPR1:   %4X  %4X  %4X  %4X\n", p->toPR1[3], p->toPR1[4], p->toPR1[5], p->toPR1[6]);
+			printf("M[0-3]:  %4X  %4X  %4X  %4X\n", p->M[0], p->M[1], p->M[2], p->M[3]);
+			printf("M1-M4:   %4X  %4X  %4X  %4X\n", p->from_MO3.from42.M1, p->from_MO3.from42.M2, p->from_MO3.from42.M3, p->from_MO3.from42.M4);
+			printf("Ms1-Ms3: %4X  %4X  %4X\n", p->to_MO3.to42.Ms1, p->to_MO3.to42.Ms2, p->to_MO3.to42.Ms3);
+			printf("-----------------\n");
+*/
 		}
 	} // if (rec4.from42.cr_com != cr_com42)
 
@@ -204,6 +212,8 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 		paramAKcom=0;
 		switch(p->num_com)
 		{
+			case 301 : 	
+						break;
 			case 300 : 	switch(p->from_MO3.fromAK.a_params[0])
 						{
 							case 0:
