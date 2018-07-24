@@ -24,6 +24,7 @@ void main( int argc, char *argv[] )
     struct sigevent event;
 	short i_p=0;
 	float Dopler1,m_porog[2],test_dpl;
+//	int pid_drv=0;	// для <Отключ. ФК> - команда 15
 
 	while( (i=getopt(argc, argv, "pis") )!=-1)	{
 		switch(i){
@@ -60,13 +61,12 @@ void main( int argc, char *argv[] )
 
 	//----------------------------------------------------
 //	while((p->from_MO3.from41.num_com==0)&&(p->from_MO3.from42.num_com==0)) delay(500);
-	cr_com=p->from_MO3.from41.cr_com; //запомнили номер команды
 
-	if ((p->from_MO3.from41.num_com==1)||(p->from_MO3.from41.num_com==2)||(p->from_MO3.from41.num_com==3))
-	{
-		Init_K1(p->from_MO3.from41.num_KS-1);
-	} //если есть команда от 4.1
-	else Init_K1(0); //если есть команда от 4.2 в К2
+	cr_com = p->from_MO3.from41.cr_com; //запомнили номер команды
+
+	if ( (p->from_MO3.from41.num_com==1) || (p->from_MO3.from41.num_com==2) || (p->from_MO3.from41.num_com==3) )
+		 Init_K1(p->from_MO3.from41.num_KS-1); //если есть команда от 4.1
+	else Init_K1(0); //есть команда от 4.2 в К2
 
 	/*
 	Dopler1=60000;
@@ -116,19 +116,19 @@ void main( int argc, char *argv[] )
     	pid=Receive( 0 , 0, 0 );
 		if (pid==proxy) //обработчик таймера
 		{
-			if ( cr_com42 != p->from_MO3.from42.cr_com )	// если New command
+			if (cr_com42!= p->from_MO3.from42.cr_com)	// если New command 4.2
 			{
-				if ( ( (p->num_com==11) || ((p->num_com==12) && (ispr->gl==0)) ) )	//	&& (cr_com42 != p->from_MO3.from42.cr_com) )
+				cr_com42 = p->from_MO3.from42.cr_com;
+
+				if ( ( (p->num_com==11) || ((p->num_com==12) && (ispr->gl==0)) ) )
 				{
 					printf("\n 					Command for TestGL (%d) [%04h]\n",
 							p->from_MO3.from42.num_com, p->to_MO3.to42.Mispr);
-					cr_com42 = p->from_MO3.from42.cr_com;
 
 					nastr_upos(0); //настройка УПОС на К1
-
 					writePorogs(1e10,7.6e8);
-
 					delay(500);
+
 					TstGl = TestGloriya(p->num_com-11); // comment для временного откл. запросов к Глории
 					printf("\nTestGloriya = %d \n", TstGl);
 					if (!TstGl) {
@@ -136,8 +136,7 @@ void main( int argc, char *argv[] )
 						TstGl = TestGloriya(p->num_com-11);
 						printf("\n TestGloriya 2 = %d \n", TstGl);
 					}
-
-					p->to_MO3.to42.status_test = (!TstGl) ? 3 : 2; // p->to_MO3.to42.status_test = (TstGl==1) ? 2 : 3;
+					p->to_MO3.to42.status_test = (!TstGl) ? 3 : 2;
 					p->to_MO3.to42.count_test++;
 printf("\n GL K1  com= %d  status= %d  counter_com= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
 
@@ -145,40 +144,42 @@ printf("\n GL K1  com= %d  status= %d  counter_com= %d\n",p->num_com,p->to_MO3.t
 					writePorogs(1e2, 2e9);	// для боевого режима
 				}
 
-				if ( ((p->num_com==12) || (p->num_com==14)) && (ispr->gl==1) )	//	&& (cr_com42 != p->from_MO3.from42.cr_com) )
+				if ((p->num_com==14) && (ispr->gl==0))	nastr_upos(1); //настройка УПОС на К2 (см. k2.c)
+
+				if (p->num_com==15) // <Отключ. ФК> - Сброс для к1
 				{
-					if (p->to_MO3.to42.status_test != 3) {// ispr->gl=1 сразу после успешного теста ?
-						p->to_MO3.to42.status_test = 3;
-						p->to_MO3.to42.count_test++;
-printf("\n GL Not  num_com= %d  status_test= %d  count_test= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
-					}
+					printf("\nФК=4:\n");
+					//p->toPR1[3]=0x0000;	//ТВК ВЫКЛ
+					
+					reset_upos();
+/*					wr_cpcs_s.type=5;	wr_cpcs_s.cnl=8;	wr_cpcs_s.cnt=2;
+					wr_cpcs_s.uom.dt[0]=0x86;	wr_cpcs_s.uom.dt[1]=0x41;
+					Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
+					delay(100);
+					printf("Reset УПОС !\n");
+*/	                
+					wr_cpcs_s.type=5;	wr_cpcs_s.cnl=8;	wr_cpcs_s.cnt=4;
+					wr_cpcs_s.uom.dt[0]=0xB8;	wr_cpcs_s.uom.dt[1]=0x00;//BoevRezim[]={0xB8, 0x00, 0x40, 0x00};
+					wr_cpcs_s.uom.dt[2]=0x40;	wr_cpcs_s.uom.dt[3]=0x00;
+					Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));// зп массива 4 байт
+					delay(100);//
+					printf("Перевод в БОЕВОЙ Режим!\n");
+                    
+					//p->toPR1[3]=0x8000;	// ТВК ВКЛ
 				}
 
-				if ( (p->num_com==14) && (ispr->gl==0) )	//	&& (cr_com42 != p->from_MO3.from42.cr_com) )
-				{ // см. k2.c
-					nastr_upos(1); //настройка УПОС на К2
-					cr_com42 = p->from_MO3.from42.cr_com;
-				}
-
-			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==1))	Init_K1(p->from_MO3.from41.num_KS-1);
-			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==2))	Init_K1(p->from_MO3.from41.num_KS-1);
-
-			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==77))	writePorogs(SREDN,SREDN);
-
-				//if ( (cr_com42 != p->from_MO3.from42.cr_com)&&(p->from_MO3.from42.num_com==6))
 				if (p->from_MO3.from42.num_com==6) // переехало снизу - из с.251
 				{
 					Dopler1=-p->from_MO3.from42.Fd*1000;
 					writeDopler(Dopler1);
-					cr_com42 = p->from_MO3.from42.cr_com;
 				}
-			} // if (cr_com42 != p->from_MO3.from42.cr_com)
+			} // new cr_com42
 
 			TCount++;
 			TC10++;
 			if ((TCount-N)>10) ispr->k1 = 1; //нет УПОСа
 			if (TC10==10) TC10=0;
-			if (p->U.c_OI!=data_count)//пришли данные
+			if (p->U.c_OI!=data_count)	//пришли данные
 			{
 				DTTM=TCount;			//запомнили время прихода
 				data_count=p->U.c_OI;   //запомним кол-во
@@ -234,19 +235,21 @@ printf("\n GL Not  num_com= %d  status_test= %d  count_test= %d\n",p->num_com,p-
 						break;
 			}
 
-			if ((cr_com!=p->from_MO3.from41.cr_com)&&(num_com!=p->from_MO3.from41.num_com))
+			if ((cr_com!=p->from_MO3.from41.cr_com) && (num_com!=p->from_MO3.from41.num_com))
 			{
 				if ((p->from_MO3.from41.num_com==1)||(p->from_MO3.from41.num_com==2))
 					Init_K1(p->from_MO3.from41.num_KS-1);
-				cr_com=p->from_MO3.from41.cr_com;
-				num_com=p->from_MO3.from41.num_com;
 
+				cr_com =p->from_MO3.from41.cr_com;
+				num_com=p->from_MO3.from41.num_com;
 			}
 
-/*			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==1))	Init_K1(p->from_MO3.from41.num_KS-1);
+/*			//if (cr_com != p->from_MO3.from41.cr_com) {
+			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==1))	Init_K1(p->from_MO3.from41.num_KS-1);
 			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==2))	Init_K1(p->from_MO3.from41.num_KS-1);
 
 			//if ((cr_com!=p->from_MO3.from41.cr_com)&&(p->from_MO3.from41.num_com==77))	writePorogs(SREDN,SREDN);
+			
 			if ((cr_com42!=p->from_MO3.from42.cr_com)&&(p->from_MO3.from42.num_com==6))
 			{
 				Dopler1=-p->from_MO3.from42.Fd*1000;

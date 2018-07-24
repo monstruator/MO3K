@@ -481,7 +481,7 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 								test_K2[13][3]=0x03;
 								test_K2[13][4]=0x5D;
 							}
-							if ( ( (p->num_com==13) || ( (p->num_com==14) && (ispr->gl==0) ) ) && (cr_com42!=p->from_MO3.from42.cr_com) )
+							if ( ( (p->num_com==13) || ((p->num_com==14) && (ispr->gl==0)) ) && (cr_com42!=p->from_MO3.from42.cr_com) )
 							{
 								TS = 1;
 								cr_com42=p->from_MO3.from42.cr_com;

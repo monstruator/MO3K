@@ -33,8 +33,7 @@
   #include "../include/gloriya.h"
   #include "../include/IO_DT_SOI.h"
   #include "../include/func_IP.h"
-  #include "../include/my_pcs.h"
-
+  
   #define PKDMV 0x0001
   #define PKVH  0x0002
   #define PKPRD 0x0004
@@ -68,7 +67,6 @@
     char	mode_gl,		// режим gloriya
 			numb_pack,		// текущий номер пакета
 			numb_vol;		// текущий номер тома в пакете
-	int pid_drv=0;	// для <Отключ. ФК> - команда 15
 
 	struct {
 		char	out_buf[max_len_OUT];  // данные для Socket'a
@@ -108,7 +106,7 @@ struct ispr_mo3k *ispr;
 	p->to_MO3.to42.Mispr = 0xFFFF;
 	ispr = (struct ispr_mo3k *) & p->to_MO3.to42.Mispr;
 //printf("\n\n obmen_MO3: ispr->gl=%d \n\n",ispr->gl);
-	ispr->cvsA = 0;	ispr->k2 = 0;
+	ispr->cvsA = 0;	// всегда
 	//if (gloriya(1,1,31)) p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr&0xFEFF;else p->to_MO3.to42.Mispr=p->to_MO3.to42.Mispr|0x0100;
 	//Angle0=4;
 	//p->jump=-1;
@@ -122,7 +120,8 @@ while(1)
     //memcpy(&p->from_MO3,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 	memcpy(&rec4,&bufi[4],sizeof(obmen_MO3_MO3K_t));
 
-	rec4.from42.q += rec4.from42.q/20; // коррекция АЗИМУТА после получения из МО3 (перед отправкой в А.)
+// коррекция АЗИМУТА перед отправкой в пр.1 (после получения с Пульта)
+//	rec4.from42.q += rec4.from42.q/20; // => m3
 
 	//выбор управляющей команды
 	if (rec4.from42.cr_com != cr_com42)
@@ -134,45 +133,30 @@ while(1)
 		cr_com42=rec4.from42.cr_com;
 		p->from_MO3.from42=rec4.from42;
 
-		if ((p->num_com==12)||(p->num_com==14)) gloria_count=100;
-
-		if ((p->num_com>=11)&&(p->num_com<=15))
+		if ((p->num_com>=11) && (p->num_com<=15))
 		{
 			p->to_MO3.to42.status_test=1; // команды тестов Глории (ФК) Выполняются
 			if (p->to_MO3.to42.count_test>65000)	p->to_MO3.to42.count_test=1;
-			else									p->to_MO3.to42.count_test++; //надо тут?
+			else									p->to_MO3.to42.count_test++;
 
 printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
 
-			if (p->num_com==15)
+			//if ((p->num_com==12)||(p->num_com==14)) gloria_count=100;
+			if ((p->num_com==12) || (p->num_com==14))
 			{
-				// Проверка запуска драйвера модуля ПЦС ЦВС-3-1
-				pid_drv=get_pid_process("PCS",0);
-				if (!pid_drv)
-					printf("!!! Драйвер ПЦС ЦВС-3-1 не запущен\n"); // err++; rez=2; // exit(rez);
-				else
+				gloria_count=100;
+
+				//if ( ((p->num_com==12) || (p->num_com==14)) && (ispr->gl==1) )
+				if (ispr->gl==1)
 				{
-					printf("\nФК=4:\n");
-					//p->toPR1[3]=0x0000;	//ТВК ВЫКЛ
-					wr_cpcs_s.type=5;	wr_cpcs_s.cnl=8;	wr_cpcs_s.cnt=2;
-					wr_cpcs_s.uom.dt[0]=0x86;	wr_cpcs_s.uom.dt[1]=0x41;
-					Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));
-					delay(100);
-					printf("Reset УПОС !\n");
-
-					wr_cpcs_s.type=5;	wr_cpcs_s.cnl=8;	wr_cpcs_s.cnt=4;
-					wr_cpcs_s.uom.dt[0]=0xB8;	wr_cpcs_s.uom.dt[1]=0x00;//BoevRezim[]={0xB8, 0x00, 0x40, 0x00};
-					wr_cpcs_s.uom.dt[2]=0x40;	wr_cpcs_s.uom.dt[3]=0x00;
-					Send(pid_drv,&wr_cpcs_s,&wr_cpcs_r,sizeof(wr_cpcs_s),sizeof(wr_cpcs_r));// зп массива 4 байт
-					delay(100);//
-					printf("Перевод в БОЕВОЙ Режим!\n");
-					//p->toPR1[3]=0x8000;	// ТВК ВКЛ
-
-					// p->to_MO3.to42.status_test=2;	// OK
-					// p->to_MO3.to42.count_test++;
+					if (p->to_MO3.to42.status_test != 3) {// ispr->gl=1 сразу после успешного теста ?
+						p->to_MO3.to42.status_test = 3;
+						p->to_MO3.to42.count_test++;
+printf("\n GL Not  num_com= %d  status_test= %d  count_test= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
+					}
 				}
 			}
-		}
+		} // p->num_com = 11..15
 
 		if (p->num_com==5)
 		{
@@ -212,8 +196,6 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 		paramAKcom=0;
 		switch(p->num_com)
 		{
-			case 301 : 	
-						break;
 			case 300 : 	switch(p->from_MO3.fromAK.a_params[0])
 						{
 							case 0:
@@ -357,18 +339,17 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 						rez=gloriya(1,p->from_MO3.from41.num_KS-1,p->from_MO3.from41.Nkey_SHAKR);
 					break;
 
-				case 12 :	rez = gloriya(1,0,31);//test K1
-							printf("rez = gloriya(1,0,31) = %1d;//test K1 \n\n", rez);
-							break;
-				case 13 :
-				case 14 :	rez = gloriya(1,1,31);//test K2
-							printf("rez = gloriya(1,1,31) = %1d;//test K2 \n\n", rez);
-							break;
+				case 12 :	
+					rez = gloriya(1,0,31);//test K1
+					printf("rez = gloriya(1,0,31) = %1d;//test K1 \n\n", rez);
+					break;
+
+				case 14 :	
+					rez = gloriya(1,1,31);//test K2
+					printf("rez = gloriya(1,1,31) = %1d;//test K2 \n\n", rez);
+					break;
 
 				default : rez = gloriya(1,0,31);//test K1
-						//printf("rez = gloriya(1,0,31);//test K1 \n\n");//mode_gl = (mode_gl==1) ? 0 : 1;
-						//rez = gloriya(1,mode_gl,31);//test K
-						//printf("def: rez = gloriya(1, %d, 31) = %d;//test K%d \n\n", mode_gl,rez,(mode_gl+1));
 			}
 
 			ispr->gl = (!rez) ? 1 : 0;	//	ispr->gl = (rez==1) ? 0 : 1;
@@ -492,7 +473,7 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 	//    p->from_MO3.fromAK.num_com,p->to_MO3.toAK.kzv);
 
 // коррекция АЗИМУТА перед передачей на Пульт
-	p->to_MO3.to42.q -= p->to_MO3.to42.q * 0.0475; // при q=180гр -> 180.0гр
+//	p->to_MO3.to42.q -= p->to_MO3.to42.q * 0.0475; // при q=180гр -> 180.0гр
 	//printf("Az korr = % 6.2f\n", p->to_MO3.to42.q);
 
 //	p->to_MO3.to42.sum_K1=p->U.SUM_4;

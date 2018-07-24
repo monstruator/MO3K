@@ -161,8 +161,7 @@ void nastr_upos (NASTR)
 	wr_cpcs_s.type=5;
 	wr_cpcs_s.cnl=chan1;
 	wr_cpcs_s.cnt=10;
-//	nastroika[3]=0; // 0-УПОС, 1-ПОСТ-3Ц
-	nastroika[3]=NASTR; // 0-УПОС, 1-ПОСТ-3Ц
+	nastroika[3]=NASTR; // 0-УПОС, 1-ПОСТ-3Ц, 2-?
 	printf("							УПОС ИНИТ K%d\n",NASTR+1);
 	delay(50);
 	for(i=0;i<10;i++) wr_cpcs_s.uom.dt[i]=nastroika[i];// зп массива 10 байт
@@ -376,6 +375,7 @@ int DDRead_K1()
     for (i=0;i<rd_cpcs_r.cnt;i++)  massivK1[i+CK1]=rd_cpcs_r.uim.dt[i];//дополним массив
 	CK1=CK1+rd_cpcs_r.cnt;//увеличим кол-во байт в буфере
 	b=rd_cpcs_r.cnt;
+
   while(CK1)
   {
 	//printf(" %x count=%d \n",rd_cpcs_r.uim.dt[0],rd_cpcs_r.cnt);

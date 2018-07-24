@@ -52,7 +52,6 @@ double x,y,x1,y1,C,S,ri,r1,r2,r3,
 		x2=0,y2=0;//дельты по качкам
 double prim,primq,primcos;
 float KK=0,KK1=0;	//курс корабля
-float AKPeleng;		//Пеленг аненны из АК с корректировкой, рад
 //const AgpecHK=28,AgpecCEB=31,nogAgpecHK=0,nogAgpecCEB=0;// agpeca OY
 const AgpecHK=18,AgpecCEB=18,nogAgpecHK=0,nogAgpecCEB=0;// agpeca OY ???(CEB=17,18)
 const Ynp_np1=1,HK=2,CEB=0;// No KAH MK
@@ -63,7 +62,7 @@ unsigned char s,pewuM_K1;
 int		 SIMF[6]={0,0,0,0}; //наличие симфонии 0,1 - ModA :  2,3 - ModB : 4,5 - sevA
 //для Авто-Сопровождения:
 int A1=0;
-float old_RAZN_0=0, old_RAZN_1=0, fUM=0, fDUM=0;
+float old_RAZN_0=0, old_RAZN_1=0, fUM=0, fDUM=0, fAz=0;
 
 //----- onucaHue daHHblx npu pa6ome c np.4-1,4-2 -----//
 
@@ -148,7 +147,15 @@ for(;;)//----- CEPBEP -----//
 		ispr->k1 = ((p->PR1[3]&0xFFF0)==0xFFF0) ? 0 : 1;// датчики К1
 		ispr->k2 = ((p->PR1[4]&0x0F00)==0x0F00) ? 0 : 1;// датчики К2 (ТВП)
 
-		p->Dout41[Cq]=	p->PR1[0];  // q
+		// коррекция АЗИМУТА после получения с пр.1 (перед отправкой на Пульт)
+		//p->to_MO3.to42.q = (1 - 0.0475) * p->to_MO3.to42.q = 0,9525 * p->to_MO3.to42.q;
+		//fAz = (p->PR1[0]-1991)*2/RADtoGRAD * 0,9525;
+
+		// коррекция АЗИМУТА после получения с пр.1 (перед отправкой на Пульт)
+		//p->PR1[0] = 0.9525 * (p->PR1[0] - 1991) + 1991; // => 
+		p->PR1[0] = 0.9525 * p->PR1[0] + 94.5725; // (0.0475*1991)
+
+		p->Dout41[Cq]=	p->PR1[0];// q
 		p->Dout41[Cq+1]=p->PR1[1];// ncu
 		p->Dout41[Cq+2]=p->PR1[2];// mema
 
