@@ -161,7 +161,7 @@ void nastr_upos (NASTR)
 	wr_cpcs_s.type=5;
 	wr_cpcs_s.cnl=chan1;
 	wr_cpcs_s.cnt=10;
-	nastroika[3]=NASTR; // 0-“‘, 1-‘’-3–, 2-?
+	nastroika[3]=NASTR; // 0-“‘, 1-‘’-3–
 	printf("							“‘ ˆˆ’ K%d\n",NASTR+1);
 	delay(50);
 	for(i=0;i<10;i++) wr_cpcs_s.uom.dt[i]=nastroika[i];// §¯ ¬ áá¨¢  10 ¡ ©â

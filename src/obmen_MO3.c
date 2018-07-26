@@ -139,7 +139,7 @@ while(1)
 			if (p->to_MO3.to42.count_test>65000)	p->to_MO3.to42.count_test=1;
 			else									p->to_MO3.to42.count_test++;
 
-printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
+			printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
 
 			//if ((p->num_com==12)||(p->num_com==14)) gloria_count=100;
 			if ((p->num_com==12) || (p->num_com==14))
@@ -152,7 +152,7 @@ printf("\n GL OBMEN com= %d  status_c= %d  counter_c= %d\n",p->num_com,p->to_MO3
 					if (p->to_MO3.to42.status_test != 3) {// ispr->gl=1 сразу после успешного теста ?
 						p->to_MO3.to42.status_test = 3;
 						p->to_MO3.to42.count_test++;
-printf("\n GL Not  num_com= %d  status_test= %d  count_test= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
+						printf("\n GL Not  num_com= %d  status_test= %d  count_test= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test);
 					}
 				}
 			}

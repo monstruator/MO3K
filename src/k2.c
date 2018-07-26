@@ -435,10 +435,6 @@ main(int argc, char *argv[]) {
 													comOK[10]=1;	//!!!
 													if (buffer[i+4]==0) printf("­®à¬ ");	//comOK[10]=1;
 													else				printf("­¥­®à¬ ");
-
-if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
-						
-													if (wDOut) printf("\n“‘ ®â¢. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
 													break;
 									}
 								}
@@ -467,12 +463,14 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 			} // ­ ©¤¥­ § £®«®¢®ª
 
 			//printf("%d\n",Tcount);
+			
+			//write_com(23);
+			
 			switch (N_COM) //¯®àï¤®ª ¢ë¯®«­¥­¨ï ª®¬ ­¤ ¢ á¥ ­á¥
 			{
 				case 0:	if (!TM)
 						{
-							p->toPR1[3]=0x0000;	 // ’‚Š ‚›Š‹ž—… !
-//							printf("-----     Ž†ˆ„€ˆ… ŠŽŒ€„› 		-----\n"); /*¨«¨*/ // printf(">");
+							//printf("-----     Ž†ˆ„€ˆ… ŠŽŒ€„› 		-----\n"); /*¨«¨*/ // printf(">");
 //							while((p->from_MO3.from41.num_com!=1)&&(p->from_MO3.from41.num_com!=2)) delay(500);
 							if ( ( (p->num_com==1) ||  (p->num_com==2) ) && (cr_com41!=p->from_MO3.from41.cr_com) && (p->from_MO3.from41.num_KS==2))
 							{
@@ -484,6 +482,9 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 							if ( ( (p->num_com==13) || ((p->num_com==14) && (ispr->gl==0)) ) && (cr_com42!=p->from_MO3.from42.cr_com) )
 							{
 								TS = 1;
+								p->M[0]=0x0000;	 // ’‚Š ‚›Š‹ž—… !
+								if (wDOut) printf("\n’‚Š OFF. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->M[0]);
+								
 								cr_com42=p->from_MO3.from42.cr_com;
 								p->to_MO3.to41.sost_CC_K2=0;
 								p->Dout41[40]=0;
@@ -563,16 +564,15 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 
 			   case 23: if (TS) //!!!!!!!!!!!!!!!!!!!!!!!!
 						{
-//							p->toPR1[3]=0xFC00;	printf("\n----- ‚Š‹ž—… ’‚Š ‘ Œ€• Ž‘‹€‹…ˆ…Œ -----\n");
-							p->toPR1[3]=0x0000;	printf("\n----- ’‚Š ‚›Š‹ž—… ! -----\n");
-							if (wDOut) printf("\n’‚Š OFF. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
+//							p->M[0]=0xFC00;	printf("\n----- ‚Š‹ž—… ’‚Š ‘ Œ€• Ž‘‹€‹…ˆ…Œ -----\n");
+							//p->M[0]=0x0000;	printf("\n----- ’‚Š ‚›Š‹ž—… ! -----\n");
+							//if (wDOut) printf("\n’‚Š OFF. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->M[0]);
 						}
 						N_COM++;break;
 			   case 24:	N_COM++;break;
 						//if(kbhit()) {N_COM++;getch();}break;
 			   case 25:	write_com(10);
 						printf(")  Š®¬ ­¤  “‘ ®â¯à ¢«¥­ \n");
-						if (wDOut) printf("\n“‘ ®â¯à. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
 						break;
 			   case 26: read_kvit_NUS();
 						break;
@@ -580,7 +580,8 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 						if (Tcount>Tcount_com+500) {printf("Timeout 50 sec\n");N_COM=-2;}
 						if (Ncount>10) {printf("TPO not responding\n");N_COM=0;}
 						break;
- 			   case 28: write_com(29);printf(") Š®¬ ­¤  —Š ®â¯à ¢«¥­ \n");
+ 			   case 28: if (TS) p->M[0]=0x8000;//8000-onn 0 dBm 0000-off TVK
+						write_com(29);printf(") Š®¬ ­¤  —Š ®â¯à ¢«¥­ \n");
 						break;
 			   case 29: read_kvit();break;
  			   case 30: write_com(28);printf(") Š®¬ ­¤  ‡„.‡ ®â¯à ¢«¥­ \n");break;
@@ -631,9 +632,9 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 						if (wDOut)		printf("   ç â  ¯®áë«ª  ª®¬ ­¤ë „ ­ˆ.V.dV\n");
 
 						comOK[24]=1;N_COM++;
-						if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
+						//if (TS) p->M[0]=0x8000;//8000-onn 0 dBm 0000-off TVK
 
-						if (wDOut) printf("\n’‚Š ON if TS=1. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
+						//if (wDOut) printf("\n’‚Š ON if TS=1. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->M[0]);
 
 						Tstart=p->from_MO3.from41.T_SS-8; //¢à¥¬ï áâ àâ  §  10 á¥ª ¤® á¥ ­á 
 						//Tpr=p->Dout41[30]*3600+p->Dout41[31]*60+p->Dout41[32]; //¢à¥¬ï ¯à¨¡®à  ¨§ ‘…‚
@@ -803,9 +804,6 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 						}
 						break;
 			   case 44: read_kvit();
-						if (verbose) printf("\n\n======== read_kvit -- sost_CC_K2= %d -- p->num_com= %d ** num_com= %d\n\n",p->to_MO3.to41.sost_CC_K2,p->num_com,num_com);
-						if (wDOut)	 printf("\n\n====== read_kvit --- sost_CC_K2= %d =======\n",p->to_MO3.to41.sost_CC_K2);
-
 						if ( (p->num_com==3) && (cr_com41 != p->from_MO3.from41.cr_com) )
 						{
 							cr_com41 = p->from_MO3.from41.cr_com;	N_COM=0;
@@ -813,7 +811,6 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 						else
 							if ( ((p->num_com==13)||(p->num_com==14)||(p->num_com==15)) && (cr_com42 != p->from_MO3.from42.cr_com) )
 							{
-//								cr_com42=p->from_MO3.from42.cr_com;
 								N_COM=0;
 								TM=0;
 								p->to_MO3.to42.priem_K2 = p->to_MO3.to41.PrM_K2 = 0;
@@ -822,18 +819,18 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 
 						if ( ((num_com==13) || (num_com==14)) && p->to_MO3.to41.sost_CC_K2)
 						{
-							printf("\n\n-------  Test K2 OK sost_CC_K2= %d ------\n\n",p->to_MO3.to41.sost_CC_K2);
+							printf("\n-------  Test K2 OK %d ------\n");
 							N_COM=0;	TM=0;
 							p->to_MO3.to42.priem_K2 = p->to_MO3.to41.PrM_K2 = 0;
 							p->to_MO3.to42.status_test=2;	p->to_MO3.to42.count_test++; // Ok
-							printf("\n GL k2 ƒ Ok: com= %d  status= %d  counter= %d  sost_CC_K2= %d",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test,p->to_MO3.to41.sost_CC_K2);
-							if (wDOut) printf("\nŠ2 ok. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
+							p->M[0]=0x0000;
 						}
 						else
 						{
 							p->to_MO3.to42.status_test=3;	p->to_MO3.to42.count_test++; // Fail
-							printf("\n GL k2 else ƒ Error!: com= %d  status= %d  counter= %d  sost_CC_K2= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test,p->to_MO3.to41.sost_CC_K2);
-							if (wDOut) printf("\nK2 Err. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
+							printf("\n Test K2 Error : com= %d  status= %d  counter= %d  sost_CC_K2= %d\n",p->num_com,p->to_MO3.to42.status_test,p->to_MO3.to42.count_test,p->to_MO3.to41.sost_CC_K2);
+							N_COM=0;	TM=0;
+							p->M[0]=0x0000;
 						}
 						break;
 			} // switch (N_COM)
@@ -846,13 +843,13 @@ if (TS) p->toPR1[3]=0x8000;//8000-onn 0 dBm 0000-off TVK
 			write_com(23);	//write_com(33);
 			write_com(23);	//write_com(33);
 			N_COM=0;
-			p->toPR1[3]=0x0000;//8000-onn 0 dBm 0000-off TVK
+			p->M[0]=0x0000;//8000-onn 0 dBm 0000-off TVK
 
 			close(fd_1);
 			timer_delete(id);
 
 			printf("EXIT KBhit\n");
-			if (wDOut) printf("\nExit. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->toPR1[3]);
+			if (wDOut) printf("\nExit. TS= %d  PR1[3]= %Xh  toPR1[3]= %Xh\n",TS, p->PR1[3], p->M[0]);
 
 			exit(0);
 		}//printf("%d",getch());
